@@ -26,8 +26,26 @@ export async function POST(req: NextRequest) {
   const planId = PLAN_IDS[`${plan}_${billingPeriod}`];
   if (!planId) return NextResponse.json({ error: "Invalid plan or billing period" }, { status: 400 });
 
+  // Try cookie-based session first, then Bearer token fallback
+  let user = null;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user: cookieUser } } = await supabase.auth.getUser();
+  if (cookieUser) {
+    user = cookieUser;
+  } else {
+    // Bearer token fallback (production client-side fetch)
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const { createClient: createAdmin } = await import("@supabase/supabase-js");
+      const admin = createAdmin(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data } = await admin.auth.getUser(token);
+      user = data.user;
+    }
+  }
   if (!user) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

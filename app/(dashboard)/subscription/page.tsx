@@ -41,6 +41,7 @@ function SubscriptionContent() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [yearly, setYearly] = useState(false);
   const [msgApi, ctx] = message.useMessage();
+  const supabase = createClient();
 
   useEffect(() => {
     load();
@@ -51,7 +52,6 @@ function SubscriptionContent() {
   }, []);
 
   async function load() {
-    const supabase = createClient();
     const { data } = await supabase.from("subscriptions").select("*").maybeSingle();
     setSub(data as SubData ?? { plan: "free", billing_period: "monthly", status: "active", current_period_end: null, cancel_at_period_end: false, chargebee_customer_id: null, stripe_customer_id: null, payment_provider: "free" });
     setLoading(false);
@@ -60,11 +60,14 @@ function SubscriptionContent() {
   async function upgrade(plan: Plan) {
     setUpgrading(plan);
     try {
-      // Use Chargebee as primary provider
+      const { data: { session } } = await supabase.auth.getSession();
       const endpoint = "/api/chargebee/checkout";
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { "Authorization": `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ plan, billingPeriod: yearly ? "yearly" : "monthly" }),
       });
       const { url, error } = await res.json();
@@ -80,11 +83,16 @@ function SubscriptionContent() {
   async function openPortal() {
     setPortalLoading(true);
     try {
-      // Chargebee portal if customer exists there, else Stripe portal
+      const { data: { session } } = await supabase.auth.getSession();
       const endpoint = sub?.chargebee_customer_id
         ? "/api/chargebee/portal"
         : "/api/billing-portal";
-      const res = await fetch(endpoint, { method: "POST" });
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          ...(session?.access_token ? { "Authorization": `Bearer ${session.access_token}` } : {}),
+        },
+      });
       const { url, error } = await res.json();
       if (error) throw new Error(error);
       if (url) window.location.href = url;

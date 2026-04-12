@@ -8,13 +8,28 @@ function cbAuth() {
   return "Basic " + Buffer.from(`${API_KEY}:`).toString("base64");
 }
 
-export async function POST(_req: NextRequest) {
+export async function POST(req: NextRequest) {
   if (!SITE || SITE.includes("placeholder")) {
     return NextResponse.json({ error: "Chargebee not configured" }, { status: 503 });
   }
 
+  let user = null;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user: cookieUser } } = await supabase.auth.getUser();
+  if (cookieUser) {
+    user = cookieUser;
+  } else {
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const { createClient: createAdmin } = await import("@supabase/supabase-js");
+      const admin = createAdmin(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data } = await admin.auth.getUser(authHeader.slice(7));
+      user = data.user;
+    }
+  }
   if (!user) return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
 
   const { data: sub } = await supabase
