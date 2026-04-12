@@ -56,13 +56,79 @@ function parseSections(text: string) {
   return sections;
 }
 
-function renderMd(text: string): string {
+function parseMarkdownTable(block: string): string | null {
+  const lines = block.trim().split("\n").map(l => l.trim()).filter(Boolean);
+  // Need at least header + separator + 1 data row
+  if (lines.length < 3) return null;
+  // Separator line must be all dashes/pipes/colons
+  const sep = lines[1];
+  if (!/^[\|\-:\s]+$/.test(sep)) return null;
+  // Parse header
+  const headers = lines[0].split("|").map(h => h.trim()).filter(Boolean);
+  if (!headers.length) return null;
+
+  const headerHtml = headers
+    .map(h => `<th style="padding:10px 16px;text-align:left;font-size:13px;font-weight:700;color:#475569;background:#f8fafc;border-bottom:2px solid #e2e8f0;white-space:nowrap">${inlineMd(h)}</th>`)
+    .join("");
+
+  const rowsHtml = lines.slice(2).map((row, ri) => {
+    const cells = row.split("|").map(c => c.trim()).filter(Boolean);
+    const cellsHtml = cells
+      .map((c, ci) => `<td style="padding:10px 16px;font-size:14px;color:#374151;border-bottom:1px solid #f1f5f9;vertical-align:top;${ci === 0 ? "font-weight:600;" : ""}">${inlineMd(c)}</td>`)
+      .join("");
+    return `<tr style="background:${ri % 2 === 0 ? "#fff" : "#f8fafc"}">${cellsHtml}</tr>`;
+  }).join("");
+
+  return `<div style="overflow-x:auto;margin:16px 0;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.04)">
+<table style="width:100%;border-collapse:collapse;font-family:inherit">
+<thead><tr>${headerHtml}</tr></thead>
+<tbody>${rowsHtml}</tbody>
+</table></div>`;
+}
+
+function inlineMd(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/^[-•]\s+(.+)$/gm, '<li class="ml-5 mb-1.5 list-disc">$1</li>')
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/\n/g, "<br/>");
+    .replace(/`(.+?)`/g, "<code style='background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:13px'>$1</code>");
+}
+
+function renderMd(text: string): string {
+  // Split into blocks by double newline
+  const blocks = text.split(/\n\n+/);
+  return blocks.map(block => {
+    const trimmed = block.trim();
+    if (!trimmed) return "";
+
+    // Table block — must have pipe chars and a separator line
+    if (trimmed.includes("|") && trimmed.split("\n").length >= 3) {
+      const table = parseMarkdownTable(trimmed);
+      if (table) return table;
+    }
+
+    // Blockquote
+    if (trimmed.startsWith("> ")) {
+      const content = trimmed.replace(/^> /gm, "");
+      return `<blockquote style="border-left:4px solid #0ea5e9;background:#f0f9ff;margin:12px 0;padding:12px 18px;border-radius:0 8px 8px 0;color:#0369a1;font-style:italic;font-size:14px">${inlineMd(content)}</blockquote>`;
+    }
+
+    // Bullet list
+    if (/^[-•*]\s/.test(trimmed)) {
+      const items = trimmed.split("\n").filter(l => /^[-•*]\s/.test(l.trim()));
+      const lis = items.map(l => `<li style="margin-bottom:6px">${inlineMd(l.replace(/^[-•*]\s+/, ""))}</li>`).join("");
+      return `<ul style="margin:8px 0;padding-left:22px;list-style:disc">${lis}</ul>`;
+    }
+
+    // Numbered list
+    if (/^\d+\.\s/.test(trimmed)) {
+      const items = trimmed.split("\n").filter(l => /^\d+\.\s/.test(l.trim()));
+      const lis = items.map(l => `<li style="margin-bottom:6px">${inlineMd(l.replace(/^\d+\.\s+/, ""))}</li>`).join("");
+      return `<ol style="margin:8px 0;padding-left:22px">${lis}</ol>`;
+    }
+
+    // Default paragraph
+    return `<p style="margin:0 0 12px;line-height:1.75">${inlineMd(trimmed.replace(/\n/g, "<br/>"))}</p>`;
+  }).join("\n");
 }
 
 export default function BrandedProposalView({ data }: Props) {
@@ -186,7 +252,7 @@ export default function BrandedProposalView({ data }: Props) {
             <div
               className="text-gray-700 leading-relaxed text-[15px]"
               style={{ fontFamily: `'${brand.fontFamily}', sans-serif` }}
-              dangerouslySetInnerHTML={{ __html: `<p class="mb-4">${renderMd(s.content)}</p>` }}
+              dangerouslySetInnerHTML={{ __html: renderMd(s.content) }}
             />
           </div>
         ))}
