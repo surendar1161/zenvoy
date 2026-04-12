@@ -12,7 +12,58 @@ import {
 import Link from "next/link";
 import { listProposals, deleteProposal } from "@/lib/db";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
+
+function renderProposalMd(text: string): string {
+  const blocks = text.split(/\n\n+/);
+  return blocks.map(block => {
+    const t = block.trim();
+    if (!t) return "";
+
+    // Headings
+    if (/^### /.test(t)) return `<h3 style="font-size:15px;font-weight:700;margin:16px 0 6px;color:#0f172a">${t.replace(/^### /, "")}</h3>`;
+    if (/^## /.test(t)) return `<h2 style="font-size:17px;font-weight:800;margin:20px 0 8px;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:6px">${t.replace(/^## /, "")}</h2>`;
+    if (/^# /.test(t))  return `<h1 style="font-size:20px;font-weight:900;margin:20px 0 8px;color:#0f172a">${t.replace(/^# /, "")}</h1>`;
+
+    // Table
+    if (t.includes("|") && t.split("\n").length >= 3 && /^[\|\-:\s]+$/.test(t.split("\n")[1])) {
+      const lines = t.split("\n").filter(Boolean);
+      const headers = lines[0].split("|").map(h => h.trim()).filter(Boolean);
+      const rows = lines.slice(2);
+      const th = headers.map(h => `<th style="padding:9px 14px;background:#f8fafc;font-size:12px;font-weight:700;color:#64748b;border-bottom:2px solid #e2e8f0;text-align:left;white-space:nowrap">${inline(h)}</th>`).join("");
+      const tbody = rows.map((row, ri) => {
+        const cells = row.split("|").map(c => c.trim()).filter(Boolean);
+        const tds = cells.map((c, ci) => `<td style="padding:9px 14px;font-size:13px;color:#374151;border-bottom:1px solid #f1f5f9;vertical-align:top;${ci===0?"font-weight:600;":""}">${inline(c)}</td>`).join("");
+        return `<tr style="background:${ri%2===0?"#fff":"#f8fafc"}">${tds}</tr>`;
+      }).join("");
+      return `<div style="overflow-x:auto;margin:12px 0;border-radius:10px;border:1px solid #e2e8f0"><table style="width:100%;border-collapse:collapse"><thead><tr>${th}</tr></thead><tbody>${tbody}</tbody></table></div>`;
+    }
+
+    // Blockquote
+    if (t.startsWith("> ")) return `<blockquote style="border-left:3px solid #0ea5e9;background:#f0f9ff;margin:10px 0;padding:10px 16px;border-radius:0 8px 8px 0;color:#0369a1;font-style:italic;font-size:13px">${inline(t.replace(/^> /gm, ""))}</blockquote>`;
+
+    // Bullet list
+    if (/^[-•*]\s/.test(t)) {
+      const lis = t.split("\n").filter(l => /^[-•*]\s/.test(l.trim())).map(l => `<li style="margin-bottom:4px">${inline(l.replace(/^[-•*]\s+/,""))}</li>`).join("");
+      return `<ul style="margin:6px 0;padding-left:20px;list-style:disc">${lis}</ul>`;
+    }
+
+    // Numbered list
+    if (/^\d+\.\s/.test(t)) {
+      const lis = t.split("\n").filter(l => /^\d+\.\s/.test(l.trim())).map(l => `<li style="margin-bottom:4px">${inline(l.replace(/^\d+\.\s+/,""))}</li>`).join("");
+      return `<ol style="margin:6px 0;padding-left:20px">${lis}</ol>`;
+    }
+
+    return `<p style="margin:0 0 10px;line-height:1.75">${inline(t.replace(/\n/g,"<br/>"))}</p>`;
+  }).join("\n");
+}
+
+function inline(t: string): string {
+  return t
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`(.+?)`/g, "<code style='background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:12px'>$1</code>");
+}
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "default", sent: "blue", viewed: "cyan",
@@ -194,22 +245,21 @@ export default function ProposalsPage() {
         footer={preview ? [
           <Button key="copy" icon={<CopyOutlined />}
             onClick={() => preview.proposal_text && copyText(preview.proposal_text)}>
-            Copy
+            Copy Text
           </Button>,
           <a key="web" href={`/proposal/${preview.id}`} target="_blank" rel="noopener noreferrer">
-            <Button type="primary">Open Web View</Button>
+            <Button type="primary" icon={<EyeOutlined />}>Open Full View & Download</Button>
           </a>,
         ] : null}
         title={preview ? `${preview.client_name} — ${preview.project_type}` : ""}
-        width={760}
-        styles={{ body: { maxHeight: "70vh", overflow: "auto" } }}
+        width={820}
+        styles={{ body: { maxHeight: "72vh", overflow: "auto", padding: "16px 24px" } }}
       >
         {preview?.proposal_text && (
-          <Paragraph>
-            <pre style={{ whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 14, lineHeight: 1.7, color: "#374151" }}>
-              {preview.proposal_text}
-            </pre>
-          </Paragraph>
+          <div
+            style={{ fontSize: 14, lineHeight: 1.8, color: "#374151" }}
+            dangerouslySetInnerHTML={{ __html: renderProposalMd(preview.proposal_text) }}
+          />
         )}
       </Modal>
     </div>
