@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Alert, Button, Card, Divider, Form, Input, Typography, Space, message,
@@ -17,7 +17,11 @@ const hasSupabase =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder");
 
-export default function SignInClient() {
+export default function SignInClientWrapper() {
+  return <Suspense><SignInClient /></Suspense>;
+}
+
+function SignInClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/dashboard";

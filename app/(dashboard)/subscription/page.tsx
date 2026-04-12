@@ -283,6 +283,10 @@ function SubscriptionContent() {
   );
 }
 
-export default function SubscriptionPage() {
+export default function SubscriptionPageWrapper() {
+  return <Suspense><SubscriptionPage /></Suspense>;
+}
+
+function SubscriptionPage() {
   return <Suspense><SubscriptionContent /></Suspense>;
 }

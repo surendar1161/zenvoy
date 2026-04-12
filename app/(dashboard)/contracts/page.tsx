@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Badge, Button, Card, Col, Empty, Input, Modal, Row, Select, Space,
@@ -60,7 +60,11 @@ type Contract = {
   contract_text: string | null;
 };
 
-export default function ContractsPage() {
+export default function ContractsPageWrapper() {
+  return <Suspense><ContractsPage /></Suspense>;
+}
+
+function ContractsPage() {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
