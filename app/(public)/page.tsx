@@ -124,7 +124,7 @@ const PLANS = [
   },
   {
     name: "Pro",
-    monthlyPrice: 19, yearlyPrice: 15,
+    monthlyPrice: 12, yearlyPrice: 9,
     color: "#0ea5e9",
     popular: true,
     features: ["Unlimited proposals & contracts", "Digital e-signatures", "Proposal analytics", "Client portals (files + invoices + chat)", "Content library", "Password protection & expiry", "White-label (no branding)", "Priority support"],
@@ -132,7 +132,7 @@ const PLANS = [
   },
   {
     name: "Business",
-    monthlyPrice: 49, yearlyPrice: 39,
+    monthlyPrice: 29, yearlyPrice: 22,
     color: "#7c3aed",
     features: ["Everything in Pro", "5 team members", "Manager approvals", "Content locking", "API access", "Custom domain", "Dedicated onboarding call"],
     missing: [],
@@ -146,7 +146,7 @@ const FAQ = [
   { q: "Which payment providers are supported?", a: "Stripe for payment links on proposals and invoices. Chargebee for subscription billing (your own subscription to Zenvoy). We plan to add PayPal and GoCardless." },
   { q: "Can I use my own branding?", a: "Yes — fully. Upload your logo, set your brand colours, and choose your font. Every proposal, contract, client portal, and cover page uses your brand. Clients never see Zenvoy. Pro and Business plans include white-labelling." },
   { q: "What's the difference between a proposal and a contract?", a: "A proposal outlines your scope, pricing, and value proposition — it's a sales document. A contract is a legally binding agreement once signed. Zenvoy generates both, and the e-signature flow can be applied to either." },
-  { q: "Is there a free trial?", a: "The Free plan is permanently free — no credit card required. You get 5 proposals and 2 contracts per month. Upgrade to Pro ($19/mo) when you're ready for unlimited everything." },
+  { q: "Is there a free trial?", a: "The Free plan is permanently free — no credit card required. You get 5 proposals and 2 contracts per month. Upgrade to Pro ($12/mo) when you're ready for unlimited everything." },
   { q: "How does the client portal work?", a: "When you create a client portal, Zenvoy generates a unique branded URL. Share it with your client. They see a dashboard with all shared files, invoices (with Pay Now buttons), signed contracts, and a live chat window to message you. Everything in one place, fully branded as your studio." },
 ];
 
@@ -518,7 +518,7 @@ export default function LandingPage() {
               <Switch checked={yearly} onChange={setYearly} style={{ background: yearly ? "#0ea5e9" : "#94a3b8" }} />
               <Text style={{ fontWeight: yearly ? 700 : 400 }}>
                 Yearly
-                <Tag color="green" style={{ marginLeft: 8, borderRadius: 20, fontSize: 11 }}>Save 21%</Tag>
+                <Tag color="green" style={{ marginLeft: 8, borderRadius: 20, fontSize: 11 }}>Save 25%</Tag>
               </Text>
             </Space>
           </div>

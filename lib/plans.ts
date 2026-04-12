@@ -54,9 +54,9 @@ export const PLANS: PlanConfig[] = [
     id: "pro",
     name: "Pro",
     tagline: "Everything you need to close deals",
-    monthlyPrice: 19,
-    yearlyPrice: 15,    // $15/mo billed as $180/yr
-    yearlyTotal: 180,
+    monthlyPrice: 12,
+    yearlyPrice: 9,     // $9/mo billed as $108/yr
+    yearlyTotal: 108,
     color: "#0ea5e9",
     popular: true,
     limits: { proposals: "unlimited", contracts: "unlimited", teamMembers: 1 },
@@ -84,9 +84,9 @@ export const PLANS: PlanConfig[] = [
     id: "business",
     name: "Business",
     tagline: "For agencies and growing teams",
-    monthlyPrice: 49,
-    yearlyPrice: 39,    // $39/mo billed as $468/yr
-    yearlyTotal: 468,
+    monthlyPrice: 29,
+    yearlyPrice: 22,    // $22/mo billed as $264/yr
+    yearlyTotal: 264,
     color: "#7c3aed",
     limits: { proposals: "unlimited", contracts: "unlimited", teamMembers: 5 },
     features: [
