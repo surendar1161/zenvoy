@@ -1,0 +1,13 @@
+{
+  "name": "zenvoy-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev":     "supabase functions serve",
+    "deploy":  "supabase functions deploy",
+    "secrets": "supabase secrets set --env-file .env"
+  },
+  "devDependencies": {
+    "supabase": "^2.20.5"
+  }
+}

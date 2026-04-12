@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── TipTap / Document Editor ─────────────────────────────── */
+
+.document-editor .ProseMirror {
+  outline: none;
+  min-height: 500px;
+  line-height: 1.8;
+  font-size: 15px;
+  color: #1e293b;
+}
+
+/* Headings */
+.document-editor .ProseMirror h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 1.6rem 0 0.6rem;
+  line-height: 1.2;
+  color: #0f172a;
+}
+.document-editor .ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.4rem 0 0.5rem;
+  color: #1e293b;
+}
+.document-editor .ProseMirror h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1.2rem 0 0.4rem;
+  color: #334155;
+}
+
+/* Paragraphs */
+.document-editor .ProseMirror p {
+  margin: 0 0 0.75rem;
+}
+
+/* Lists */
+.document-editor .ProseMirror ul,
+.document-editor .ProseMirror ol {
+  padding-left: 1.6rem;
+  margin: 0.5rem 0 1rem;
+}
+.document-editor .ProseMirror li {
+  margin-bottom: 0.3rem;
+}
+.document-editor .ProseMirror ul li { list-style-type: disc; }
+.document-editor .ProseMirror ol li { list-style-type: decimal; }
+
+/* Highlight */
+.document-editor .ProseMirror mark {
+  background-color: #fef08a;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Placeholder */
+.document-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #94a3b8;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Selection */
+.document-editor .ProseMirror ::selection {
+  background: #bfdbfe;
+}
+
+/* Horizontal rule */
+.document-editor .ProseMirror hr {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 1.5rem 0;
+}
+
+/* Blockquote */
+.document-editor .ProseMirror blockquote {
+  border-left: 4px solid #0ea5e9;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  color: #64748b;
+  background: #f0f9ff;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Code */
+.document-editor .ProseMirror code {
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 0.875em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Bubble menu */
+.bubble-menu {
+  display: flex;
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.bubble-menu button {
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.bubble-menu button:hover,
+.bubble-menu button.is-active {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+/* Print */
+@media print {
+  .doc-toolbar,
+  .doc-status-bar,
+  .no-print { display: none !important; }
+  .document-page {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
