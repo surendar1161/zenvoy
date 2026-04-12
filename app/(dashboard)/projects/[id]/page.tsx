@@ -8,12 +8,15 @@ import {
   Table, Tabs, Tag, Tooltip, Typography, message,
 } from "antd";
 import type { MenuProps, TableColumnsType } from "antd";
+import type { UploadProps } from "antd";
+import { Upload } from "antd";
 import {
   ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined,
   EllipsisOutlined, CheckCircleOutlined, ClockCircleOutlined,
   CalendarOutlined, FolderOpenOutlined, CheckOutlined,
   ExclamationCircleOutlined, MessageOutlined, SendOutlined,
   UserOutlined, FieldTimeOutlined, PlayCircleOutlined, PauseCircleOutlined,
+  PaperClipOutlined, DownloadOutlined, InboxOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -71,6 +74,14 @@ interface TimeEntry {
   timer_started_at: string | null; task_id: string | null;
 }
 
+interface ProjectFile {
+  id: string; project_id: string; name: string;
+  storage_path: string; storage_url: string | null;
+  size_bytes: number | null; mime_type: string | null;
+  uploaded_by: string; uploader_name: string | null;
+  category: string; created_at: string;
+}
+
 interface ProjectMessage {
   id: string; project_id: string; user_id: string | null;
   sender_name: string; sender_role: "freelancer" | "client";
@@ -91,6 +102,11 @@ export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState("tasks");
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
+
+  // Files state
+  const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [fileCategory, setFileCategory] = useState("general");
 
   // Time tracking state
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
@@ -142,6 +158,7 @@ export default function ProjectDetailPage() {
     if (activeTab === "conversation" && messages.length === 0) loadMessages();
     if (activeTab === "conversation") setUnread(0);
     if (activeTab === "time") loadTimeEntries();
+    if (activeTab === "files") loadFiles();
   }, [activeTab]);
 
   // Timer tick
@@ -204,6 +221,74 @@ export default function ProjectDetailPage() {
     const running = entries.find(e => e.is_running);
     if (running) setRunningEntry(running);
   }
+
+  async function loadFiles() {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("project_files")
+      .select("*")
+      .eq("project_id", id)
+      .order("created_at", { ascending: false });
+    setFiles((data ?? []) as ProjectFile[]);
+  }
+
+  async function uploadFile(file: File) {
+    setUploading(true);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const ext = file.name.split(".").pop();
+    const path = `${id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error: uploadErr } = await supabase.storage
+      .from("project-files")
+      .upload(path, file);
+
+    if (uploadErr) { msgApi.error("Upload failed: " + uploadErr.message); setUploading(false); return; }
+
+    const { data: { publicUrl } } = supabase.storage.from("project-files").getPublicUrl(path);
+
+    const { data: row } = await supabase.from("project_files").insert({
+      project_id: id,
+      user_id: user?.id ?? null,
+      name: file.name,
+      storage_path: path,
+      storage_url: publicUrl,
+      size_bytes: file.size,
+      mime_type: file.type,
+      uploaded_by: "freelancer",
+      uploader_name: (user?.user_metadata?.full_name as string) ?? user?.email ?? "Freelancer",
+      category: fileCategory,
+    }).select().single();
+
+    if (row) setFiles(prev => [row as ProjectFile, ...prev]);
+    msgApi.success("File uploaded!");
+    setUploading(false);
+  }
+
+  async function deleteFile(fileId: string, storagePath: string) {
+    Modal.confirm({
+      title: "Delete this file?", okText: "Delete", okType: "danger",
+      onOk: async () => {
+        const supabase = createClient();
+        await supabase.storage.from("project-files").remove([storagePath]);
+        await supabase.from("project_files").delete().eq("id", fileId);
+        setFiles(prev => prev.filter(f => f.id !== fileId));
+        msgApi.success("File deleted");
+      },
+    });
+  }
+
+  function formatBytes(b: number | null) {
+    if (!b) return "";
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  const FILE_ICONS: Record<string, string> = {
+    design: "🎨", document: "📝", image: "🖼️",
+    contract: "📄", invoice: "💰", reference: "📚", general: "📎",
+  };
 
   async function startTimer() {
     const supabase = createClient();
@@ -578,6 +663,99 @@ export default function ProjectDetailPage() {
                   )}
                 </Card>
               </>
+            ),
+          },
+          {
+            key: "files",
+            label: (
+              <Space>
+                <PaperClipOutlined />
+                Files
+                {files.length > 0 && <Tag style={{ borderRadius: 20, fontSize: 10, marginLeft: 2 }}>{files.length}</Tag>}
+              </Space>
+            ),
+            children: (
+              <div>
+                {/* Upload area */}
+                <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
+                  <div style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 16 }}>
+                    <div>
+                      <Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Category</Text>
+                      <Select value={fileCategory} onChange={setFileCategory} style={{ width: 160 }}
+                        options={["general","design","document","image","contract","invoice","reference"].map(c => ({
+                          value: c, label: <Space>{FILE_ICONS[c]} {c.charAt(0).toUpperCase() + c.slice(1)}</Space>
+                        }))} />
+                    </div>
+                    <Upload.Dragger
+                      multiple
+                      showUploadList={false}
+                      beforeUpload={(file) => { uploadFile(file); return false; }}
+                      style={{ flex: 1, minWidth: 200, borderRadius: 12, border: "2px dashed #e2e8f0", background: "#f8fafc" }}
+                    >
+                      <div style={{ padding: "12px 0" }}>
+                        <InboxOutlined style={{ fontSize: 32, color: "#0ea5e9", display: "block", marginBottom: 6 }} />
+                        <Text style={{ fontSize: 14, fontWeight: 600 }}>Drop files here or click to upload</Text>
+                        <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+                          Any file type · Max 50MB per file
+                        </Text>
+                      </div>
+                    </Upload.Dragger>
+                  </div>
+                  {uploading && (
+                    <div style={{ background: "#eff6ff", borderRadius: 8, padding: "10px 14px" }}>
+                      <Text style={{ color: "#0ea5e9", fontSize: 13 }}>⏳ Uploading…</Text>
+                    </div>
+                  )}
+                </Card>
+
+                {/* File list */}
+                <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
+                  {files.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "60px 40px" }}>
+                      <PaperClipOutlined style={{ fontSize: 48, color: "#cbd5e1", marginBottom: 12 }} />
+                      <Text type="secondary" style={{ display: "block" }}>No files yet. Upload files to share with your client.</Text>
+                    </div>
+                  ) : (
+                    files.map((f, i) => (
+                      <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", borderBottom: i < files.length - 1 ? "1px solid #f8fafc" : "none" }}>
+                        {/* Icon */}
+                        <div style={{ width: 42, height: 42, borderRadius: 10, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                          {FILE_ICONS[f.category] ?? "📎"}
+                        </div>
+
+                        {/* Info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Text strong style={{ fontSize: 14, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {f.name}
+                          </Text>
+                          <Space size={10} style={{ marginTop: 2 }}>
+                            <Tag style={{ borderRadius: 20, fontSize: 11, textTransform: "capitalize", padding: "0 8px" }}>{f.category}</Tag>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {f.uploaded_by === "client" ? "👤" : "💼"} {f.uploader_name ?? f.uploaded_by}
+                            </Text>
+                            {f.size_bytes && <Text type="secondary" style={{ fontSize: 12 }}>{formatBytes(f.size_bytes)}</Text>}
+                            <Text type="secondary" style={{ fontSize: 12 }}>{dayjs(f.created_at).fromNow()}</Text>
+                          </Space>
+                        </div>
+
+                        {/* Actions */}
+                        <Space>
+                          {f.storage_url && (
+                            <Tooltip title="Download">
+                              <a href={f.storage_url} target="_blank" rel="noopener noreferrer" download={f.name}>
+                                <Button type="text" icon={<DownloadOutlined />} style={{ borderRadius: 8 }} />
+                              </a>
+                            </Tooltip>
+                          )}
+                          <Tooltip title="Delete">
+                            <Button type="text" danger icon={<DeleteOutlined />} onClick={() => deleteFile(f.id, f.storage_path)} />
+                          </Tooltip>
+                        </Space>
+                      </div>
+                    ))
+                  )}
+                </Card>
+              </div>
             ),
           },
           {
