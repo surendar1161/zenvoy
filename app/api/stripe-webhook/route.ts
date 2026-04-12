@@ -2,8 +2,8 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Uses service role to bypass RLS for webhook updates
-const supabaseAdmin = createClient(
+// Lazy — created per-request so env vars are available at runtime
+const getAdmin = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     periodEnd: number | null,
     cancelAtPeriodEnd: boolean,
   ) {
-    await supabaseAdmin.from("subscriptions").upsert({
+    await getAdmin().from("subscriptions").upsert({
       user_id: userId,
       stripe_customer_id: customerId,
       stripe_subscription_id: subscriptionId,
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       const invoice = event.data.object as unknown as { subscription?: string | { id: string } };
       const subId = typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id;
       if (subId) {
-        await supabaseAdmin.from("subscriptions").update({ status: "past_due" }).eq("stripe_subscription_id", subId);
+        await getAdmin().from("subscriptions").update({ status: "past_due" }).eq("stripe_subscription_id", subId);
       }
       break;
     }

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 
-// Admin client — bypasses RLS for webhook updates
-const supabaseAdmin = createSupabaseAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy — created per-request so env vars are available at runtime
+function getAdmin() {
+  return createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 type CBPlan = "free" | "pro" | "business";
 type CBStatus = "active" | "trialing" | "past_due" | "canceled" | "unpaid";
@@ -37,7 +39,7 @@ async function upsert(
   status: CBStatus,
   periodEnd: number | null,
 ) {
-  await supabaseAdmin.from("subscriptions").upsert({
+  await getAdmin().from("subscriptions").upsert({
     user_id: userId,
     chargebee_customer_id: customerId,
     chargebee_subscription_id: subscriptionId,
@@ -107,7 +109,7 @@ export async function POST(req: NextRequest) {
 
   // Fallback: look up by existing chargebee_customer_id
   if (!userId) {
-    const { data } = await supabaseAdmin
+    const { data } = await getAdmin()
       .from("subscriptions")
       .select("user_id")
       .eq("chargebee_customer_id", customerId)
@@ -124,7 +126,7 @@ export async function POST(req: NextRequest) {
 
   // Notify user of payment failure
   if (eventType === "payment_failed") {
-    await supabaseAdmin.from("notifications").insert({
+    await getAdmin().from("notifications").insert({
       user_id: userId,
       type: "payment_failed",
       title: "Payment failed",
