@@ -12,6 +12,7 @@ import {
   DollarOutlined, CheckCircleOutlined, ClockCircleOutlined,
   SendOutlined, FileTextOutlined, SyncOutlined,
 } from "@ant-design/icons";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
@@ -177,9 +178,12 @@ export default function InvoicesPage() {
       },
     },
     {
-      title: "Actions", key: "actions", width: 200,
+      title: "Actions", key: "actions", width: 240,
       render: (_, i) => (
         <Space size={6}>
+          <Link href={`/invoices/${i.id}`}>
+            <Button size="small" icon={<EyeOutlined />} style={{ borderRadius: 6 }}>View</Button>
+          </Link>
           <Select size="small" value={i.status} style={{ width: 110 }}
             onChange={v => updateStatus(i.id, v)}
             options={["draft","sent","viewed","paid","overdue","cancelled"].map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))} />
