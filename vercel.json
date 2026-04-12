@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install --no-strict-peer-dependencies",
   "regions": ["iad1"]
 }
