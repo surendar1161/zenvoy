@@ -15,7 +15,7 @@ import Link from "next/link";
 import { CONTRACT_TYPES, CONTRACT_CATEGORIES } from "@/lib/contract-types";
 import { listContracts, deleteContract, signContract, updateContractStatus } from "@/lib/db";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const CATEGORY_COLORS: Record<string, string> = {
   Employment:      "#0ea5e9",
@@ -73,7 +73,6 @@ function ContractsPage() {
   // My Contracts state
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
-  const [preview, setPreview] = useState<Contract | null>(null);
   const [signTarget, setSignTarget] = useState<Contract | null>(null);
   const [signing, setSigning] = useState(false);
   const [signForm] = Form.useForm();
@@ -104,7 +103,6 @@ function ContractsPage() {
       onOk: async () => {
         await deleteContract(id);
         setContracts(prev => prev.filter(c => c.id !== id));
-        if (preview?.id === id) setPreview(null);
         msgApi.success("Contract deleted");
       },
     });
@@ -216,8 +214,10 @@ function ContractsPage() {
                       style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%" }}
                       styles={{ body: { padding: 22 } }}
                       actions={[
-                        <Tooltip key="view" title="Preview contract">
-                          <Button type="text" icon={<EyeOutlined />} onClick={() => setPreview(c)} />
+                        <Tooltip key="view" title="View contract">
+                          <Link href={`/contract/${c.id}`} target="_blank">
+                            <Button type="text" icon={<EyeOutlined />} />
+                          </Link>
                         </Tooltip>,
                         <Tooltip key="sign" title={c.status === "signed" ? `Signed by ${c.signer_name}` : "Sign contract"}>
                           <Button
@@ -298,32 +298,6 @@ function ContractsPage() {
           },
         ]}
       />
-
-      {/* Preview Modal */}
-      <Modal
-        open={!!preview}
-        onCancel={() => setPreview(null)}
-        footer={[
-          <Button key="close" onClick={() => setPreview(null)}>Close</Button>,
-          preview?.status !== "signed" && (
-            <Button key="sign" type="primary" icon={<EditOutlined />}
-              onClick={() => { setSignTarget(preview); setPreview(null); signForm.resetFields(); }}>
-              Sign Contract
-            </Button>
-          ),
-        ].filter(Boolean)}
-        title={preview ? `${preview.contract_type_name} — ${preview.party_a_name} & ${preview.party_b_name}` : ""}
-        width={800}
-        styles={{ body: { maxHeight: "70vh", overflow: "auto" } }}
-      >
-        {preview?.contract_text && (
-          <Paragraph>
-            <pre style={{ whiteSpace: "pre-wrap", fontFamily: "'Georgia', serif", fontSize: 13, lineHeight: 1.8, color: "#1e293b" }}>
-              {preview.contract_text}
-            </pre>
-          </Paragraph>
-        )}
-      </Modal>
 
       {/* E-Signature Modal */}
       <Modal
