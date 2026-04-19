@@ -213,6 +213,7 @@ export default function GenerateClient() {
             add_ons:             addOns,
             milestones:          milestones,
             brand_snapshot:      brand,
+            payment_link:        paymentLink || null,
             status:              "draft",
             view_count:          0,
           })
@@ -236,41 +237,13 @@ export default function GenerateClient() {
           freelancerName: form.freelancerName, freelancerTitle: form.freelancerTitle,
           freelancerEmail: form.freelancerEmail, clientName: form.clientName, clientCompany: form.clientCompany,
           projectType: form.projectType, currency: form.currency, totalBudget: form.totalBudget,
-          depositAmount, paymentLink: null, tiers, addOns, milestones, brand,
+          depositAmount, paymentLink, tiers, addOns, milestones, brand,
         }));
       } catch { /* storage full */ }
-      setLoadingPayment(true);
-      await Promise.allSettled([createDepositLink(), createMilestoneLinks(), createTierLinks()]);
     } catch (err) {
       msgApi.error(err instanceof Error ? err.message : "Something went wrong");
       setStep("form");
     } finally { setLoading(false); setLoadingPayment(false); }
-  }
-
-  async function createDepositLink() {
-    try {
-      const res = await fetch("/api/create-payment-link", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: depositAmount, currency: form.currency, description: `${form.projectType} Deposit`, freelancerName: form.freelancerName, clientName: form.clientName }) });
-      if (res.ok) { const { url } = await res.json(); setPaymentLink(url); }
-    } catch { /* optional */ }
-  }
-  async function createMilestoneLinks() {
-    try {
-      const res = await fetch("/api/create-milestone-links", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ milestones, totalBudget: form.totalBudget, currency: form.currency, freelancerName: form.freelancerName, clientName: form.clientName }) });
-      if (res.ok) { const { milestones: linked } = await res.json(); setLinkedMilestones(linked); }
-    } catch { /* optional */ }
-  }
-  async function createTierLinks() {
-    const enabled = tiers.filter(t => t.price > 0);
-    if (!enabled.length) return;
-    try {
-      const linked = await Promise.all(enabled.map(async tier => {
-        const deposit = Math.round(tier.price * tier.depositPercent / 100);
-        const res = await fetch("/api/create-payment-link", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: deposit, currency: form.currency, description: `${tier.name} Deposit`, freelancerName: form.freelancerName, clientName: form.clientName }) });
-        if (res.ok) { const { url } = await res.json(); return { ...tier, paymentLink: url }; }
-        return tier;
-      }));
-      setLinkedTiers(linked);
-    } catch { /* optional */ }
   }
 
   if (step === "result") {
@@ -456,12 +429,38 @@ export default function GenerateClient() {
                 </Form.Item>
               </Col>
             </Row>
-            <div style={{ background: "#eff6ff", borderRadius: 10, padding: "12px 16px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+            <div style={{ background: "#eff6ff", borderRadius: 10, padding: "12px 16px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
               <Text style={{ color: "#1d4ed8" }}>
                 Deposit: <strong>{form.currency} {depositAmount.toLocaleString()}</strong>
               </Text>
               <Text style={{ color: "#3b82f6" }}>
                 Balance on completion: <strong>{form.currency} {(form.totalBudget - depositAmount).toLocaleString()}</strong>
+              </Text>
+            </div>
+
+            {/* Stripe payment link */}
+            <div style={{ background: "#f0fdf4", borderRadius: 10, padding: "14px 16px", border: "1px solid #bbf7d0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 18 }}>💳</span>
+                <Text strong style={{ color: "#166534", fontSize: 13 }}>Deposit Payment Link (optional)</Text>
+              </div>
+              <Input
+                size="large"
+                placeholder="Paste your Stripe payment link — e.g. https://buy.stripe.com/..."
+                value={paymentLink ?? ""}
+                onChange={e => setPaymentLink(e.target.value || null)}
+                style={{ borderRadius: 8, marginBottom: 8 }}
+                prefix={<span style={{ color: "#94a3b8" }}>🔗</span>}
+                allowClear
+              />
+              <Text type="secondary" style={{ fontSize: 12, lineHeight: 1.5, display: "block" }}>
+                Create a payment link in your{" "}
+                <a href="https://dashboard.stripe.com/payment-links" target="_blank" rel="noopener noreferrer" style={{ color: "#0ea5e9" }}>
+                  Stripe Dashboard → Payment Links
+                </a>
+                {" "}→ set amount to{" "}
+                <strong>{form.currency} {depositAmount.toLocaleString()}</strong>
+                {" "}→ copy and paste the link here. The client will see a Pay Now button in their proposal.
               </Text>
             </div>
           </Card>

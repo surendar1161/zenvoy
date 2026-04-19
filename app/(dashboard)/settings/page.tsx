@@ -15,6 +15,7 @@ import {
   CheckCircleOutlined, ClockCircleOutlined, StopOutlined,
   BgColorsOutlined, FontSizeOutlined, UploadOutlined, SaveOutlined,
   EyeOutlined, EyeInvisibleOutlined, ArrowRightOutlined, CheckCircleFilled,
+  DollarOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import type { BrandKit } from "@/lib/brand";
@@ -320,6 +321,64 @@ export default function SettingsPage() {
             </Card>
           </Col>
         </Row>
+      ),
+    },
+    {
+      key: "payments",
+      label: <Space><DollarOutlined />Payments</Space>,
+      children: (
+        <div style={{ maxWidth: 700 }}>
+          <Text strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>Stripe Payment Setup</Text>
+          <Text type="secondary" style={{ fontSize: 14, display: "block", marginBottom: 24 }}>
+            Zenvoy uses your own Stripe account — payments go directly to you. No platform fees.
+          </Text>
+
+          {/* How it works */}
+          <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
+            <Text strong style={{ fontSize: 14, display: "block", marginBottom: 16 }}>How payment links work</Text>
+            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              {[
+                { step: "1", title: "Create a Stripe account", desc: "Sign up free at stripe.com. No monthly fees — Stripe charges 2.9% + 30¢ per transaction only when you get paid.", link: "https://stripe.com", linkLabel: "stripe.com →" },
+                { step: "2", title: "Create a Payment Link", desc: `Go to Stripe Dashboard → Payment Links → Create link. Set the amount to your deposit amount (e.g. 50% of the project total), give it a name like "Project Deposit".`, link: "https://dashboard.stripe.com/payment-links", linkLabel: "Open Stripe Dashboard →" },
+                { step: "3", title: "Copy and paste into Zenvoy", desc: "Copy the payment link URL (looks like https://buy.stripe.com/...) and paste it into the Deposit Payment Link field when creating a proposal.", link: null, linkLabel: null },
+                { step: "4", title: "Client pays directly to you", desc: "When the client opens your proposal, they see a Pay Now button. Clicking it takes them to your Stripe checkout. Money lands in your Stripe account within 2 business days.", link: null, linkLabel: null },
+              ].map(s => (
+                <div key={s.step} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Text style={{ color: "#fff", fontWeight: 800, fontSize: 14 }}>{s.step}</Text>
+                  </div>
+                  <div>
+                    <Text strong style={{ fontSize: 14, display: "block", marginBottom: 3 }}>{s.title}</Text>
+                    <Text type="secondary" style={{ fontSize: 13, lineHeight: 1.6 }}>{s.desc}</Text>
+                    {s.link && (
+                      <a href={s.link} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4, fontSize: 13, color: "#0ea5e9", fontWeight: 600 }}>
+                        {s.linkLabel}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </Space>
+          </Card>
+
+          {/* Tips */}
+          <Card style={{ borderRadius: 14, border: "1px solid #dbeafe", background: "#eff6ff" }} styles={{ body: { padding: 20 } }}>
+            <Text strong style={{ color: "#1d4ed8", display: "block", marginBottom: 10 }}>💡 Tips for payment links</Text>
+            <Space direction="vertical" size={6}>
+              {[
+                "Create one payment link per standard deposit amount (e.g. $500, $1000, $2500) and reuse them",
+                "Or create a new link for each proposal with the exact deposit amount",
+                "You can also create milestone payment links — paste them into the Milestone section of each proposal",
+                "For recurring clients, save their payment link in their client profile",
+              ].map((tip, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <Text style={{ color: "#0369a1", fontSize: 14 }}>•</Text>
+                  <Text style={{ fontSize: 13, color: "#1e40af" }}>{tip}</Text>
+                </div>
+              ))}
+            </Space>
+          </Card>
+        </div>
       ),
     },
     {
