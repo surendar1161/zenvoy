@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Badge, Button, Card, Col, Empty, List, Progress,
-  Row, Space, Statistic, Tag, Typography, Spin,
+  Avatar, Badge, Button, Card, Col, Empty, List, Modal, Progress,
+  Row, Space, Statistic, Tag, Typography, Spin, message,
 } from "antd";
 import {
   ThunderboltOutlined, FileTextOutlined, SafetyCertificateOutlined,
   TeamOutlined, DollarOutlined, EyeOutlined, CheckCircleOutlined,
   ArrowRightOutlined, ClockCircleOutlined, BellOutlined, WarningOutlined,
-  RiseOutlined,
+  RiseOutlined, DeleteOutlined, ExperimentOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -48,10 +48,34 @@ interface DashboardData {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasDemoData, setHasDemoData] = useState(false);
+  const [deletingDemo, setDeletingDemo] = useState(false);
+  const [msgApi, ctx] = message.useMessage();
 
   useEffect(() => {
     load();
   }, []);
+
+  async function handleDeleteDemo() {
+    Modal.confirm({
+      title: "Delete all demo data?",
+      content: "This will permanently remove all demo clients, proposals, contracts, projects, invoices, and content library items. Your real data will not be affected.",
+      okText: "Delete Demo Data",
+      okType: "danger",
+      onOk: async () => {
+        setDeletingDemo(true);
+        const res = await fetch("/api/delete-demo", { method: "POST" });
+        setDeletingDemo(false);
+        if (res.ok) {
+          setHasDemoData(false);
+          msgApi.success("Demo data deleted — your workspace is clean!");
+          load();
+        } else {
+          msgApi.error("Failed to delete demo data");
+        }
+      },
+    });
+  }
 
   async function load() {
     const supabase = createClient();
@@ -62,13 +86,16 @@ export default function DashboardPage() {
       { data: contracts },
       { data: clients },
       { data: notifs },
+      { data: profile },
     ] = await Promise.all([
       supabase.auth.getUser(),
       supabase.from("proposals").select("id,client_name,project_type,status,currency,total_budget,view_count,created_at").order("created_at", { ascending: false }),
       supabase.from("contracts").select("id,status,created_at").order("created_at", { ascending: false }),
       supabase.from("clients").select("id,status").order("created_at", { ascending: false }),
       supabase.from("notifications").select("id,title,message,type,created_at").order("created_at", { ascending: false }).limit(8),
+      supabase.from("profiles").select("has_demo_data").eq("id", (await supabase.auth.getUser()).data.user?.id ?? "").maybeSingle(),
     ]);
+    setHasDemoData(profile?.has_demo_data ?? false);
 
     const allProps = props ?? [];
     const allContracts = contracts ?? [];
@@ -152,6 +179,40 @@ export default function DashboardPage() {
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+      {ctx}
+
+      {/* Demo data banner */}
+      {hasDemoData && (
+        <div style={{
+          background: "linear-gradient(135deg, #fef9c3, #fefce8)",
+          border: "1px solid #fde047",
+          borderRadius: 14, padding: "14px 20px",
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between", gap: 12,
+          marginBottom: 24, flexWrap: "wrap",
+        }}>
+          <Space size={10}>
+            <ExperimentOutlined style={{ color: "#a16207", fontSize: 18 }} />
+            <div>
+              <Text strong style={{ color: "#713f12", display: "block", fontSize: 14 }}>
+                You're viewing demo data
+              </Text>
+              <Text style={{ color: "#92400e", fontSize: 13 }}>
+                Sample clients, proposals, contracts, projects and invoices have been pre-loaded so you can explore the product. Delete them whenever you're ready to start fresh.
+              </Text>
+            </div>
+          </Space>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            loading={deletingDemo}
+            onClick={handleDeleteDemo}
+            style={{ borderRadius: 8, fontWeight: 600, flexShrink: 0 }}
+          >
+            Delete Demo Data
+          </Button>
+        </div>
+      )}
 
       {/* Welcome */}
       <div style={{ marginBottom: 32 }}>

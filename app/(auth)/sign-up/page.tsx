@@ -52,6 +52,8 @@ export default function SignUpPage() {
       setError(error.message);
       setLoading(false);
     } else {
+      // Seed demo data in background — don't block the UI
+      fetch("/api/seed-demo", { method: "POST" }).catch(() => {});
       setSignedUpEmail(email);
       setDone(true);
     }
