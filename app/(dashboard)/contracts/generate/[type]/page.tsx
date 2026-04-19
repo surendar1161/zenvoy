@@ -25,6 +25,24 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
+// Lightweight markdown renderer for streaming preview
+function renderStreamMd(text: string): string {
+  return text.split(/\n\n+/).map(block => {
+    const t = block.trim();
+    if (!t) return "";
+    if (/^---+$/.test(t)) return `<hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">`;
+    if (/^### /.test(t)) return `<h3 style="font-size:14px;font-weight:700;margin:18px 0 6px;color:#0f172a">${t.replace(/^### /, "")}</h3>`;
+    if (/^## /.test(t))  return `<h2 style="font-size:16px;font-weight:800;margin:24px 0 8px;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em">${t.replace(/^## /, "")}</h2>`;
+    if (/^# /.test(t))   return `<h1 style="font-size:20px;font-weight:900;margin:0 0 10px;color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:8px">${t.replace(/^# /, "")}</h1>`;
+    const inline = (s: string) => s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
+    if (/^[-•]\s/.test(t)) {
+      const lis = t.split("\n").filter(l=>/^[-•]\s/.test(l)).map(l=>`<li style="margin-bottom:4px">${inline(l.replace(/^[-•]\s+/,""))}</li>`).join("");
+      return `<ul style="margin:6px 0 12px 20px">${lis}</ul>`;
+    }
+    return `<p style="margin:0 0 10px;line-height:1.85">${inline(t.replace(/\n/g,"<br>"))}</p>`;
+  }).join("\n");
+}
+
 const CATEGORY_COLORS: Record<string, string> = {
   Employment: "#0ea5e9", Confidentiality: "#7c3aed", Services: "#0369a1",
   Commerce: "#10b981", Business: "#f59e0b", Property: "#ef4444",
@@ -461,16 +479,18 @@ export default function ContractGeneratePage() {
             </Button>
           </div>
 
-          {/* Streaming raw text (while generating) */}
+          {/* Streaming preview (while generating) */}
           {loading && (
-            <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 32 } }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, color, marginBottom: 16 }}>
-                <span>⚡</span>
-                <Text style={{ color, fontSize: 14 }}>Writing — editing available when complete…</Text>
+            <Card style={{ borderRadius: 16, border: `1px solid ${color}30`, marginBottom: 16, background: `${color}05` }} styles={{ body: { padding: 32 } }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color, marginBottom: 20 }}>
+                <span style={{ fontSize: 20 }}>⚡</span>
+                <Text style={{ color, fontSize: 14, fontWeight: 600 }}>Claude is drafting your {contract.name}…</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Editing available when complete</Text>
               </div>
-              <pre style={{ whiteSpace: "pre-wrap", fontFamily: "'Georgia', serif", fontSize: 13, lineHeight: 1.8, color: "#1e293b", maxHeight: 400, overflow: "auto" }}>
-                {contractText}
-              </pre>
+              <div
+                style={{ fontFamily: "'Georgia', serif", fontSize: 14, lineHeight: 1.85, color: "#1e293b", maxHeight: 440, overflow: "auto" }}
+                dangerouslySetInnerHTML={{ __html: renderStreamMd(contractText) }}
+              />
             </Card>
           )}
 
@@ -498,8 +518,13 @@ export default function ContractGeneratePage() {
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
                 <Button icon={<CopyOutlined />} onClick={copyContract}>Copy</Button>
                 <Button icon={<DownloadOutlined />} onClick={downloadContract}>Download .txt</Button>
+                {savedContractId && (
+                  <a href={`/contract/${savedContractId}`} target="_blank" rel="noopener noreferrer">
+                    <Button icon={<SafetyCertificateOutlined />}>Web View</Button>
+                  </a>
+                )}
                 <Link href="/contracts?tab=my-contracts">
-                  <Button type="primary" icon={<SafetyCertificateOutlined />}>View in My Contracts</Button>
+                  <Button type="primary" icon={<SafetyCertificateOutlined />}>My Contracts</Button>
                 </Link>
               </div>
 
