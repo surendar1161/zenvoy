@@ -50,6 +50,9 @@ export default function ContentLibraryPage() {
     }
     setSaving(true);
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { msgApi.error("Not signed in"); setSaving(false); return; }
+
     if (editItem.id) {
       await supabase.from("content_library").update({
         title: editItem.title, content: editItem.content,
@@ -57,6 +60,7 @@ export default function ContentLibraryPage() {
       }).eq("id", editItem.id);
     } else {
       await supabase.from("content_library").insert({
+        user_id: user.id,
         title: editItem.title, content: editItem.content,
         category: editItem.category ?? "General", tags: editItem.tags ?? [],
       });
