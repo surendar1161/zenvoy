@@ -219,6 +219,11 @@ function ContractsPage() {
                             <Button type="text" icon={<EyeOutlined />} />
                           </Link>
                         </Tooltip>,
+                        <Tooltip key="edit" title="Edit in document editor">
+                          <Link href={`/editor/contract/${c.id}`} target="_blank">
+                            <Button type="text" icon={<EditOutlined />} />
+                          </Link>
+                        </Tooltip>,
                         <Tooltip key="sign" title={c.status === "signed" ? `Signed by ${c.signer_name}` : "Sign contract"}>
                           <Button
                             type="text"

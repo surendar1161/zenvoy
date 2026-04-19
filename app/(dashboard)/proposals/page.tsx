@@ -7,7 +7,7 @@ import {
 } from "antd";
 import {
   FileTextOutlined, CopyOutlined, DeleteOutlined, EyeOutlined,
-  PlusOutlined, DollarOutlined, CalendarOutlined, GlobalOutlined,
+  PlusOutlined, DollarOutlined, CalendarOutlined, GlobalOutlined, EditOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { listProposals, deleteProposal } from "@/lib/db";
@@ -174,6 +174,11 @@ export default function ProposalsPage() {
                   </Tooltip>,
                   <Tooltip key="view" title="Preview">
                     <Button type="text" icon={<EyeOutlined />} onClick={() => setPreview(p)} />
+                  </Tooltip>,
+                  <Tooltip key="edit" title="Edit in document editor">
+                    <Link href={`/editor/proposal/${p.id}`}>
+                      <Button type="text" icon={<EditOutlined />} />
+                    </Link>
                   </Tooltip>,
                   <Tooltip key="web" title="Open web view">
                     <a href={`/proposal/${p.id}`} target="_blank" rel="noopener noreferrer">

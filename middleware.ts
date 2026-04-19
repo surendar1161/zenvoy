@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const FREELANCER_ONLY = [
   "/dashboard", "/generate", "/proposals", "/clients", "/projects",
   "/contracts", "/templates", "/analytics", "/content-library",
-  "/brand", "/subscription", "/portals", "/settings", "/pipeline", "/invoices",
+  "/brand", "/subscription", "/portals", "/settings", "/pipeline", "/invoices", "/editor",
 ];
 
 // Client-accessible routes
