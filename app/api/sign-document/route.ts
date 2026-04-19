@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,7 +22,6 @@ export async function POST(req: NextRequest) {
   if (!doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
   if (doc.status === "signed") return NextResponse.json({ error: "Already signed" }, { status: 409 });
 
-  const supabase = await createClient();
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
   const ua = req.headers.get("user-agent") ?? "";
   const now = new Date().toISOString();
@@ -53,7 +51,5 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Remove unused variable warning
-  void supabase;
   return NextResponse.json({ ok: true, signedAt: now });
 }
