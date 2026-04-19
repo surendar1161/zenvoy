@@ -9,8 +9,10 @@ import {
   PlusOutlined, UserOutlined, LogoutOutlined, SafetyCertificateOutlined,
   BookOutlined, BarChartOutlined, CreditCardOutlined, TeamOutlined,
   GlobalOutlined, FolderOpenOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
-  FundOutlined, ThunderboltOutlined, DollarOutlined,
+  FundOutlined, ThunderboltOutlined, DollarOutlined, RocketOutlined, CloseOutlined,
 } from "@ant-design/icons";
+import { Modal } from "antd";
+import { getTrialInfo } from "@/lib/trial";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { antdTheme } from "@/lib/theme";
@@ -47,12 +49,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
+  const [plan, setPlan] = useState<string>("free");
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [showExpiredBanner, setShowExpiredBanner] = useState(true);
 
   const siderWidth = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(async ({ data }) => {
+      setUser(data.user);
+      if (!data.user) return;
+      // Load trial + plan
+      const [{ data: profile }, { data: sub }] = await Promise.all([
+        supabase.from("profiles").select("trial_ends_at").eq("id", data.user.id).maybeSingle(),
+        supabase.from("subscriptions").select("plan").maybeSingle(),
+      ]);
+      const t = profile?.trial_ends_at ?? null;
+      const p = sub?.plan ?? "free";
+      setTrialEndsAt(t);
+      setPlan(p);
+      // Show expired modal once per session if trial expired + no paid plan
+      if (p === "free" && t) {
+        const trial = getTrialInfo(t);
+        if (trial.isExpired) {
+          const shownKey = "zenvoy_trial_expired_modal_shown";
+          if (!sessionStorage.getItem(shownKey)) {
+            sessionStorage.setItem(shownKey, "1");
+            setShowExpiredModal(true);
+          }
+        }
+      }
+    });
   }, []);
 
   // Persist collapse state
@@ -89,9 +118,93 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { key: "signout", label: "Sign Out", icon: <LogoutOutlined />, danger: true, onClick: handleSignOut },
   ];
 
+  const trial = getTrialInfo(trialEndsAt);
+  const isExpiredFree = trial.isExpired && plan === "free";
+
   return (
     <ConfigProvider theme={antdTheme}>
+      {/* Trial expired — full-screen modal (shown once per session) */}
+      <Modal
+        open={showExpiredModal}
+        footer={null}
+        closable={false}
+        centered
+        width={520}
+        styles={{ body: { padding: 0 } }}
+      >
+        <div style={{ borderRadius: 16, overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(135deg, #0c4a6e, #0369a1, #0ea5e9)", padding: "40px 40px 32px", textAlign: "center" }}>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>⏰</div>
+            <Text strong style={{ color: "#fff", fontSize: 22, display: "block", marginBottom: 8 }}>
+              Your free trial has ended
+            </Text>
+            <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 15 }}>
+              You had 30 days of full Pro access. Choose a plan to keep your proposals, contracts, and client portals working.
+            </Text>
+          </div>
+          <div style={{ padding: "28px 40px 36px", background: "#fff" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+              {[
+                "Unlimited proposals & contracts",
+                "Digital e-signatures",
+                "Client portals with file sharing & chat",
+                "Deal pipeline & analytics",
+                "AI contract generation (15 types)",
+              ].map(f => (
+                <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#10b981", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ color: "#fff", fontSize: 11, fontWeight: 700 }}>✓</span>
+                  </div>
+                  <Text style={{ fontSize: 14 }}>{f}</Text>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => { setShowExpiredModal(false); router.push("/subscription"); }}
+                style={{ flex: 1, height: 48, borderRadius: 10, border: "none", background: "linear-gradient(135deg, #0369a1, #0ea5e9)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}
+              >
+                🚀 View Plans — from $12/mo
+              </button>
+              <button
+                onClick={() => setShowExpiredModal(false)}
+                style={{ width: 48, height: 48, borderRadius: 10, border: "1px solid #e2e8f0", background: "#f8fafc", cursor: "pointer", fontSize: 16, color: "#64748b" }}
+              >
+                ✕
+              </button>
+            </div>
+            <Text type="secondary" style={{ fontSize: 12, textAlign: "center", display: "block", marginTop: 12 }}>
+              14-day money-back guarantee · Cancel anytime
+            </Text>
+          </div>
+        </div>
+      </Modal>
+
       <Layout style={{ minHeight: "100vh" }}>
+        {/* Trial expired — persistent top banner (dismissible per session) */}
+        {isExpiredFree && showExpiredBanner && path !== "/subscription" && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
+            background: "linear-gradient(90deg, #0c4a6e, #0369a1)",
+            padding: "10px 24px",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 16,
+          }}>
+            <Text style={{ color: "#fff", fontSize: 14 }}>
+              ⏰ <strong>Your 30-day trial has ended.</strong> Upgrade to keep your proposals, contracts, and portals.
+            </Text>
+            <Link href="/subscription">
+              <button style={{ background: "#fff", color: "#0369a1", border: "none", borderRadius: 8, padding: "6px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                Upgrade Now →
+              </button>
+            </Link>
+            <button
+              onClick={() => setShowExpiredBanner(false)}
+              style={{ background: "transparent", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer", fontSize: 16, padding: "0 4px", marginLeft: 4 }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
         {/* Sidebar */}
         <Sider
           collapsed={collapsed}
@@ -163,6 +276,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             style={{ border: "none", flex: 1, padding: "0 8px" }}
           />
 
+          {/* Trial expired — sidebar upgrade CTA */}
+          {isExpiredFree && !collapsed && (
+            <div style={{ margin: "8px 12px", borderRadius: 12, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", padding: "14px 16px" }}>
+              <Text style={{ color: "#fff", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 4 }}>
+                🔒 Trial Ended
+              </Text>
+              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11, display: "block", marginBottom: 10 }}>
+                Upgrade to unlock all features
+              </Text>
+              <Link href="/subscription">
+                <button style={{ width: "100%", background: "#fff", color: "#0369a1", border: "none", borderRadius: 8, padding: "7px 0", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>
+                  Upgrade from $12/mo
+                </button>
+              </Link>
+            </div>
+          )}
+
           {/* User */}
           <div style={{
             padding: collapsed ? "12px 8px" : "12px 16px",
@@ -199,7 +329,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </Sider>
 
         {/* Main */}
-        <Layout style={{ marginLeft: siderWidth, transition: "margin-left 0.2s ease" }}>
+        <Layout style={{ marginLeft: siderWidth, transition: "margin-left 0.2s ease", marginTop: isExpiredFree && showExpiredBanner && path !== "/subscription" ? 44 : 0 }}>
           <Header style={{
             background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)",
             borderBottom: "1px solid #e2e8f0", padding: "0 28px",
