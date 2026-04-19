@@ -1,3 +1,4 @@
+import { requireAuth } from "@/lib/api-auth";
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -18,6 +19,9 @@ const SECTION_PROMPTS: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  const { user, error } = await requireAuth(req);
+  if (error) return error;
+
   const { sectionId, sectionTitle, formData, tone } = await req.json();
 
   const toneGuide = {

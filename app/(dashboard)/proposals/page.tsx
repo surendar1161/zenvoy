@@ -1,4 +1,5 @@
 "use client";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 import { useEffect, useState } from "react";
 import {
@@ -263,7 +264,7 @@ export default function ProposalsPage() {
         {preview?.proposal_text && (
           <div
             style={{ fontSize: 14, lineHeight: 1.8, color: "#374151" }}
-            dangerouslySetInnerHTML={{ __html: renderProposalMd(preview.proposal_text) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(renderProposalMd(preview.proposal_text))}}
           />
         )}
       </Modal>

@@ -1,4 +1,5 @@
 "use client";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -230,7 +231,7 @@ export default function ContractViewPage() {
 
           {/* Contract body */}
           <div style={{ padding: "40px 48px" }}
-            dangerouslySetInnerHTML={{ __html: rendered }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(rendered)}}
           />
 
           {/* Signed badge */}

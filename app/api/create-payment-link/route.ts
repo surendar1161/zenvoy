@@ -1,7 +1,11 @@
+import { requireAuth } from "@/lib/api-auth";
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const { user, error } = await requireAuth(req);
+  if (error) return error;
+
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) {
     return NextResponse.json(

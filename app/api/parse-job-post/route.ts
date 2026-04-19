@@ -1,9 +1,13 @@
+import { requireAuth } from "@/lib/api-auth";
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
+  const { user, error } = await requireAuth(req);
+  if (error) return error;
+
   const { jobPost } = await req.json();
   if (!jobPost?.trim()) return NextResponse.json({ error: "No job post provided" }, { status: 400 });
 

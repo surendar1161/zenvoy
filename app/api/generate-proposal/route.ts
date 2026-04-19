@@ -1,3 +1,4 @@
+import { requireAuth } from "@/lib/api-auth";
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import type { ProposalFormData } from "@/lib/types";
@@ -5,6 +6,9 @@ import type { ProposalFormData } from "@/lib/types";
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
+  const { user, error } = await requireAuth(req);
+  if (error) return error;
+
   const data: ProposalFormData = await req.json();
 
   const depositAmount = Math.round((data.totalBudget * data.depositPercent) / 100);

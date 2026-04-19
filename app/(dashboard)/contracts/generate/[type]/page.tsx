@@ -1,4 +1,5 @@
 "use client";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -489,7 +490,7 @@ export default function ContractGeneratePage() {
               </div>
               <div
                 style={{ fontFamily: "'Georgia', serif", fontSize: 14, lineHeight: 1.85, color: "#1e293b", maxHeight: 440, overflow: "auto" }}
-                dangerouslySetInnerHTML={{ __html: renderStreamMd(contractText) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(renderStreamMd(contractText))}}
               />
             </Card>
           )}

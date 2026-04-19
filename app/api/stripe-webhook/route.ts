@@ -17,13 +17,19 @@ export async function POST(req: NextRequest) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const body = await req.text();
 
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not set — webhook rejected");
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 401 });
+  }
+  if (!sig) {
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+  }
+
   let event: Stripe.Event;
   try {
-    event = webhookSecret && sig
-      ? stripe.webhooks.constructEvent(body, sig, webhookSecret)
-      : JSON.parse(body); // allow unsigned in dev
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
-    return NextResponse.json({ error: `Webhook error: ${(err as Error).message}` }, { status: 400 });
+    return NextResponse.json({ error: `Webhook signature invalid: ${(err as Error).message}` }, { status: 400 });
   }
 
   async function upsertSubscription(

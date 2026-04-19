@@ -12,7 +12,7 @@ const FREELANCER_ONLY = [
 const CLIENT_ROUTES = ["/my-portal", "/portal"];
 
 // Public routes (no auth needed)
-const PUBLIC = ["/", "/pricing", "/sign-in", "/sign-up", "/auth"];
+const PUBLIC = ["/", "/pricing", "/sign-in", "/sign-up", "/auth", "/forgot-password", "/reset-password"];
 
 export async function middleware(request: NextRequest) {
   if (

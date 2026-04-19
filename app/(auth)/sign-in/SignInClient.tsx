@@ -109,7 +109,7 @@ function SignInClient() {
               label={
                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                   <Text strong style={{ fontSize: 13 }}>Password</Text>
-                  <Text style={{ fontSize: 13, color: "#0ea5e9" }}>Forgot password?</Text>
+                  <Link href="/forgot-password" style={{ fontSize: 13, color: "#0ea5e9" }}>Forgot password?</Link>
                 </div>
               }
               rules={[{ required: true, message: "Enter your password" }]}>

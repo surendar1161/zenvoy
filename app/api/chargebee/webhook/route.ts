@@ -53,6 +53,11 @@ async function upsert(
 export async function POST(req: NextRequest) {
   // Verify webhook authenticity (Chargebee sends a basic-auth style header or custom header)
   const webhookPassword = process.env.CHARGEBEE_WEBHOOK_PASSWORD;
+  const isProd = process.env.NODE_ENV === "production";
+  if (!webhookPassword && isProd) {
+    console.error("CHARGEBEE_WEBHOOK_PASSWORD not set — rejecting webhook in production");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 401 });
+  }
   if (webhookPassword) {
     const auth = req.headers.get("authorization");
     const expected = `Basic ${Buffer.from(`:${webhookPassword}`).toString("base64")}`;

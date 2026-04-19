@@ -1,4 +1,5 @@
 "use client";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 import { useEffect, useState } from "react";
 import type { BrandKit } from "@/lib/brand";
@@ -252,7 +253,7 @@ export default function BrandedProposalView({ data }: Props) {
             <div
               className="text-gray-700 leading-relaxed text-[15px]"
               style={{ fontFamily: `'${brand.fontFamily}', sans-serif` }}
-              dangerouslySetInnerHTML={{ __html: renderMd(s.content) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(renderMd(s.content))}}
             />
           </div>
         ))}
