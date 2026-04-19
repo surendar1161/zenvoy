@@ -96,11 +96,13 @@ export async function POST(req: NextRequest) {
     { user_id: userId, title: "Case Study Template",             category: "Case Study",          tags: ["case-study","results"],   use_count: 0, content: "**Case Study:** [Project Name]\n\nRedesigned [client]'s [product], reducing [metric] by [X]% and increasing [metric] by [Y]%. Migrated from [old] to [new] in [timeframe] without downtime. Result: [business outcome]." },
   ]);
 
-  // ── Mark profile as seeded ────────────────────────────────────
+  // ── Mark profile as seeded + ensure trial is set ─────────────
+  const trialEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
   await db.from("profiles").upsert({
     id: userId,
     has_demo_data: true,
     demo_seeded_at: new Date().toISOString(),
+    trial_ends_at: trialEnd,
   }, { onConflict: "id" });
 
   return NextResponse.json({ ok: true, message: "Demo data seeded" });

@@ -10,6 +10,7 @@ import {
   CreditCardOutlined, SettingOutlined, ArrowRightOutlined, StarFilled,
 } from "@ant-design/icons";
 import { PLANS, getPlan } from "@/lib/plans";
+import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
 import type { Plan, BillingPeriod } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
@@ -40,6 +41,7 @@ function SubscriptionContent() {
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [yearly, setYearly] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
   const supabase = createClient();
 
@@ -52,8 +54,15 @@ function SubscriptionContent() {
   }, []);
 
   async function load() {
-    const { data } = await supabase.from("subscriptions").select("*").maybeSingle();
+    const [{ data }, { data: { user } }] = await Promise.all([
+      supabase.from("subscriptions").select("*").maybeSingle(),
+      supabase.auth.getUser(),
+    ]);
     setSub(data as SubData ?? { plan: "free", billing_period: "monthly", status: "active", current_period_end: null, cancel_at_period_end: false, chargebee_customer_id: null, stripe_customer_id: null, payment_provider: "free" });
+    if (user) {
+      const { data: profile } = await supabase.from("profiles").select("trial_ends_at").eq("id", user.id).maybeSingle();
+      setTrialEndsAt(profile?.trial_ends_at ?? null);
+    }
     setLoading(false);
   }
 
@@ -108,6 +117,7 @@ function SubscriptionContent() {
   const currentPlan = getPlan(sub?.plan ?? "free");
   const isPaid = sub?.plan !== "free";
   const isCanceling = sub?.cancel_at_period_end;
+  const trial = getTrialInfo(trialEndsAt);
 
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 28px" }}>
@@ -117,6 +127,50 @@ function SubscriptionContent() {
         <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>Subscription & Billing</Title>
         <Text type="secondary" style={{ fontSize: 15 }}>Manage your plan, billing, and usage.</Text>
       </div>
+
+      {/* Trial banner */}
+      {(trial.isOnTrial || trial.isExpired) && !isPaid && (
+        <Card style={{
+          borderRadius: 16, marginBottom: 24,
+          border: `2px solid ${trial.isExpired ? "#e2e8f0" : trialUrgency(trial) === "critical" ? "#fca5a5" : trialUrgency(trial) === "warning" ? "#fcd34d" : "#bfdbfe"}`,
+          background: trial.isExpired ? "#f8fafc" : trialUrgency(trial) === "critical" ? "#fff1f2" : trialUrgency(trial) === "warning" ? "#fffbeb" : "#eff6ff",
+        }} styles={{ body: { padding: 24 } }}>
+          <Row justify="space-between" align="middle" gutter={[16, 12]}>
+            <Col>
+              <Space size={12}>
+                <span style={{ fontSize: 28 }}>{trial.isExpired ? "⏰" : "🎉"}</span>
+                <div>
+                  <Text strong style={{ fontSize: 16, display: "block" }}>
+                    {trial.isOnTrial ? "30-Day Free Trial — Full Pro Access" : "Trial Ended"}
+                  </Text>
+                  {trial.isOnTrial && (
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      {trialBadgeText(trial)} · Upgrade before your trial ends to keep all features
+                    </Text>
+                  )}
+                  {trial.isExpired && (
+                    <Text type="secondary" style={{ fontSize: 14 }}>
+                      Your free trial ended. Choose a plan below to continue.
+                    </Text>
+                  )}
+                  {trial.isOnTrial && trial.trialEndsAt && (
+                    <Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
+                      Expires: {new Date(trial.trialEndsAt).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}
+                    </Text>
+                  )}
+                </div>
+              </Space>
+            </Col>
+            <Col>
+              {trial.isOnTrial && (
+                <Tag color="blue" style={{ borderRadius: 20, fontSize: 13, padding: "4px 14px", fontWeight: 700 }}>
+                  {trial.daysLeft > 0 ? `${trial.daysLeft} days left` : `${trial.hoursLeft}h left`}
+                </Tag>
+              )}
+            </Col>
+          </Row>
+        </Card>
+      )}
 
       {/* Current plan card */}
       <Card style={{ borderRadius: 20, border: `2px solid ${currentPlan.color}`, marginBottom: 32, background: `${currentPlan.color}08` }} styles={{ body: { padding: 32 } }}>

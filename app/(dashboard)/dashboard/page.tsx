@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
 
 const { Title, Text } = Typography;
 
@@ -50,6 +51,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [hasDemoData, setHasDemoData] = useState(false);
   const [deletingDemo, setDeletingDemo] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
 
   useEffect(() => {
@@ -93,9 +95,10 @@ export default function DashboardPage() {
       supabase.from("contracts").select("id,status,created_at").order("created_at", { ascending: false }),
       supabase.from("clients").select("id,status").order("created_at", { ascending: false }),
       supabase.from("notifications").select("id,title,message,type,created_at").order("created_at", { ascending: false }).limit(8),
-      supabase.from("profiles").select("has_demo_data").eq("id", (await supabase.auth.getUser()).data.user?.id ?? "").maybeSingle(),
+      supabase.from("profiles").select("has_demo_data, trial_ends_at").eq("id", (await supabase.auth.getUser()).data.user?.id ?? "").maybeSingle(),
     ]);
     setHasDemoData(profile?.has_demo_data ?? false);
+    setTrialEndsAt(profile?.trial_ends_at ?? null);
 
     const allProps = props ?? [];
     const allContracts = contracts ?? [];
@@ -180,6 +183,49 @@ export default function DashboardPage() {
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
       {ctx}
+
+      {/* Trial banner */}
+      {(() => {
+        const trial = getTrialInfo(trialEndsAt);
+        if (!trial.isOnTrial && !trial.isExpired) return null;
+        const urgency = trialUrgency(trial);
+        const colors = {
+          normal:   { bg: "linear-gradient(135deg,#eff6ff,#dbeafe)", border: "#bfdbfe", text: "#1e40af", badge: "#0ea5e9" },
+          warning:  { bg: "linear-gradient(135deg,#fffbeb,#fef3c7)", border: "#fcd34d", text: "#92400e", badge: "#f59e0b" },
+          critical: { bg: "linear-gradient(135deg,#fff1f2,#fecaca)", border: "#fca5a5", text: "#991b1b", badge: "#ef4444" },
+          expired:  { bg: "linear-gradient(135deg,#f8fafc,#f1f5f9)", border: "#e2e8f0", text: "#475569", badge: "#94a3b8" },
+        };
+        const c = trial.isExpired ? colors.expired : colors[urgency];
+        return (
+          <div style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: 14, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+            <Space size={10}>
+              <span style={{ fontSize: 20 }}>{trial.isExpired ? "⏰" : urgency === "critical" ? "🔴" : urgency === "warning" ? "🟡" : "🎉"}</span>
+              <div>
+                {trial.isOnTrial ? (
+                  <>
+                    <Text strong style={{ color: c.text, display: "block", fontSize: 14 }}>
+                      Free trial — full Pro access · {trialBadgeText(trial)}
+                    </Text>
+                    <Text style={{ color: c.text, fontSize: 13, opacity: 0.85 }}>
+                      You have access to all features. Upgrade before your trial ends to keep access.
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text strong style={{ color: c.text, display: "block", fontSize: 14 }}>Your 30-day trial has ended</Text>
+                    <Text style={{ color: c.text, fontSize: 13, opacity: 0.85 }}>Upgrade to Pro to continue using all features.</Text>
+                  </>
+                )}
+              </div>
+            </Space>
+            <Link href="/subscription">
+              <Button type="primary" style={{ borderRadius: 8, fontWeight: 700, background: c.badge, borderColor: c.badge, flexShrink: 0 }}>
+                {trial.isExpired ? "Upgrade Now" : "View Plans"}
+              </Button>
+            </Link>
+          </div>
+        );
+      })()}
 
       {/* Demo data banner */}
       {hasDemoData && (
