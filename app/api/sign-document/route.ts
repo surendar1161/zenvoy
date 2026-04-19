@@ -39,6 +39,10 @@ export async function POST(req: NextRequest) {
   const ua  = req.headers.get("user-agent") ?? "";
   const now = new Date().toISOString();
 
+  // Proposals use "accepted" status; contracts use "signed"
+  const signedStatus = documentType === "proposal" ? "accepted" : "signed";
+  const alreadySignedStatus = documentType === "proposal" ? "accepted" : "signed";
+
   const { error } = await db.from(table).update({
     signer_name:    signerName,
     signer_email:   signerEmail ?? null,
@@ -47,8 +51,8 @@ export async function POST(req: NextRequest) {
     signature_ip:   ip,
     signature_ua:   ua,
     signed_at:      now,
-    status:         "signed",
-  }).eq("id", documentId).neq("status", "signed"); // extra safety guard
+    status:         signedStatus,
+  }).eq("id", documentId).neq("status", alreadySignedStatus);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
