@@ -13,7 +13,7 @@ const FAQ = [
   { q: "Is there a free trial?", a: "The Free plan is available permanently — no credit card required. Upgrade whenever you're ready." },
   { q: "What payment methods do you accept?", a: "All major credit and debit cards (Visa, Mastercard, Amex, Discover) via Stripe. Invoicing available for Business annual plans." },
   { q: "Can I switch between monthly and yearly?", a: "Yes, you can switch at any time from your billing portal. Proration is handled automatically." },
-  { q: "Do you offer refunds?", a: "Yes — we offer a 14-day money-back guarantee on first-time paid subscriptions. Contact support." },
+  { q: "Do you offer refunds?", a: "We do not currently offer refunds. You can cancel your subscription at any time and you will not be charged again." },
   { q: "What happens when I hit the free plan limit?", a: "You'll be prompted to upgrade. Existing proposals and contracts are never deleted." },
 ];
 

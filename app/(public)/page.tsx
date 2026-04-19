@@ -574,7 +574,7 @@ export default function LandingPage() {
           </Row>
           <div style={{ textAlign: "center", marginTop: 28 }}>
             <Text type="secondary" style={{ fontSize: 14 }}>
-              🛡️ 14-day money-back guarantee · Cancel anytime · All plans include Claude Opus 4.6
+              Cancel anytime · No hidden fees · All plans include Claude Opus 4.6
             </Text>
           </div>
         </div>

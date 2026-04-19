@@ -174,7 +174,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
             </div>
             <Text type="secondary" style={{ fontSize: 12, textAlign: "center", display: "block", marginTop: 12 }}>
-              14-day money-back guarantee · Cancel anytime
+              Cancel anytime · No hidden fees
             </Text>
           </div>
         </div>

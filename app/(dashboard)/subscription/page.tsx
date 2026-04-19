@@ -338,7 +338,7 @@ function SubscriptionContent() {
       {/* Money back guarantee */}
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <Text type="secondary" style={{ fontSize: 13 }}>
-          🛡️ 14-day money-back guarantee · Cancel anytime · No hidden fees
+          ✓ Cancel anytime · No hidden fees · Billed via Chargebee
         </Text>
       </div>
     </div>
