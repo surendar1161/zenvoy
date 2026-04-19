@@ -109,35 +109,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         >
           {/* Logo + collapse toggle */}
           <div style={{
-            padding: collapsed ? "16px 0" : "16px 16px 12px",
+            padding: collapsed ? "12px 0" : "16px 16px 12px",
             borderBottom: "1px solid #f1f5f9",
             marginBottom: 8,
             display: "flex",
+            flexDirection: collapsed ? "column" : "row",
             alignItems: "center",
-            justifyContent: collapsed ? "center" : "space-between",
-            gap: 8,
+            justifyContent: "center",
+            gap: collapsed ? 6 : 8,
           }}>
-            {!collapsed && (
-              <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <ThunderboltFilled style={{ color: "#fff", fontSize: 16 }} />
-                </div>
+            <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", flex: collapsed ? undefined : 1 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <ThunderboltFilled style={{ color: "#fff", fontSize: 16 }} />
+              </div>
+              {!collapsed && (
                 <Text strong style={{ fontSize: 16, color: "#0ea5e9", letterSpacing: "-0.3px", whiteSpace: "nowrap" }}>Zenvoy</Text>
-              </Link>
-            )}
-            {collapsed && (
-              <Link href="/dashboard" style={{ display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <ThunderboltFilled style={{ color: "#fff", fontSize: 16 }} />
-                </div>
-              </Link>
-            )}
+              )}
+            </Link>
             <Button
               type="text"
               size="small"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(c => !c)}
-              style={{ color: "#94a3b8", flexShrink: 0 }}
+              style={{ color: "#94a3b8", flexShrink: 0, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}
             />
           </div>
 
