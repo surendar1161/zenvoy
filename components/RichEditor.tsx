@@ -50,7 +50,7 @@ import {
   UndoOutlined, RedoOutlined, HighlightOutlined, PrinterOutlined,
   CopyOutlined, DownloadOutlined, SaveOutlined, CheckCircleOutlined,
   LoadingOutlined, ArrowLeftOutlined, FullscreenOutlined, FullscreenExitOutlined,
-  LinkOutlined, TableOutlined, DeleteRowOutlined,
+  LinkOutlined, TableOutlined, BookOutlined, SearchOutlined,
 } from "@ant-design/icons";
 import NextLink from "next/link";
 
@@ -87,6 +87,9 @@ export default function RichEditor({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [libraryItems, setLibraryItems] = useState<{id:string;title:string;content:string;category:string;use_count:number}[]>([]);
+  const [librarySearch, setLibrarySearch] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [msgApi, ctx] = message.useMessage();
@@ -163,6 +166,26 @@ export default function RichEditor({
   function copyText() {
     navigator.clipboard.writeText(htmlToPlainText(editor?.getHTML() ?? ""));
     msgApi.success("Copied!");
+  }
+
+
+  async function loadLibrary() {
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    const { data } = await supabase.from('content_library').select('*').order('use_count', { ascending: false });
+    setLibraryItems((data ?? []) as typeof libraryItems);
+  }
+
+  async function insertFromLibrary(item: typeof libraryItems[0]) {
+    if (!editor) return;
+    const isHtml = item.content.trimStart().startsWith('<'); const html = isHtml ? item.content : item.content.split('\n').join('<br>');
+    editor.chain().focus().insertContent(html).run();
+    setShowLibrary(false);
+    // increment use_count
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
+    await supabase.from('content_library').update({ use_count: item.use_count + 1 }).eq('id', item.id);
+    setLibraryItems(prev => prev.map(i => i.id === item.id ? { ...i, use_count: i.use_count + 1 } : i));
   }
 
   function downloadHtml() {
@@ -437,6 +460,36 @@ export default function RichEditor({
         )}
       </div>
 
+
+        {/* Content Library insert */}
+        <Sep />
+        <div style={{ position: 'relative' }}>
+          <ToolBtn tip="Insert from Content Library" icon={<BookOutlined />}
+            onClick={() => { setShowLibrary(p => !p); loadLibrary(); setShowColorPicker(false); setShowHighlightPicker(false); setShowTableMenu(false); }} />
+          {showLibrary && (
+            <div style={{ position: 'absolute', top: 34, right: 0, zIndex: 100, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: 360, padding: 12 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10, color: '#0f172a' }}>📚 Content Library</div>
+              <input placeholder="Search…" value={librarySearch} onChange={e => setLibrarySearch(e.target.value)}
+                style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: 8, padding: '6px 10px', fontSize: 13, marginBottom: 10, outline: 'none', boxSizing: 'border-box' }} />
+              <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {libraryItems.filter(i => !librarySearch || i.title.toLowerCase().includes(librarySearch.toLowerCase())).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px 0', color: '#94a3b8', fontSize: 13 }}>
+                    No items. <a href="/content-library" target="_blank" rel="noopener noreferrer" style={{ color: '#0ea5e9' }}>Add some →</a>
+                  </div>
+                ) : libraryItems.filter(i => !librarySearch || i.title.toLowerCase().includes(librarySearch.toLowerCase())).map(item => (
+                  <div key={item.id} onClick={() => insertFromLibrary(item)}
+                    style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', cursor: 'pointer' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.background = '#f0f9ff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#fff'; }}>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{item.title}</div>
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{item.category} {item.use_count > 0 ? `· Used ${item.use_count}×` : ''}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>{item.content.replace(/<[^>]+>/g,' ').slice(0,80)}…</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       {/* ── Bubble menu (selection popup) ── */}
       {/* Bubble menu disabled - use toolbar instead */}
 
