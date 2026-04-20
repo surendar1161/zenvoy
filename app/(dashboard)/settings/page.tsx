@@ -15,7 +15,7 @@ import {
   CheckCircleOutlined, ClockCircleOutlined, StopOutlined,
   BgColorsOutlined, FontSizeOutlined, UploadOutlined, SaveOutlined,
   EyeOutlined, EyeInvisibleOutlined, ArrowRightOutlined, CheckCircleFilled,
-  DollarOutlined,
+  DollarOutlined, CreditCardOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import type { BrandKit } from "@/lib/brand";
@@ -236,12 +236,6 @@ export default function SettingsPage() {
     },
   ];
 
-  const envLines = [
-    { key: "NEXT_PUBLIC_SUPABASE_URL",      url: "https://supabase.com/dashboard → Project Settings → API" },
-    { key: "NEXT_PUBLIC_SUPABASE_ANON_KEY", url: "https://supabase.com/dashboard → Project Settings → API" },
-    { key: "ANTHROPIC_API_KEY",             url: "https://console.anthropic.com" },
-    { key: "STRIPE_SECRET_KEY",             url: "https://dashboard.stripe.com/apikeys" },
-  ];
 
   const tabItems = [
     {
@@ -300,18 +294,23 @@ export default function SettingsPage() {
 
           <Col xs={24} lg={10}>
             <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
-              <Title level={5} style={{ margin: "0 0 16px" }}>🔑 Required API Keys</Title>
-              <Space direction="vertical" style={{ width: "100%" }}>
-                {envLines.map(e => (
-                  <div key={e.key} style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                      <Text code style={{ fontSize: 11, wordBreak: "break-all" }}>{e.key}</Text>
-                      <Button type="text" size="small" icon={<CopyOutlined />}
-                        onClick={() => { navigator.clipboard.writeText(e.key); msgApi.success("Copied!"); }} style={{ flexShrink: 0 }} />
-                    </div>
-                    <a href={e.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#0ea5e9" }}>Get key →</a>
-                  </div>
-                ))}
+              <Title level={5} style={{ margin: "0 0 16px" }}>Account</Title>
+              <Space direction="vertical" size={12} style={{ width: "100%" }}>
+                <div style={{ padding: "12px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid #f1f5f9" }}>
+                  <Text type="secondary" style={{ fontSize: 11, display: "block", marginBottom: 4 }}>ACCOUNT ID</Text>
+                  <Text copyable style={{ fontSize: 12, fontFamily: "monospace", color: "#374151" }}>{user?.id ?? "—"}</Text>
+                </div>
+                <div style={{ padding: "12px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid #f1f5f9" }}>
+                  <Text type="secondary" style={{ fontSize: 11, display: "block", marginBottom: 4 }}>MEMBER SINCE</Text>
+                  <Text style={{ fontSize: 13 }}>
+                    {user?.created_at ? new Date(user.created_at).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" }) : "—"}
+                  </Text>
+                </div>
+                <Link href="/subscription">
+                  <Button block icon={<CreditCardOutlined />} style={{ borderRadius: 10, fontWeight: 600 }}>
+                    Manage Subscription
+                  </Button>
+                </Link>
               </Space>
             </Card>
             <Card style={{ borderRadius: 16, border: "1px solid #fee2e2", background: "#fff5f5" }} styles={{ body: { padding: 20 } }}>
