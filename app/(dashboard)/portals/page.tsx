@@ -119,7 +119,7 @@ export default function PortalsPage() {
           <Space align="center" style={{ marginBottom: 6 }}>
             <GlobalOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
             <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Client Portals</Title>
-            <Tag style={{ borderRadius: 20 }}>{portals.length} active</Tag>
+            <Tag style={{ borderRadius: 20 }}>{portals.length} total</Tag>
           </Space>
           <Text type="secondary" style={{ fontSize: 15 }}>
             One branded link per client — files, invoices, contracts, and chat. All in one place.

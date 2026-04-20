@@ -148,7 +148,7 @@ export default function PipelinePage() {
             color: "#0369a1", bg: "#eff6ff",
           },
         ].map(k => (
-          <Col key={k.label} xs={12} sm={8} md={5}>
+          <Col key={k.label} xs={12} sm={8} md={8} lg={5}>
             <Card style={{ borderRadius: 14, border: `1.5px solid ${k.color}20`, background: k.bg, height: "100%" }} styles={{ body: { padding: 18 } }}>
               <Space direction="vertical" size={4} style={{ width: "100%" }}>
                 {k.icon}

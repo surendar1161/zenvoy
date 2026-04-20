@@ -82,6 +82,10 @@ export default function InvoicesPage() {
 
   async function create() {
     const values = await form.validateFields();
+    if (total <= 0) {
+      msgApi.error("Add at least one line item with a value greater than zero.");
+      return;
+    }
     setSaving(true);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();

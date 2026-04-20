@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import {
   Avatar, Button, Card, Col, ColorPicker, Descriptions, Divider,
   Form, Input, Modal, Radio, Row, Select, Space, Switch, Table,
@@ -59,8 +60,14 @@ const DEFAULT_PERMISSIONS = {
   projects: true, invoices: true, portals: false,
 };
 
-export default function SettingsPage() {
+export default function SettingsPageWrapper() {
+  return <Suspense><SettingsPage /></Suspense>;
+}
+
+function SettingsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get("tab") ?? "profile";
   const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
@@ -572,7 +579,7 @@ export default function SettingsPage() {
         <Text type="secondary" style={{ fontSize: 15 }}>Manage your account, team, and API configuration.</Text>
       </div>
 
-      <Tabs size="large" items={tabItems} />
+      <Tabs size="large" items={tabItems} defaultActiveKey={defaultTab} />
 
       {/* Invite Modal */}
       <Modal

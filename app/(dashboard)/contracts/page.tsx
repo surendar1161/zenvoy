@@ -9,7 +9,7 @@ import {
 import {
   SearchOutlined, ArrowRightOutlined, SafetyCertificateOutlined,
   DeleteOutlined, EyeOutlined, FileTextOutlined, EditOutlined,
-  CheckCircleOutlined, PlusOutlined, ClockCircleOutlined,
+  CheckCircleOutlined, PlusOutlined, ClockCircleOutlined, FormOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { CONTRACT_TYPES, CONTRACT_CATEGORIES } from "@/lib/contract-types";
@@ -227,7 +227,7 @@ function ContractsPage() {
                         <Tooltip key="sign" title={c.status === "signed" ? `Signed by ${c.signer_name}` : "Sign contract"}>
                           <Button
                             type="text"
-                            icon={<EditOutlined />}
+                            icon={<FormOutlined />}
                             disabled={c.status === "signed"}
                             onClick={() => { setSignTarget(c); signForm.resetFields(); }}
                           />

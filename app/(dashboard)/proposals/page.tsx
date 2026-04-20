@@ -9,7 +9,9 @@ import {
 import {
   FileTextOutlined, CopyOutlined, DeleteOutlined, EyeOutlined,
   PlusOutlined, DollarOutlined, CalendarOutlined, GlobalOutlined, EditOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
+import { Input } from "antd";
 import Link from "next/link";
 import { listProposals, deleteProposal } from "@/lib/db";
 
@@ -87,6 +89,8 @@ export default function ProposalsPage() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState<Proposal | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
 
   useEffect(() => { fetchProposals(); }, []);
@@ -125,13 +129,22 @@ export default function ProposalsPage() {
     msgApi.success("Copied to clipboard!");
   }
 
+  const filtered = proposals.filter(p => {
+    const matchSearch = !search ||
+      p.client_name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.client_company ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (p.project_type ?? "").toLowerCase().includes(search.toLowerCase());
+    const matchStatus = !statusFilter || p.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
       {ctx}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 36, flexWrap: "wrap", gap: 16 }}>
         <div>
           <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>My Proposals</Title>
-          <Text type="secondary" style={{ fontSize: 15 }}>All proposals stored in your Supabase database.</Text>
+          <Text type="secondary" style={{ fontSize: 15 }}>Track, manage, and follow up on all your proposals.</Text>
         </div>
         <Link href="/generate">
           <Button type="primary" icon={<PlusOutlined />} size="large" style={{ borderRadius: 10, fontWeight: 600 }}>
@@ -139,6 +152,38 @@ export default function ProposalsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Search + filter */}
+      {proposals.length > 0 && (
+        <Space wrap style={{ marginBottom: 20 }}>
+          <Input
+            prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
+            placeholder="Search client or project…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            allowClear
+            style={{ width: 260, borderRadius: 10 }}
+          />
+          <Select
+            placeholder="All statuses"
+            allowClear
+            value={statusFilter ?? undefined}
+            onChange={v => setStatusFilter(v ?? null)}
+            style={{ width: 160 }}
+            options={[
+              { value: "draft",    label: "Draft" },
+              { value: "sent",     label: "Sent" },
+              { value: "viewed",   label: "Viewed" },
+              { value: "accepted", label: "Accepted" },
+              { value: "declined", label: "Declined" },
+              { value: "expired",  label: "Expired" },
+            ]}
+          />
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            {filtered.length} of {proposals.length} proposals
+          </Text>
+        </Space>
+      )}
 
       {loading ? (
         <div style={{ textAlign: "center", padding: "80px 0" }}><Spin size="large" /></div>
@@ -159,9 +204,15 @@ export default function ProposalsPage() {
             </Link>
           </Empty>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card style={{ borderRadius: 16, textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
+          <Text type="secondary" style={{ fontSize: 15, display: "block" }}>
+            No proposals match your search. <Button type="link" onClick={() => { setSearch(""); setStatusFilter(null); }} style={{ padding: 0 }}>Clear filters</Button>
+          </Text>
+        </Card>
       ) : (
         <Row gutter={[16, 16]}>
-          {proposals.map(p => (
+          {filtered.map(p => (
             <Col key={p.id} xs={24} sm={12} lg={8}>
               <Card
                 hoverable
@@ -229,12 +280,12 @@ export default function ProposalsPage() {
                     style={{ width: "100%", borderRadius: 8 }}
                     onChange={v => updateStatus(p.id, v)}
                     options={[
-                      { value: "draft",    label: "📝 Draft" },
-                      { value: "sent",     label: "📤 Sent" },
-                      { value: "viewed",   label: "👁 Viewed" },
-                      { value: "accepted", label: "✅ Accepted" },
-                      { value: "declined", label: "❌ Declined" },
-                      { value: "expired",  label: "⏰ Expired" },
+                      { value: "draft",    label: "Draft" },
+                      { value: "sent",     label: "Sent" },
+                      { value: "viewed",   label: "Viewed" },
+                      { value: "accepted", label: "Accepted" },
+                      { value: "declined", label: "Declined" },
+                      { value: "expired",  label: "Expired" },
                     ]}
                   />
                 </Space>
