@@ -82,7 +82,7 @@ export default function MyPortalPage() {
     setClientName(user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "Client");
 
     // Check first visit
-    const visitKey = `zenvoy_portal_visited_${user.id}`;
+    const visitKey = `dealpilot_portal_visited_${user.id}`;
     if (!localStorage.getItem(visitKey)) {
       setIsFirstVisit(true);
       localStorage.setItem(visitKey, "1");

@@ -356,7 +356,7 @@ export default function ClientPortalPage() {
       {/* Footer */}
       <div style={{ borderTop: "1px solid #e2e8f0", padding: "20px 24px", textAlign: "center", marginTop: 40 }}>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          Secure client portal · Powered by {brand.companyName || "Zenvoy"}
+          Secure client portal · Powered by {brand.companyName || "DealPilot"}
         </Text>
       </div>
     </div>

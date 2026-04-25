@@ -84,8 +84,8 @@ const FEATURES = [
   {
     icon: <BgColorsOutlined style={{ fontSize: 28, color: "#7c3aed" }} />,
     title: "White-Label Brand Kit",
-    desc: "Upload your logo, pick your brand colours, and choose your font. Every proposal, contract, and client portal auto-applies your brand. Clients never see Zenvoy. Set up multiple brand profiles for different studios or clients.",
-    points: ["Logo, colours, and font applied everywhere", "Cover page with client name auto-inserted", "5 professional Google Fonts included", "No Zenvoy branding anywhere"],
+    desc: "Upload your logo, pick your brand colours, and choose your font. Every proposal, contract, and client portal auto-applies your brand. Clients never see DealPilot. Set up multiple brand profiles for different studios or clients.",
+    points: ["Logo, colours, and font applied everywhere", "Cover page with client name auto-inserted", "5 professional Google Fonts included", "No DealPilot branding anywhere"],
     bg: "#faf5ff",
     border: "#e9d5ff",
   },
@@ -140,14 +140,14 @@ const PLANS = [
 ];
 
 const FAQ = [
-  { q: "How does the AI generate proposals?", a: "Zenvoy uses Claude Opus 4.6 — Anthropic's most capable model. You answer 5 questions (or paste a job post), and Claude writes a fully tailored proposal in under 60 seconds, mirroring the client's language and addressing their specific pain points." },
+  { q: "How does the AI generate proposals?", a: "DealPilot uses Claude Opus 4.6 — Anthropic's most capable model. You answer 5 questions (or paste a job post), and Claude writes a fully tailored proposal in under 60 seconds, mirroring the client's language and addressing their specific pain points." },
   { q: "Are the contracts legally binding?", a: "The AI-generated contracts follow correct legal frameworks (UCC for goods, ESIGN Act for e-signatures, state-specific non-compete law, etc.) and are reviewed against jurisdiction-specific requirements. However, we always recommend having any contract reviewed by a licensed attorney before signing — especially for high-value or complex engagements." },
   { q: "Do clients need to create an account to view my proposal?", a: "No. Clients access proposals and client portals via a unique link — no login, no app download, no friction. They can sign, pay, message you, and download files directly from the link." },
-  { q: "Which payment providers are supported?", a: "Stripe for payment links on proposals and invoices. Chargebee for subscription billing (your own subscription to Zenvoy). We plan to add PayPal and GoCardless." },
-  { q: "Can I use my own branding?", a: "Yes — fully. Upload your logo, set your brand colours, and choose your font. Every proposal, contract, client portal, and cover page uses your brand. Clients never see Zenvoy. Pro and Business plans include white-labelling." },
-  { q: "What's the difference between a proposal and a contract?", a: "A proposal outlines your scope, pricing, and value proposition — it's a sales document. A contract is a legally binding agreement once signed. Zenvoy generates both, and the e-signature flow can be applied to either." },
+  { q: "Which payment providers are supported?", a: "Stripe for payment links on proposals and invoices. Chargebee for subscription billing (your own subscription to DealPilot). We plan to add PayPal and GoCardless." },
+  { q: "Can I use my own branding?", a: "Yes — fully. Upload your logo, set your brand colours, and choose your font. Every proposal, contract, client portal, and cover page uses your brand. Clients never see DealPilot. Pro and Business plans include white-labelling." },
+  { q: "What's the difference between a proposal and a contract?", a: "A proposal outlines your scope, pricing, and value proposition — it's a sales document. A contract is a legally binding agreement once signed. DealPilot generates both, and the e-signature flow can be applied to either." },
   { q: "Is there a free trial?", a: "The Free plan is permanently free — no credit card required. You get 5 proposals and 2 contracts per month. Upgrade to Pro ($12/mo) when you're ready for unlimited everything." },
-  { q: "How does the client portal work?", a: "When you create a client portal, Zenvoy generates a unique branded URL. Share it with your client. They see a dashboard with all shared files, invoices (with Pay Now buttons), signed contracts, and a live chat window to message you. Everything in one place, fully branded as your studio." },
+  { q: "How does the client portal work?", a: "When you create a client portal, DealPilot generates a unique branded URL. Share it with your client. They see a dashboard with all shared files, invoices (with Pay Now buttons), signed contracts, and a live chat window to message you. Everything in one place, fully branded as your studio." },
 ];
 
 const TESTIMONIALS = [
@@ -173,7 +173,7 @@ export default function LandingPage() {
           {/* Brand name + tagline */}
           <div style={{ marginBottom: 8 }}>
             <span style={{ fontSize: "clamp(14px, 2vw, 18px)", fontWeight: 700, color: "#7dd3fc", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-              ZENVOY
+              DEALPILOT
             </span>
           </div>
           <h1 style={{ fontSize: "clamp(34px, 6vw, 62px)", fontWeight: 900, color: "#fff", lineHeight: 1.1, margin: "0 0 18px", letterSpacing: "-1.5px" }}>
@@ -183,7 +183,7 @@ export default function LandingPage() {
 
           {/* Brand manifesto — one-liner */}
           <p style={{ fontSize: "clamp(16px, 2.2vw, 20px)", color: "rgba(255,255,255,0.95)", maxWidth: 660, margin: "0 auto 16px", lineHeight: 1.6, fontStyle: "italic", fontWeight: 400 }}>
-            "Zenvoy is your calm, intelligent representative — sent to every client on your behalf, closing deals while you focus on your craft."
+            "DealPilot is your calm, intelligent representative — sent to every client on your behalf, closing deals while you focus on your craft."
           </p>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", maxWidth: 560, margin: "0 auto 36px", lineHeight: 1.6 }}>
             AI proposals in 60 seconds. Legally sound contracts. Branded client portals. Stripe payment links. All in one place.
@@ -219,8 +219,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── ZENVOY MANIFESTO ───────────────────────────────── */}
-      <section aria-label="What is Zenvoy" style={{ background: "#fff", padding: "80px 24px", borderBottom: "1px solid #e2e8f0" }}>
+      {/* ── DEALPILOT MANIFESTO ───────────────────────────────── */}
+      <section aria-label="What is DealPilot" style={{ background: "#fff", padding: "80px 24px", borderBottom: "1px solid #e2e8f0" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <Row gutter={[64, 48]} align="middle">
             <Col xs={24} md={12}>
@@ -229,31 +229,31 @@ export default function LandingPage() {
                 The name, explained
               </Tag>
               <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, margin: "0 0 28px", letterSpacing: "-0.8px", lineHeight: 1.15 }}>
-                What does <span style={{ color: "#0ea5e9" }}>Zenvoy</span> mean?
+                What does <span style={{ color: "#0ea5e9" }}>DealPilot</span> mean?
               </h2>
 
-              {/* Zen block */}
+              {/* Deal block */}
               <div style={{ display: "flex", gap: 18, marginBottom: 24, alignItems: "flex-start" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 14, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ fontSize: 26, color: "#fff" }}>禅</span>
+                  <span style={{ fontSize: 26, color: "#fff" }}>🤝</span>
                 </div>
                 <div>
-                  <Text strong style={{ fontSize: 18, display: "block", marginBottom: 4, color: "#0369a1" }}>Zen</Text>
+                  <Text strong style={{ fontSize: 18, display: "block", marginBottom: 4, color: "#0369a1" }}>Deal</Text>
                   <Text style={{ fontSize: 15, color: "#475569", lineHeight: 1.6 }}>
-                    Calm focus and clarity — the opposite of the stress and anxiety that comes with chasing clients, writing proposals, and waiting for signatures. You stay in flow. Zenvoy handles the rest.
+                    Every client engagement is a deal — a proposal to write, a contract to sign, a payment to collect. DealPilot is built around the entire deal lifecycle, from first pitch to final signature.
                   </Text>
                 </div>
               </div>
 
-              {/* Envoy block */}
+              {/* Pilot block */}
               <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 14, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ fontSize: 24 }}>📜</span>
+                  <span style={{ fontSize: 24 }}>✈️</span>
                 </div>
                 <div>
-                  <Text strong style={{ fontSize: 18, display: "block", marginBottom: 4, color: "#0369a1" }}>Envoy</Text>
+                  <Text strong style={{ fontSize: 18, display: "block", marginBottom: 4, color: "#0369a1" }}>Pilot</Text>
                   <Text style={{ fontSize: 15, color: "#475569", lineHeight: 1.6 }}>
-                    A diplomatic representative sent to negotiate and close deals on someone's behalf. An envoy carries proposals, terms, and agreements between two parties — exactly what this product does for you.
+                    A pilot navigates complexity and lands safely — every time. Your AI co-pilot handles the proposals, contracts, and follow-ups while you stay in control of your craft and your clients.
                   </Text>
                 </div>
               </div>
@@ -274,7 +274,7 @@ export default function LandingPage() {
                 <div style={{ position: "relative" }}>
                   <div style={{ fontSize: 52, color: "rgba(255,255,255,0.3)", lineHeight: 1, marginBottom: 8, fontFamily: "Georgia, serif" }}>"</div>
                   <p style={{ fontSize: "clamp(17px, 2.2vw, 22px)", color: "#fff", fontWeight: 600, lineHeight: 1.6, margin: "0 0 28px", letterSpacing: "-0.2px" }}>
-                    Zenvoy is your calm, intelligent representative — sent to every client on your behalf, closing deals while you focus on your craft.
+                    DealPilot is your AI co-pilot for closing deals — it writes the proposals, sends the contracts, and chases the signatures while you focus on your craft.
                   </p>
                   <div style={{ width: 48, height: 2, background: "rgba(255,255,255,0.4)", marginBottom: 20 }} />
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -282,8 +282,8 @@ export default function LandingPage() {
                       <ThunderboltFilled style={{ color: "#fff", fontSize: 18 }} />
                     </div>
                     <div>
-                      <Text style={{ color: "#fff", fontWeight: 700, fontSize: 15, display: "block" }}>Zenvoy</Text>
-                      <Text style={{ color: "rgba(255,255,255,0.65)", fontSize: 13 }}>Your AI envoy. Every client, every deal.</Text>
+                      <Text style={{ color: "#fff", fontWeight: 700, fontSize: 15, display: "block" }}>DealPilot</Text>
+                      <Text style={{ color: "rgba(255,255,255,0.65)", fontSize: 13 }}>Your AI co-pilot. Every proposal, every close.</Text>
                     </div>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ export default function LandingPage() {
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <Tag color="red" style={{ borderRadius: 20, marginBottom: 14, fontSize: 13, padding: "3px 14px" }}>Real freelancer frustrations</Tag>
             <h2 style={{ fontSize: 36, fontWeight: 900, margin: "0 0 10px", letterSpacing: "-0.5px" }}>Sound familiar?</h2>
-            <p style={{ color: "#64748b", fontSize: 17 }}>Thousands of freelancers deal with this every week. Zenvoy fixes all of it.</p>
+            <p style={{ color: "#64748b", fontSize: 17 }}>Thousands of freelancers deal with this every week. DealPilot fixes all of it.</p>
           </div>
           <Row gutter={[24, 24]}>
             {PAIN_POINTS.map(p => (
@@ -611,10 +611,10 @@ export default function LandingPage() {
               Your AI envoy. Every client, every deal.
             </Text>
             <h2 style={{ color: "#fff", fontSize: 34, fontWeight: 900, margin: "0 0 14px", letterSpacing: "-0.5px" }}>
-              Send Zenvoy to your next client.
+              Close your next deal with DealPilot.
             </h2>
             <p style={{ color: "rgba(255,255,255,0.82)", fontSize: 17, lineHeight: 1.65, margin: "0 0 36px" }}>
-              Generate your first AI proposal in 60 seconds. No credit card, no setup, no commitment. Join 1,200+ freelancers who let Zenvoy do the pitching.
+              Generate your first AI proposal in 60 seconds. No credit card, no setup, no commitment. Join 1,200+ freelancers who let DealPilot do the pitching.
             </p>
             <Link href="/sign-up">
               <Button size="large" icon={<ArrowRightOutlined />}

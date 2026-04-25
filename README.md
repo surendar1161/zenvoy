@@ -1,4 +1,4 @@
-# Zenvoy — Monorepo
+# DealPilot — Monorepo
 
 ```
 ai-proposal-generator/

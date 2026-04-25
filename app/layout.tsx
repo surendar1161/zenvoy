@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "./globals.css";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://zenvoy.ai";
-const APP_NAME = "Zenvoy";
-const TAGLINE = "Your AI Envoy for Every Client Deal";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
+const APP_NAME = "DealPilot";
+const TAGLINE = "Your AI Co-Pilot for Closing Client Deals";
 const DESCRIPTION =
   "Generate professional freelance proposals in seconds with Claude AI. Includes e-signatures, Stripe payment links, client portals, AI contracts, milestone billing, and analytics. Free to start.";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "e-signature for freelancers", "proposal with payment link", "Stripe proposal tool",
     "better proposals alternative", "proposify alternative", "freelance CRM",
     "AI contract writer", "freelance project management", "white label proposals",
-    "zenvoy", "zenvoy ai", "freelance deal closing software",
+    "dealpilot", "dealpilot ai", "freelance deal closing software",
   ],
   authors: [{ name: APP_NAME, url: APP_URL }],
   creator: APP_NAME,
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     title: `${APP_NAME} — ${TAGLINE}`,
     description: DESCRIPTION,
     images: [`${APP_URL}/og-image.png`],
-    creator: "@zenvoy_ai",
+    creator: "@dealpilot",
   },
   alternates: { canonical: APP_URL },
   verification: {

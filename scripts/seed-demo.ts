@@ -1,5 +1,5 @@
 /**
- * Seed realistic demo data for Zenvoy demo recording
+ * Seed realistic demo data for DealPilot demo recording
  * Run: npx tsx scripts/seed-demo.ts
  */
 import { createClient } from "@supabase/supabase-js";
@@ -15,7 +15,7 @@ const EMAIL    = process.env.DEMO_EMAIL    ?? "surendar1160@gmail.com";
 const PASSWORD = process.env.DEMO_PASSWORD ?? "";
 
 async function seed() {
-  console.log("\n🎬 Zenvoy Demo Data Seeder\n");
+  console.log("\n🎬 DealPilot Demo Data Seeder\n");
 
   if (!PASSWORD) {
     console.error("❌ Set DEMO_PASSWORD=your_password in .env.local or pass as env var");

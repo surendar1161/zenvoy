@@ -76,7 +76,7 @@ export const PLANS: PlanConfig[] = [
       "Section-level AI regeneration",
       "Good / Better / Best pricing tiers",
       "Milestone payment schedule",
-      "White-label (no Zenvoy branding)",
+      "White-label (no DealPilot branding)",
       "Priority support (< 4h response)",
     ],
   },

@@ -336,7 +336,7 @@ function SettingsPage() {
         <div style={{ maxWidth: 700 }}>
           <Text strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>Stripe Payment Setup</Text>
           <Text type="secondary" style={{ fontSize: 14, display: "block", marginBottom: 24 }}>
-            Zenvoy uses your own Stripe account — payments go directly to you. No platform fees.
+            DealPilot uses your own Stripe account — payments go directly to you. No platform fees.
           </Text>
 
           {/* How it works */}
@@ -346,7 +346,7 @@ function SettingsPage() {
               {[
                 { step: "1", title: "Create a Stripe account", desc: "Sign up free at stripe.com. No monthly fees — Stripe charges 2.9% + 30¢ per transaction only when you get paid.", link: "https://stripe.com", linkLabel: "stripe.com →" },
                 { step: "2", title: "Create a Payment Link", desc: `Go to Stripe Dashboard → Payment Links → Create link. Set the amount to your deposit amount (e.g. 50% of the project total), give it a name like "Project Deposit".`, link: "https://dashboard.stripe.com/payment-links", linkLabel: "Open Stripe Dashboard →" },
-                { step: "3", title: "Copy and paste into Zenvoy", desc: "Copy the payment link URL (looks like https://buy.stripe.com/...) and paste it into the Deposit Payment Link field when creating a proposal.", link: null, linkLabel: null },
+                { step: "3", title: "Copy and paste into DealPilot", desc: "Copy the payment link URL (looks like https://buy.stripe.com/...) and paste it into the Deposit Payment Link field when creating a proposal.", link: null, linkLabel: null },
                 { step: "4", title: "Client pays directly to you", desc: "When the client opens your proposal, they see a Pay Now button. Clicking it takes them to your Stripe checkout. Money lands in your Stripe account within 2 business days.", link: null, linkLabel: null },
               ].map(s => (
                 <div key={s.step} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -451,7 +451,7 @@ function SettingsPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
             <div>
               <Text strong style={{ fontSize: 16, display: "block", marginBottom: 4 }}>Brand Kit</Text>
-              <Text type="secondary" style={{ fontSize: 14 }}>Your logo, colours, and font — applied to every proposal. Clients never see Zenvoy branding.</Text>
+              <Text type="secondary" style={{ fontSize: 14 }}>Your logo, colours, and font — applied to every proposal. Clients never see DealPilot branding.</Text>
             </div>
             <Space>
               <Button icon={brandPreview ? <EyeInvisibleOutlined /> : <EyeOutlined />} onClick={() => setBrandPreview(p => !p)}>
@@ -541,7 +541,7 @@ function SettingsPage() {
                   <CheckCircleFilled style={{ color: "#0ea5e9", fontSize: 18 }} />
                   <div>
                     <Text strong style={{ color: "#1d4ed8" }}>White-label included</Text>
-                    <Text style={{ color: "#2563eb", display: "block", fontSize: 13 }}>Your logo and colours appear on every proposal. Clients never see Zenvoy.</Text>
+                    <Text style={{ color: "#2563eb", display: "block", fontSize: 13 }}>Your logo and colours appear on every proposal. Clients never see DealPilot.</Text>
                   </div>
                 </Space>
               </Card>

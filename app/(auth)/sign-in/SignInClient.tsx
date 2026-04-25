@@ -69,7 +69,7 @@ function SignInClient() {
             <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ThunderboltFilled style={{ color: "#fff", fontSize: 22 }} />
             </div>
-            <Text strong style={{ fontSize: 22, color: "#0ea5e9", letterSpacing: "-0.5px" }}>Zenvoy</Text>
+            <Text strong style={{ fontSize: 22, color: "#0ea5e9", letterSpacing: "-0.5px" }}>DealPilot</Text>
           </Link>
           <Title level={3} style={{ margin: "20px 0 4px", fontWeight: 800 }}>Welcome back</Title>
           <Text type="secondary">Sign in to your account</Text>

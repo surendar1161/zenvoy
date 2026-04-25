@@ -13,7 +13,7 @@ const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const EMAIL    = process.env.TEST_EMAIL    ?? "test@zenvoy.dev";
+const EMAIL    = process.env.TEST_EMAIL    ?? "test@dealpilot.co.in";
 const PASSWORD = process.env.TEST_PASSWORD ?? "TestPassword123!";
 
 const SAMPLE_CLIENTS = [
@@ -47,7 +47,7 @@ The total investment for this project is outlined below. A 50% deposit is requir
 Review this proposal, then click the payment link below to pay your deposit and get started immediately.`;
 
 async function seed() {
-  console.log("\n🌱 Zenvoy — Seed Script\n");
+  console.log("\n🌱 DealPilot — Seed Script\n");
 
   // Sign in
   const { data: auth, error: authErr } = await sb.auth.signInWithPassword({ email: EMAIL, password: PASSWORD });

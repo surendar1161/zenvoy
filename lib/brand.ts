@@ -3,7 +3,7 @@ export interface BrandKit {
   primaryColor: string;         // hex e.g. "#0ea5e9"
   secondaryColor: string;       // hex e.g. "#0369a1"
   fontFamily: string;           // Google Font name
-  companyName: string;          // for white-label — shown instead of "Zenvoy"
+  companyName: string;          // for white-label — shown instead of "DealPilot"
 }
 
 export const DEFAULT_BRAND: BrandKit = {
@@ -22,7 +22,7 @@ export const FONT_OPTIONS = [
   { value: "Raleway",         label: "Raleway",           preview: "Creative & bold",    url: "https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&display=swap" },
 ];
 
-export const STORAGE_KEY = "zenvoy_brand";
+export const STORAGE_KEY = "dealpilot_brand";
 
 export function loadBrand(): BrandKit {
   if (typeof window === "undefined") return DEFAULT_BRAND;

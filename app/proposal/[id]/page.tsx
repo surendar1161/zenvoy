@@ -48,7 +48,7 @@ export default function ProposalViewPage() {
 
       // Fallback to localStorage
       try {
-        const raw = localStorage.getItem(`zenvoy_full_${id}`);
+        const raw = localStorage.getItem(`dealpilot_full_${id}`);
         if (!raw) { setError(true); setLoading(false); return; }
         setData(JSON.parse(raw));
       } catch { setError(true); }
@@ -100,7 +100,7 @@ export default function ProposalViewPage() {
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <Result status="warning" title="This proposal has expired"
           subTitle="The sender set an expiry date. Contact them for a new link."
-          extra={<Button href="/">Zenvoy</Button>} />
+          extra={<Button href="/">DealPilot</Button>} />
       </div>
     );
   }
@@ -137,7 +137,7 @@ export default function ProposalViewPage() {
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <Result status="404" title="Proposal not found"
           subTitle="This link may have expired or the proposal was deleted. Contact the sender for a new link."
-          extra={<Button href="/">Go to Zenvoy</Button>} />
+          extra={<Button href="/">Go to DealPilot</Button>} />
       </div>
     );
   }

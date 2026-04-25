@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import type { Plan, BillingPeriod } from "@/lib/plans";
 
 const PRICES: Record<string, { amount: number; interval: "month" | "year"; name: string }> = {
-  pro_monthly:      { amount: 1200,  interval: "month", name: "Zenvoy Pro (Monthly)" },
-  pro_yearly:       { amount: 10800, interval: "year",  name: "Zenvoy Pro (Yearly — save 25%)" },
-  business_monthly: { amount: 2900,  interval: "month", name: "Zenvoy Business (Monthly)" },
-  business_yearly:  { amount: 26400, interval: "year",  name: "Zenvoy Business (Yearly — save 24%)" },
+  pro_monthly:      { amount: 1200,  interval: "month", name: "DealPilot Pro (Monthly)" },
+  pro_yearly:       { amount: 10800, interval: "year",  name: "DealPilot Pro (Yearly — save 25%)" },
+  business_monthly: { amount: 2900,  interval: "month", name: "DealPilot Business (Monthly)" },
+  business_yearly:  { amount: 26400, interval: "year",  name: "DealPilot Business (Yearly — save 24%)" },
 };
 
 export async function POST(req: NextRequest) {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     line_items: [{
       price_data: {
         currency: "usd",
-        product_data: { name: priceConfig.name, description: "Zenvoy subscription" },
+        product_data: { name: priceConfig.name, description: "DealPilot subscription" },
         recurring: { interval: priceConfig.interval },
         unit_amount: priceConfig.amount,
       },

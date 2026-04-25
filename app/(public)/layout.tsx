@@ -20,7 +20,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             <ThunderboltFilled style={{ color: "#0ea5e9", fontSize: 22 }} />
-            <span style={{ fontWeight: 800, fontSize: 18, color: "#0ea5e9", letterSpacing: "-0.3px" }}>Zenvoy</span>
+            <span style={{ fontWeight: 800, fontSize: 18, color: "#0ea5e9", letterSpacing: "-0.3px" }}>DealPilot</span>
           </Link>
           <Space>
             <Link href="/pricing"><Button type="text" size="middle">Pricing</Button></Link>

@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (p === "free" && t) {
         const trial = getTrialInfo(t);
         if (trial.isExpired) {
-          const shownKey = "zenvoy_trial_expired_modal_shown";
+          const shownKey = "dealpilot_trial_expired_modal_shown";
           if (!sessionStorage.getItem(shownKey)) {
             sessionStorage.setItem(shownKey, "1");
             setShowExpiredModal(true);
@@ -236,7 +236,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <ThunderboltFilled style={{ color: "#fff", fontSize: 16 }} />
               </div>
               {!collapsed && (
-                <Text strong style={{ fontSize: 16, color: "#0ea5e9", letterSpacing: "-0.3px", whiteSpace: "nowrap" }}>Zenvoy</Text>
+                <Text strong style={{ fontSize: 16, color: "#0ea5e9", letterSpacing: "-0.3px", whiteSpace: "nowrap" }}>DealPilot</Text>
               )}
             </Link>
             <Button

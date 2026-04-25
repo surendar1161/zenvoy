@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
             <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#fff", fontSize: 22, fontWeight: 900 }}>Z</span>
             </div>
-            <Text strong style={{ fontSize: 22, color: "#0ea5e9" }}>Zenvoy</Text>
+            <Text strong style={{ fontSize: 22, color: "#0ea5e9" }}>DealPilot</Text>
           </Link>
           <Title level={3} style={{ margin: "0 0 8px", fontWeight: 800 }}>Reset your password</Title>
           <Text type="secondary">Enter your email and we'll send you a reset link.</Text>

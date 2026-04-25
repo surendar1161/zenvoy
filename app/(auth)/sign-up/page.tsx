@@ -106,7 +106,7 @@ export default function SignUpPage() {
             <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ThunderboltFilled style={{ color: "#fff", fontSize: 22 }} />
             </div>
-            <Text strong style={{ fontSize: 22, color: "#0ea5e9", letterSpacing: "-0.5px" }}>Zenvoy</Text>
+            <Text strong style={{ fontSize: 22, color: "#0ea5e9", letterSpacing: "-0.5px" }}>DealPilot</Text>
           </Link>
           <Title level={2} style={{ fontWeight: 900, margin: "0 0 12px", fontSize: 30, lineHeight: 1.2 }}>
             Win more clients with AI proposals

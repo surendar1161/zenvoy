@@ -232,7 +232,7 @@ export default function GenerateClient() {
       }
       setProposalId(pid);
       try {
-        localStorage.setItem(`zenvoy_full_${pid}`, JSON.stringify({
+        localStorage.setItem(`dealpilot_full_${pid}`, JSON.stringify({
           id: pid, createdAt: new Date().toISOString(), proposalText: text,
           freelancerName: form.freelancerName, freelancerTitle: form.freelancerTitle,
           freelancerEmail: form.freelancerEmail, clientName: form.clientName, clientCompany: form.clientCompany,
