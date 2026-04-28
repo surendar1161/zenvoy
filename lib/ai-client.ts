@@ -2,8 +2,8 @@
  * Unified AI client — OpenAI primary (via raw fetch), Claude fallback.
  *
  * Strategy:
- *  1. Try OpenAI (gpt-4o) up to 3 times with exponential backoff.
- *  2. If all 3 attempts fail, fall back to Claude (claude-opus-4-6).
+ *  1. If OPENAI_API_KEY is set, try OpenAI (gpt-4o) up to 2 times (8s timeout each).
+ *  2. If OpenAI is not configured OR all attempts fail → fall back to Claude.
  *
  * No openai npm package needed — uses fetch directly against the REST API.
  */
@@ -15,52 +15,44 @@ const OPENAI_API_KEY  = process.env.OPENAI_API_KEY ?? "";
 const OPENAI_BASE     = "https://api.openai.com/v1/chat/completions";
 const OPENAI_MODEL    = "gpt-4o";
 const ANTHROPIC_MODEL = "claude-opus-4-6";
-const MAX_ATTEMPTS    = 3;
+const MAX_ATTEMPTS    = 2;
+const OPENAI_TIMEOUT  = 8000; // 8 seconds per attempt
 
 function sleep(ms: number) {
   return new Promise<void>(r => setTimeout(r, ms));
 }
 
+const hasOpenAI = () => OPENAI_API_KEY.length > 10;
+
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 // ── OpenAI helpers (raw fetch) ─────────────────────────────────────────────────
 
-async function openAIRequest(
-  messages: ChatMessage[],
-  maxTokens: number,
-  stream: true,
-): Promise<Response>;
-async function openAIRequest(
-  messages: ChatMessage[],
-  maxTokens: number,
-  stream: false,
-): Promise<string>;
-async function openAIRequest(
+async function openAIFetch(
   messages: ChatMessage[],
   maxTokens: number,
   stream: boolean,
-): Promise<Response | string> {
-  const res = await fetch(OPENAI_BASE, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type":  "application/json",
-    },
-    body: JSON.stringify({ model: OPENAI_MODEL, max_tokens: maxTokens, stream, messages }),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`OpenAI ${res.status}: ${errText}`);
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OPENAI_TIMEOUT);
+  try {
+    const res = await fetch(OPENAI_BASE, {
+      method:  "POST",
+      headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
+      body:    JSON.stringify({ model: OPENAI_MODEL, max_tokens: maxTokens, stream, messages }),
+      signal:  controller.signal,
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => res.statusText);
+      throw new Error(`OpenAI ${res.status}: ${errText}`);
+    }
+    return res;
+  } finally {
+    clearTimeout(timer);
   }
-
-  if (stream) return res as Response;
-
-  const data = await res.json();
-  return (data.choices?.[0]?.message?.content ?? "") as string;
 }
 
-async function withOpenAIRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+async function withOpenAIRetry(fn: () => Promise<Response>, label: string): Promise<Response> {
   let lastErr: unknown;
   for (let i = 0; i < MAX_ATTEMPTS; i++) {
     try {
@@ -68,7 +60,7 @@ async function withOpenAIRetry<T>(fn: () => Promise<T>, label: string): Promise<
     } catch (err) {
       lastErr = err;
       console.warn(`[AI] ${label} attempt ${i + 1}/${MAX_ATTEMPTS} failed:`, (err as Error).message);
-      if (i < MAX_ATTEMPTS - 1) await sleep(200 * Math.pow(2, i));
+      if (i < MAX_ATTEMPTS - 1) await sleep(300);
     }
   }
   throw lastErr;
@@ -99,7 +91,7 @@ function openAIStreamToText(body: ReadableStream<Uint8Array>): ReadableStream<Ui
             const parsed = JSON.parse(data);
             const text = parsed.choices?.[0]?.delta?.content;
             if (text) await writer.write(encoder.encode(text));
-          } catch { /* ignore parse errors */ }
+          } catch { /* ignore SSE parse errors */ }
         }
       }
     } finally {
@@ -110,37 +102,15 @@ function openAIStreamToText(body: ReadableStream<Uint8Array>): ReadableStream<Ui
   return readable;
 }
 
-// ── Public API ─────────────────────────────────────────────────────────────────
+// ── Claude helpers ─────────────────────────────────────────────────────────────
 
-/**
- * Stream text — OpenAI primary (3 retries), Claude fallback.
- * Returns a ReadableStream<Uint8Array> of raw text chunks.
- */
-export async function streamWithFallback(
+function claudeStream(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 4096,
-): Promise<ReadableStream<Uint8Array>> {
-  const messages: ChatMessage[] = [
-    { role: "system", content: systemPrompt },
-    { role: "user",   content: userPrompt },
-  ];
-
-  // ── Try OpenAI ──────────────────────────────────────────────────────────────
-  try {
-    const res = await withOpenAIRetry(
-      () => openAIRequest(messages, maxTokens, true),
-      "OpenAI stream",
-    );
-    return openAIStreamToText(res.body!);
-
-  } catch (openaiErr) {
-    console.warn("[AI] OpenAI failed 3 times — falling back to Claude:", (openaiErr as Error).message);
-  }
-
-  // ── Claude fallback ─────────────────────────────────────────────────────────
+  maxTokens: number,
+): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
-  const stream  = await anthropic.messages.stream({
+  const stream  = anthropic.messages.stream({
     model:      ANTHROPIC_MODEL,
     max_tokens: maxTokens,
     thinking:   { type: "adaptive" },
@@ -163,8 +133,60 @@ export async function streamWithFallback(
   });
 }
 
+async function claudeComplete(
+  systemPrompt: string,
+  userPrompt: string,
+  maxTokens: number,
+): Promise<string> {
+  const response = await anthropic.messages.create({
+    model:      ANTHROPIC_MODEL,
+    max_tokens: maxTokens,
+    thinking:   { type: "adaptive" },
+    system:     systemPrompt,
+    messages:   [{ role: "user", content: userPrompt }],
+  });
+  return response.content.find(b => b.type === "text")?.text ?? "";
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────────
+
 /**
- * Non-streaming completion — OpenAI primary (3 retries), Claude fallback.
+ * Stream text — OpenAI primary (if configured), Claude fallback.
+ * Returns a ReadableStream<Uint8Array> of raw text chunks.
+ */
+export async function streamWithFallback(
+  systemPrompt: string,
+  userPrompt: string,
+  maxTokens = 4096,
+): Promise<ReadableStream<Uint8Array>> {
+  const messages: ChatMessage[] = [
+    { role: "system", content: systemPrompt },
+    { role: "user",   content: userPrompt },
+  ];
+
+  // ── Try OpenAI (only if key is configured) ──────────────────────────────────
+  if (hasOpenAI()) {
+    try {
+      const res = await withOpenAIRetry(
+        () => openAIFetch(messages, maxTokens, true),
+        "OpenAI stream",
+      );
+      console.log("[AI] Using OpenAI for streaming");
+      return openAIStreamToText(res.body!);
+    } catch (err) {
+      console.warn("[AI] OpenAI failed — falling back to Claude:", (err as Error).message);
+    }
+  } else {
+    console.log("[AI] OPENAI_API_KEY not set — using Claude directly");
+  }
+
+  // ── Claude fallback ─────────────────────────────────────────────────────────
+  console.log("[AI] Using Claude for streaming");
+  return claudeStream(systemPrompt, userPrompt, maxTokens);
+}
+
+/**
+ * Non-streaming completion — OpenAI primary (if configured), Claude fallback.
  * Returns the full response as a plain string.
  */
 export async function completeWithFallback(
@@ -177,24 +199,25 @@ export async function completeWithFallback(
     { role: "user",   content: userPrompt },
   ];
 
-  // ── Try OpenAI ──────────────────────────────────────────────────────────────
-  try {
-    return await withOpenAIRetry(
-      () => openAIRequest(messages, maxTokens, false),
-      "OpenAI complete",
-    );
-  } catch (openaiErr) {
-    console.warn("[AI] OpenAI failed 3 times — falling back to Claude:", (openaiErr as Error).message);
+  // ── Try OpenAI (only if key is configured) ──────────────────────────────────
+  if (hasOpenAI()) {
+    try {
+      const res = await withOpenAIRetry(
+        () => openAIFetch(messages, maxTokens, false),
+        "OpenAI complete",
+      );
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content ?? "";
+      console.log("[AI] Using OpenAI for completion");
+      return text;
+    } catch (err) {
+      console.warn("[AI] OpenAI failed — falling back to Claude:", (err as Error).message);
+    }
+  } else {
+    console.log("[AI] OPENAI_API_KEY not set — using Claude directly");
   }
 
   // ── Claude fallback ─────────────────────────────────────────────────────────
-  const response = await anthropic.messages.create({
-    model:      ANTHROPIC_MODEL,
-    max_tokens: maxTokens,
-    thinking:   { type: "adaptive" },
-    system:     systemPrompt,
-    messages:   [{ role: "user", content: userPrompt }],
-  });
-
-  return response.content.find(b => b.type === "text")?.text ?? "";
+  console.log("[AI] Using Claude for completion");
+  return claudeComplete(systemPrompt, userPrompt, maxTokens);
 }

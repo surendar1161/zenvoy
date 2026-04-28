@@ -58,12 +58,15 @@ Structure the proposal with these sections:
 
 End with a warm but action-oriented closing that creates urgency without being pushy.`;
 
-  const stream = await streamWithFallback(systemPrompt, userPrompt, 4096);
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type":     "text/plain; charset=utf-8",
-      "Transfer-Encoding": "chunked",
-    },
-  });
+  try {
+    const stream = await streamWithFallback(systemPrompt, userPrompt, 4096);
+    return new Response(stream, {
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Transfer-Encoding": "chunked" },
+    });
+  } catch (err: any) {
+    console.error("[generate-proposal]", err?.message);
+    return new Response(JSON.stringify({ error: "AI generation failed. Please try again." }), {
+      status: 500, headers: { "Content-Type": "application/json" },
+    });
+  }
 }

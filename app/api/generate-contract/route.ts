@@ -48,9 +48,13 @@ Draft the complete, full contract with all necessary clauses, definitions, and p
 Use proper legal numbering (1.0, 1.1, 2.0, 2.1, etc.).
 Include: Recitals / Background, Definitions, main operative clauses, Representations & Warranties, Limitation of Liability, Governing Law, Dispute Resolution, Miscellaneous (integration, severability, waiver, notices), Signature Block.`;
 
-  const stream = await streamWithFallback(systemPrompt, userPrompt, 8000);
-
-  return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8" },
-  });
+  try {
+    const stream = await streamWithFallback(systemPrompt, userPrompt, 8000);
+    return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  } catch (err: any) {
+    console.error("[generate-contract]", err?.message);
+    return new Response(JSON.stringify({ error: "AI generation failed. Please try again." }), {
+      status: 500, headers: { "Content-Type": "application/json" },
+    });
+  }
 }
