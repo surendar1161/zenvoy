@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Badge, Button, Card, Col, Collapse, Divider, Row, Space,
-  Switch, Tag, Typography,
+  Switch, Tag, Typography, Input, Form, message,
 } from "antd";
 import {
   CheckCircleFilled, ThunderboltFilled, ArrowRightOutlined,
@@ -11,7 +11,8 @@ import {
   FileTextOutlined, CreditCardOutlined, TeamOutlined,
   BarChartOutlined, BgColorsOutlined, EditOutlined, MessageOutlined,
   DollarOutlined, LockOutlined, CalendarOutlined, AppstoreOutlined,
-  CheckOutlined, CloseOutlined,
+  CheckOutlined, CloseOutlined, DownloadOutlined, MailOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 
@@ -157,6 +158,173 @@ const TESTIMONIALS = [
 ];
 
 // ── Component ─────────────────────────────────────────────────
+
+const LEAD_MAGNET_ITEMS = [
+  { emoji: "📄", title: "5 Proposal Templates",    desc: "Web Dev, Design, SEO, Consulting & Copywriting — ready to send" },
+  { emoji: "✅", title: "Proposal Checklist",       desc: "12-point checklist used by freelancers with 60%+ close rates" },
+  { emoji: "💰", title: "Freelance Rate Guide",     desc: "Market rates for 10 professions across US, UK, and AU" },
+  { emoji: "📧", title: "5 Follow-Up Email Scripts",desc: "What to say when they ghost you — politely and effectively" },
+];
+
+function LeadMagnetSection() {
+  const [email, setEmail] = useState("");
+  const [name, setName]   = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone]   = useState(false);
+  const [msgApi, ctx]     = message.useMessage();
+
+  async function submit() {
+    if (!email) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/lead-magnet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, source: "lead_magnet", magnet: "proposal_templates" }),
+      });
+      const data = await res.json();
+      if (!res.ok) { msgApi.error(data.error || "Something went wrong"); return; }
+      setDone(true);
+    } catch {
+      msgApi.error("Network error — please try again");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section
+      aria-label="Free freelance proposal template pack"
+      style={{ background: "linear-gradient(160deg, #0c4a6e 0%, #0369a1 60%, #0ea5e9 100%)", padding: "90px 24px", position: "relative", overflow: "hidden" }}
+    >
+      {ctx}
+      {/* Dot pattern */}
+      <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} aria-hidden />
+
+      <div style={{ position: "relative", maxWidth: 1060, margin: "0 auto" }}>
+        <Row gutter={[60, 48]} align="middle">
+
+          {/* Left — what they get */}
+          <Col xs={24} md={13}>
+            <Tag style={{ marginBottom: 20, borderRadius: 20, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", color: "#fff", fontSize: 13, fontWeight: 700, padding: "5px 16px" }}>
+              🎁 Free Resource Pack
+            </Tag>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 900, color: "#fff", margin: "0 0 14px", letterSpacing: "-0.8px", lineHeight: 1.15 }}>
+              Get 5 freelance proposal templates — free
+            </h2>
+            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.82)", lineHeight: 1.7, margin: "0 0 32px" }}>
+              Used by 1,200+ freelancers to win higher-paying clients. Drop your email and get the full pack instantly — no spam, ever.
+            </p>
+
+            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              {LEAD_MAGNET_ITEMS.map(item => (
+                <div key={item.title} style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                    {item.emoji}
+                  </div>
+                  <div>
+                    <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{item.title}</div>
+                    <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </Space>
+          </Col>
+
+          {/* Right — email capture form */}
+          <Col xs={24} md={11}>
+            <div style={{ background: "#fff", borderRadius: 24, padding: "36px 32px", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
+              {done ? (
+                <div style={{ textAlign: "center", padding: "20px 0" }}>
+                  <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: "#0369a1", marginBottom: 10 }}>You're in!</div>
+                  <p style={{ color: "#475569", fontSize: 15, lineHeight: 1.65, marginBottom: 24 }}>
+                    The template pack is on its way to <strong>{email}</strong>.<br />
+                    While you wait — try DealPilot free and generate your first AI proposal in 60 seconds.
+                  </p>
+                  <Link href="/sign-up">
+                    <Button type="primary" size="large" icon={<ThunderboltFilled />} block
+                      style={{ height: 50, borderRadius: 12, fontWeight: 700, fontSize: 15, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", border: "none" }}>
+                      Try DealPilot Free →
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div style={{ textAlign: "center", marginBottom: 28 }}>
+                    <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+                      <DownloadOutlined style={{ fontSize: 24, color: "#fff" }} />
+                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginBottom: 4 }}>Get your free pack</div>
+                    <div style={{ fontSize: 13, color: "#64748b" }}>4 resources · Instant access · No credit card</div>
+                  </div>
+
+                  <Space direction="vertical" size={12} style={{ width: "100%" }}>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Your name (optional)</div>
+                      <Input
+                        size="large"
+                        placeholder="Alex Johnson"
+                        prefix={<span style={{ color: "#94a3b8" }}>👤</span>}
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        style={{ borderRadius: 10, height: 46, fontSize: 14 }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Work email *</div>
+                      <Input
+                        size="large"
+                        type="email"
+                        placeholder="you@yourname.com"
+                        prefix={<MailOutlined style={{ color: "#94a3b8" }} />}
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        onPressEnter={submit}
+                        style={{ borderRadius: 10, height: 46, fontSize: 14 }}
+                      />
+                    </div>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      loading={loading}
+                      onClick={submit}
+                      disabled={!email}
+                      icon={<GiftOutlined />}
+                      style={{ height: 50, borderRadius: 12, fontWeight: 700, fontSize: 15, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", border: "none", marginTop: 4 }}
+                    >
+                      Send Me the Free Pack →
+                    </Button>
+                  </Space>
+
+                  <div style={{ textAlign: "center", marginTop: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                    <LockOutlined style={{ color: "#94a3b8", fontSize: 12 }} />
+                    <span style={{ fontSize: 12, color: "#94a3b8" }}>No spam. Unsubscribe anytime. We hate spam too.</span>
+                  </div>
+
+                  {/* Social proof */}
+                  <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid #f1f5f9", display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ display: "flex" }}>
+                      {["#0ea5e9","#7c3aed","#10b981","#f59e0b"].map((c, i) => (
+                        <div key={i} style={{ width: 28, height: 28, borderRadius: "50%", background: c, border: "2px solid #fff", marginLeft: i > 0 ? -8 : 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700 }}>
+                          {["M","S","J","A"][i]}
+                        </div>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 12, color: "#64748b" }}>
+                      <strong style={{ color: "#0f172a" }}>1,200+ freelancers</strong> already use these templates
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </Col>
+        </Row>
+      </div>
+    </section>
+  );
+}
 
 export default function LandingPage() {
   const [yearly, setYearly] = useState(false);
@@ -334,6 +502,9 @@ export default function LandingPage() {
           </Row>
         </div>
       </section>
+
+      {/* ── LEAD MAGNET ────────────────────────────────────── */}
+      <LeadMagnetSection />
 
       {/* ── FEATURES ───────────────────────────────────────── */}
       <section id="features" aria-label="Product features" style={{ padding: "90px 24px", background: "#fff" }}>
