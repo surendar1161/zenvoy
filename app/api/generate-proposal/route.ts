@@ -1,9 +1,7 @@
 import { requireAuth } from "@/lib/api-auth";
-import Anthropic from "@anthropic-ai/sdk";
+import { streamWithFallback } from "@/lib/ai-client";
 import { NextRequest } from "next/server";
 import type { ProposalFormData } from "@/lib/types";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   const { user, error } = await requireAuth(req);
@@ -11,13 +9,13 @@ export async function POST(req: NextRequest) {
 
   const data: ProposalFormData = await req.json();
 
-  const depositAmount = Math.round((data.totalBudget * data.depositPercent) / 100);
-  const remainingAmount = data.totalBudget - depositAmount;
+  const depositAmount    = Math.round((data.totalBudget * data.depositPercent) / 100);
+  const remainingAmount  = data.totalBudget - depositAmount;
 
   const toneGuide = {
     professional: "formal, polished, and business-like. Use clear corporate language.",
-    friendly: "warm, approachable, and conversational while remaining credible.",
-    bold: "confident, direct, and results-focused. Make bold statements about value delivered.",
+    friendly:     "warm, approachable, and conversational while remaining credible.",
+    bold:         "confident, direct, and results-focused. Make bold statements about value delivered.",
   }[data.tone];
 
   const systemPrompt = `You are an expert freelance proposal writer. Your proposals consistently win clients.
@@ -60,34 +58,11 @@ Structure the proposal with these sections:
 
 End with a warm but action-oriented closing that creates urgency without being pushy.`;
 
-  // Stream the response
-  const stream = await client.messages.stream({
-    model: "claude-opus-4-6",
-    max_tokens: 4096,
-    thinking: { type: "adaptive" },
-    system: systemPrompt,
-    messages: [{ role: "user", content: userPrompt }],
-  });
+  const stream = await streamWithFallback(systemPrompt, userPrompt, 4096);
 
-  // Return a ReadableStream to the client
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        if (
-          chunk.type === "content_block_delta" &&
-          chunk.delta.type === "text_delta"
-        ) {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
-      }
-      controller.close();
-    },
-  });
-
-  return new Response(readable, {
+  return new Response(stream, {
     headers: {
-      "Content-Type": "text/plain; charset=utf-8",
+      "Content-Type":     "text/plain; charset=utf-8",
       "Transfer-Encoding": "chunked",
     },
   });

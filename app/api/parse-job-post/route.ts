@@ -1,8 +1,6 @@
 import { requireAuth } from "@/lib/api-auth";
-import Anthropic from "@anthropic-ai/sdk";
+import { completeWithFallback } from "@/lib/ai-client";
 import { NextRequest, NextResponse } from "next/server";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   const { user, error } = await requireAuth(req);
@@ -11,15 +9,10 @@ export async function POST(req: NextRequest) {
   const { jobPost } = await req.json();
   if (!jobPost?.trim()) return NextResponse.json({ error: "No job post provided" }, { status: 400 });
 
-  const response = await client.messages.create({
-    model: "claude-opus-4-6",
-    max_tokens: 1024,
-    system: `You are a proposal assistant. Extract structured information from a freelance job post or client brief.
-Return ONLY valid JSON — no markdown, no commentary.`,
-    messages: [
-      {
-        role: "user",
-        content: `Extract key proposal details from this job post. Return JSON with these fields:
+  const systemPrompt = `You are a proposal assistant. Extract structured information from a freelance job post or client brief.
+Return ONLY valid JSON — no markdown, no commentary.`;
+
+  const userPrompt = `Extract key proposal details from this job post. Return JSON with these fields:
 {
   "projectType": "best matching type from: Web Design & Development | Mobile App Development | Branding & Identity | SEO & Content Marketing | Social Media Management | Copywriting | Video Production | UI/UX Design | Data Analysis | Consulting | Other",
   "clientCompany": "company name if mentioned, else empty string",
@@ -31,18 +24,13 @@ Return ONLY valid JSON — no markdown, no commentary.`,
 }
 
 Job post:
-${jobPost}`,
-      },
-    ],
-  });
+${jobPost}`;
 
-  const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+  const text = await completeWithFallback(systemPrompt, userPrompt, 1024);
 
   try {
-    const parsed = JSON.parse(text);
-    return NextResponse.json(parsed);
+    return NextResponse.json(JSON.parse(text));
   } catch {
-    // Try to extract JSON from the response
     const match = text.match(/\{[\s\S]*\}/);
     if (match) return NextResponse.json(JSON.parse(match[0]));
     return NextResponse.json({ error: "Failed to parse job post" }, { status: 500 });

@@ -1,9 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { streamWithFallback } from "@/lib/ai-client";
 import { NextRequest, NextResponse } from "next/server";
 import { getContractType } from "@/lib/contract-types";
 import { createClient } from "@/lib/supabase/server";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -50,27 +48,9 @@ Draft the complete, full contract with all necessary clauses, definitions, and p
 Use proper legal numbering (1.0, 1.1, 2.0, 2.1, etc.).
 Include: Recitals / Background, Definitions, main operative clauses, Representations & Warranties, Limitation of Liability, Governing Law, Dispute Resolution, Miscellaneous (integration, severability, waiver, notices), Signature Block.`;
 
-  const stream = await client.messages.stream({
-    model: "claude-opus-4-6",
-    max_tokens: 8000,
-    thinking: { type: "adaptive" },
-    system: systemPrompt,
-    messages: [{ role: "user", content: userPrompt }],
-  });
+  const stream = await streamWithFallback(systemPrompt, userPrompt, 8000);
 
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
-      }
-      controller.close();
-    },
-  });
-
-  return new Response(readable, {
+  return new Response(stream, {
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
 }

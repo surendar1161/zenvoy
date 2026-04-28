@@ -1,8 +1,6 @@
 import { requireAuth } from "@/lib/api-auth";
-import Anthropic from "@anthropic-ai/sdk";
+import { completeWithFallback } from "@/lib/ai-client";
 import { NextRequest, NextResponse } from "next/server";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   const { user, error } = await requireAuth(req);
@@ -13,21 +11,15 @@ export async function POST(req: NextRequest) {
 
   const toneGuide = {
     professional: "formal, polished, and business-like",
-    friendly: "warm, approachable, and conversational",
-    bold: "confident, direct, and results-focused with bold statements",
+    friendly:     "warm, approachable, and conversational",
+    bold:         "confident, direct, and results-focused with bold statements",
   }[tone as string] ?? "professional";
 
-  const response = await client.messages.create({
-    model: "claude-opus-4-6",
-    max_tokens: 2048,
-    thinking: { type: "adaptive" },
-    system: `You are an expert freelance proposal writer. Tone: ${toneGuide}.
+  const systemPrompt = `You are an expert freelance proposal writer. Tone: ${toneGuide}.
 Generate 3 distinct alternatives for a specific section of a proposal.
-Return ONLY valid JSON — no markdown fences, no commentary outside the JSON.`,
-    messages: [
-      {
-        role: "user",
-        content: `Generate 3 distinct, high-quality alternatives for the "${sectionTitle}" section of this proposal.
+Return ONLY valid JSON — no markdown fences, no commentary outside the JSON.`;
+
+  const userPrompt = `Generate 3 distinct, high-quality alternatives for the "${sectionTitle}" section of this proposal.
 
 Freelancer: ${freelancerName}
 Client: ${clientName}
@@ -48,16 +40,12 @@ Return this exact JSON structure:
   ]
 }
 
-Each alternative must be meaningfully different in approach, not just word choice. Keep the same section heading.`,
-      },
-    ],
-  });
+Each alternative must be meaningfully different in approach, not just word choice. Keep the same section heading.`;
 
-  const text = response.content.find((b) => b.type === "text")?.text ?? "{}";
+  const text = await completeWithFallback(systemPrompt, userPrompt, 2048);
 
   try {
-    const parsed = JSON.parse(text);
-    return NextResponse.json(parsed);
+    return NextResponse.json(JSON.parse(text));
   } catch {
     const match = text.match(/\{[\s\S]*\}/);
     if (match) return NextResponse.json(JSON.parse(match[0]));
