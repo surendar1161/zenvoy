@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all cursor-pointer no-underline;
+    background-color: #0369a1;
+  }
+  .btn-primary:hover {
+    @apply opacity-90;
+  }
+  .btn-primary:focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-sky-500;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all cursor-pointer no-underline;
+  }
+  .btn-secondary:hover {
+    @apply border-sky-400 text-sky-600 bg-sky-50;
+  }
+  .btn-secondary:focus-visible {
+    @apply outline-none ring-2 ring-offset-2 ring-sky-500;
+  }
+}
+
 /* ── TipTap / Document Editor ─────────────────────────────── */
 
 .document-editor .ProseMirror {

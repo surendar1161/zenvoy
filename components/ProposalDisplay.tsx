@@ -297,7 +297,7 @@ export default function ProposalDisplay({
               {proposalId && (
                 <a href={`/proposal/${proposalId}`} target="_blank" rel="noopener noreferrer"
                   className="btn-primary text-sm gap-1.5"
-                  style={{ backgroundColor: primaryColor, borderColor: primaryColor }}>
+                  style={{ backgroundColor: primaryColor, borderColor: primaryColor, color: "white" }}>
                   🔗 Web View
                 </a>
               )}
@@ -325,7 +325,7 @@ export default function ProposalDisplay({
             >📋 Copy Link</button>
             <a href={`/proposal/${proposalId}`} target="_blank" rel="noopener noreferrer"
               className="btn-primary text-xs py-1.5 px-3"
-              style={{ backgroundColor: primaryColor }}>
+              style={{ backgroundColor: primaryColor, color: "white" }}>
               Open →
             </a>
           </div>

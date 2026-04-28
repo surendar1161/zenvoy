@@ -183,7 +183,7 @@ export default function BrandedProposalView({ data }: Props) {
           {effectivePaymentLink && (
             <a href={effectivePaymentLink} target="_blank" rel="noopener noreferrer"
               className="btn-primary text-sm py-2"
-              style={{ backgroundColor: brand.primaryColor, borderColor: brand.primaryColor }}>
+              style={{ backgroundColor: brand.primaryColor, borderColor: brand.primaryColor, color: "white" }}>
               💳 Pay Deposit — {data.currency} {effectiveDeposit.toLocaleString()}{addOnTotal > 0 ? ` + ${data.currency} ${addOnTotal.toLocaleString()}` : ""}
             </a>
           )}
