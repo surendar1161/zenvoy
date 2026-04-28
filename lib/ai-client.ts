@@ -3,7 +3,7 @@
  *
  * Strategy:
  *  1. If OPENAI_API_KEY is set, try OpenAI (gpt-4o) up to 2 times (8s timeout each).
- *  2. If OpenAI is not configured OR all attempts fail → fall back to Claude.
+ *  2. If OpenAI is not configured OR fails → fall back to Claude (claude-opus-4-6).
  *
  * No openai npm package needed — uses fetch directly against the REST API.
  */
@@ -33,18 +33,18 @@ async function openAIFetch(
   maxTokens: number,
   stream: boolean,
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), OPENAI_TIMEOUT);
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), OPENAI_TIMEOUT);
   try {
     const res = await fetch(OPENAI_BASE, {
       method:  "POST",
       headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
       body:    JSON.stringify({ model: OPENAI_MODEL, max_tokens: maxTokens, stream, messages }),
-      signal:  controller.signal,
+      signal:  ctrl.signal,
     });
     if (!res.ok) {
-      const errText = await res.text().catch(() => res.statusText);
-      throw new Error(`OpenAI ${res.status}: ${errText}`);
+      const err = await res.text().catch(() => res.statusText);
+      throw new Error(`OpenAI ${res.status}: ${err}`);
     }
     return res;
   } finally {
@@ -66,7 +66,6 @@ async function withOpenAIRetry(fn: () => Promise<Response>, label: string): Prom
   throw lastErr;
 }
 
-/** Convert OpenAI SSE stream → plain-text ReadableStream<Uint8Array> */
 function openAIStreamToText(body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
@@ -107,8 +106,10 @@ function openAIStreamToText(body: ReadableStream<Uint8Array>): ReadableStream<Ui
 // ── Claude (Anthropic SDK) ─────────────────────────────────────────────────────
 
 /**
- * Claude streaming — properly propagates errors so the client
- * sees a real error instead of a silent empty response.
+ * Claude streaming with proper error propagation.
+ * Uses a single iterator to avoid the double-consumption bug.
+ * Pre-awaits the first event so auth/API errors throw before the Response
+ * is sent (allowing the route try/catch to return a proper 500).
  */
 async function claudeStreamInternal(
   systemPrompt: string,
@@ -117,10 +118,7 @@ async function claudeStreamInternal(
 ): Promise<ReadableStream<Uint8Array>> {
   const encoder = new TextEncoder();
 
-  // Initiate the stream — this starts the HTTP connection to Anthropic.
-  // If the API key is invalid or the API is down, this will throw here
-  // (before we return), so the caller can catch it properly.
-  const stream = anthropic.messages.stream({
+  const msgStream = anthropic.messages.stream({
     model:      ANTHROPIC_MODEL,
     max_tokens: maxTokens,
     thinking:   { type: "adaptive" } as any,
@@ -128,36 +126,49 @@ async function claudeStreamInternal(
     messages:   [{ role: "user", content: userPrompt }],
   });
 
-  // Trigger the first event to validate the connection before returning.
-  // This ensures auth errors surface immediately rather than silently inside
-  // the ReadableStream where they'd be hard to catch.
-  const firstEvent = await Promise.race([
-    stream[Symbol.asyncIterator]().next(),
+  // Use ONE iterator throughout — critical to avoid double-consumption
+  const iterator = msgStream[Symbol.asyncIterator]();
+
+  // Await the first event BEFORE returning the ReadableStream.
+  // If the API key is invalid or Anthropic is down, the error throws here
+  // and is caught by the route's try/catch → proper 500 response.
+  const first = await Promise.race<IteratorResult<Anthropic.MessageStreamEvent>>([
+    iterator.next(),
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Claude connection timeout")), 15000)
+      setTimeout(() => reject(new Error("Claude connection timeout (20s)")), 20000)
     ),
   ]);
 
+  // Connection confirmed — return the ReadableStream, continuing
+  // from the SAME iterator so no events are lost or replayed.
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        // Emit the first event we already fetched
-        const chunk = firstEvent.value;
-        if (chunk && chunk.type === "content_block_delta" && chunk.delta?.type === "text_delta") {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
-
-        // Continue with the rest
-        for await (const next of stream) {
-          if (next.type === "content_block_delta" && next.delta?.type === "text_delta") {
-            controller.enqueue(encoder.encode(next.delta.text));
+        // Process the first event we already fetched
+        if (!first.done) {
+          const c = first.value;
+          if (c.type === "content_block_delta" && c.delta?.type === "text_delta") {
+            controller.enqueue(encoder.encode(c.delta.text));
           }
         }
+
+        // Continue with the same iterator
+        while (true) {
+          const { done, value } = await iterator.next();
+          if (done) break;
+          if (value.type === "content_block_delta" && value.delta?.type === "text_delta") {
+            controller.enqueue(encoder.encode(value.delta.text));
+          }
+        }
+
         controller.close();
       } catch (err) {
         console.error("[AI] Claude stream error:", (err as Error).message);
         controller.error(err);
       }
+    },
+    cancel() {
+      try { msgStream.abort(); } catch { /* ignore */ }
     },
   });
 }
@@ -179,11 +190,6 @@ async function claudeCompleteInternal(
 
 // ── Public API ─────────────────────────────────────────────────────────────────
 
-/**
- * Stream text — OpenAI primary (if configured), Claude fallback.
- * Returns a ReadableStream<Uint8Array> of raw text chunks.
- * Throws if both providers fail.
- */
 export async function streamWithFallback(
   systemPrompt: string,
   userPrompt: string,
@@ -194,7 +200,6 @@ export async function streamWithFallback(
     { role: "user",   content: userPrompt },
   ];
 
-  // ── Try OpenAI (only if key is configured) ──────────────────────────────────
   if (hasOpenAI()) {
     try {
       const res = await withOpenAIRetry(
@@ -207,19 +212,13 @@ export async function streamWithFallback(
       console.warn("[AI] OpenAI failed — falling back to Claude:", (err as Error).message);
     }
   } else {
-    console.log("[AI] OPENAI_API_KEY not configured — using Claude");
+    console.log("[AI] OPENAI_API_KEY not set — using Claude");
   }
 
-  // ── Claude fallback ─────────────────────────────────────────────────────────
   console.log("[AI] Streaming via Claude");
   return claudeStreamInternal(systemPrompt, userPrompt, maxTokens);
 }
 
-/**
- * Non-streaming completion — OpenAI primary (if configured), Claude fallback.
- * Returns the full response as a plain string.
- * Throws if both providers fail.
- */
 export async function completeWithFallback(
   systemPrompt: string,
   userPrompt: string,
@@ -230,7 +229,6 @@ export async function completeWithFallback(
     { role: "user",   content: userPrompt },
   ];
 
-  // ── Try OpenAI (only if key is configured) ──────────────────────────────────
   if (hasOpenAI()) {
     try {
       const res = await withOpenAIRetry(
@@ -238,17 +236,15 @@ export async function completeWithFallback(
         "OpenAI complete",
       );
       const data = await res.json();
-      const text = data.choices?.[0]?.message?.content ?? "";
       console.log("[AI] Completion via OpenAI");
-      return text;
+      return data.choices?.[0]?.message?.content ?? "";
     } catch (err) {
       console.warn("[AI] OpenAI failed — falling back to Claude:", (err as Error).message);
     }
   } else {
-    console.log("[AI] OPENAI_API_KEY not configured — using Claude");
+    console.log("[AI] OPENAI_API_KEY not set — using Claude");
   }
 
-  // ── Claude fallback ─────────────────────────────────────────────────────────
   console.log("[AI] Completion via Claude");
   return claudeCompleteInternal(systemPrompt, userPrompt, maxTokens);
 }
