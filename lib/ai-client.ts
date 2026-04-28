@@ -16,7 +16,7 @@ const OPENAI_BASE     = "https://api.openai.com/v1/chat/completions";
 const OPENAI_MODEL    = "gpt-4o";
 const ANTHROPIC_MODEL = "claude-opus-4-6";
 const MAX_ATTEMPTS    = 2;
-const OPENAI_TIMEOUT  = 8000; // 8 seconds per attempt
+const OPENAI_TIMEOUT  = 8000;
 
 function sleep(ms: number) {
   return new Promise<void>(r => setTimeout(r, ms));
@@ -26,7 +26,7 @@ const hasOpenAI = () => OPENAI_API_KEY.length > 10;
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
-// ── OpenAI helpers (raw fetch) ─────────────────────────────────────────────────
+// ── OpenAI (raw fetch) ─────────────────────────────────────────────────────────
 
 async function openAIFetch(
   messages: ChatMessage[],
@@ -94,46 +94,75 @@ function openAIStreamToText(body: ReadableStream<Uint8Array>): ReadableStream<Ui
           } catch { /* ignore SSE parse errors */ }
         }
       }
+    } catch (err) {
+      console.error("[AI] OpenAI stream read error:", (err as Error).message);
     } finally {
-      await writer.close();
+      await writer.close().catch(() => {});
     }
   })();
 
   return readable;
 }
 
-// ── Claude helpers ─────────────────────────────────────────────────────────────
+// ── Claude (Anthropic SDK) ─────────────────────────────────────────────────────
 
-function claudeStream(
+/**
+ * Claude streaming — properly propagates errors so the client
+ * sees a real error instead of a silent empty response.
+ */
+async function claudeStreamInternal(
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number,
-): ReadableStream<Uint8Array> {
+): Promise<ReadableStream<Uint8Array>> {
   const encoder = new TextEncoder();
-  const stream  = anthropic.messages.stream({
+
+  // Initiate the stream — this starts the HTTP connection to Anthropic.
+  // If the API key is invalid or the API is down, this will throw here
+  // (before we return), so the caller can catch it properly.
+  const stream = anthropic.messages.stream({
     model:      ANTHROPIC_MODEL,
     max_tokens: maxTokens,
-    thinking:   { type: "adaptive" },
+    thinking:   { type: "adaptive" } as any,
     system:     systemPrompt,
     messages:   [{ role: "user", content: userPrompt }],
   });
 
+  // Trigger the first event to validate the connection before returning.
+  // This ensures auth errors surface immediately rather than silently inside
+  // the ReadableStream where they'd be hard to catch.
+  const firstEvent = await Promise.race([
+    stream[Symbol.asyncIterator]().next(),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Claude connection timeout")), 15000)
+    ),
+  ]);
+
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        for await (const chunk of stream) {
-          if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-            controller.enqueue(encoder.encode(chunk.delta.text));
+        // Emit the first event we already fetched
+        const chunk = firstEvent.value;
+        if (chunk && chunk.type === "content_block_delta" && chunk.delta?.type === "text_delta") {
+          controller.enqueue(encoder.encode(chunk.delta.text));
+        }
+
+        // Continue with the rest
+        for await (const next of stream) {
+          if (next.type === "content_block_delta" && next.delta?.type === "text_delta") {
+            controller.enqueue(encoder.encode(next.delta.text));
           }
         }
-      } finally {
         controller.close();
+      } catch (err) {
+        console.error("[AI] Claude stream error:", (err as Error).message);
+        controller.error(err);
       }
     },
   });
 }
 
-async function claudeComplete(
+async function claudeCompleteInternal(
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number,
@@ -141,7 +170,7 @@ async function claudeComplete(
   const response = await anthropic.messages.create({
     model:      ANTHROPIC_MODEL,
     max_tokens: maxTokens,
-    thinking:   { type: "adaptive" },
+    thinking:   { type: "adaptive" } as any,
     system:     systemPrompt,
     messages:   [{ role: "user", content: userPrompt }],
   });
@@ -153,6 +182,7 @@ async function claudeComplete(
 /**
  * Stream text — OpenAI primary (if configured), Claude fallback.
  * Returns a ReadableStream<Uint8Array> of raw text chunks.
+ * Throws if both providers fail.
  */
 export async function streamWithFallback(
   systemPrompt: string,
@@ -171,23 +201,24 @@ export async function streamWithFallback(
         () => openAIFetch(messages, maxTokens, true),
         "OpenAI stream",
       );
-      console.log("[AI] Using OpenAI for streaming");
+      console.log("[AI] Streaming via OpenAI");
       return openAIStreamToText(res.body!);
     } catch (err) {
       console.warn("[AI] OpenAI failed — falling back to Claude:", (err as Error).message);
     }
   } else {
-    console.log("[AI] OPENAI_API_KEY not set — using Claude directly");
+    console.log("[AI] OPENAI_API_KEY not configured — using Claude");
   }
 
   // ── Claude fallback ─────────────────────────────────────────────────────────
-  console.log("[AI] Using Claude for streaming");
-  return claudeStream(systemPrompt, userPrompt, maxTokens);
+  console.log("[AI] Streaming via Claude");
+  return claudeStreamInternal(systemPrompt, userPrompt, maxTokens);
 }
 
 /**
  * Non-streaming completion — OpenAI primary (if configured), Claude fallback.
  * Returns the full response as a plain string.
+ * Throws if both providers fail.
  */
 export async function completeWithFallback(
   systemPrompt: string,
@@ -208,16 +239,16 @@ export async function completeWithFallback(
       );
       const data = await res.json();
       const text = data.choices?.[0]?.message?.content ?? "";
-      console.log("[AI] Using OpenAI for completion");
+      console.log("[AI] Completion via OpenAI");
       return text;
     } catch (err) {
       console.warn("[AI] OpenAI failed — falling back to Claude:", (err as Error).message);
     }
   } else {
-    console.log("[AI] OPENAI_API_KEY not set — using Claude directly");
+    console.log("[AI] OPENAI_API_KEY not configured — using Claude");
   }
 
   // ── Claude fallback ─────────────────────────────────────────────────────────
-  console.log("[AI] Using Claude for completion");
-  return claudeComplete(systemPrompt, userPrompt, maxTokens);
+  console.log("[AI] Completion via Claude");
+  return claudeCompleteInternal(systemPrompt, userPrompt, maxTokens);
 }
