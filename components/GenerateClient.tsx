@@ -120,6 +120,24 @@ export default function GenerateClient() {
     }
     if (wizard === "1") setShowWizard(true);
     if (client) setForm(f => ({ ...f, clientName: client, clientCompany: company ?? "" }));
+
+    // Chrome extension pre-fill — ?ext_data=<base64-encoded-JSON>
+    const extData = searchParams.get("ext_data");
+    if (extData) {
+      try {
+        const parsed = JSON.parse(atob(extData));
+        setForm(f => ({
+          ...f,
+          clientName:         parsed.clientName        || f.clientName,
+          clientCompany:      parsed.clientCompany     || f.clientCompany,
+          projectType:        parsed.projectType       || f.projectType,
+          projectDescription: parsed.projectDescription|| f.projectDescription,
+          deliverables:       parsed.deliverables      || f.deliverables,
+          timeline:           parsed.timeline          || f.timeline,
+          totalBudget:        parsed.budget            || f.totalBudget,
+        }));
+      } catch { /* ignore malformed ext_data */ }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
