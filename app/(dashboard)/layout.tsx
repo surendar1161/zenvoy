@@ -10,9 +10,11 @@ import {
   BookOutlined, BarChartOutlined, CreditCardOutlined, TeamOutlined,
   GlobalOutlined, FolderOpenOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   FundOutlined, ThunderboltOutlined, DollarOutlined, RocketOutlined, CloseOutlined,
+  HeatMapOutlined,
 } from "@ant-design/icons";
 import { Modal } from "antd";
 import { getTrialInfo } from "@/lib/trial";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { antdTheme } from "@/lib/theme";
@@ -25,7 +27,7 @@ const { Text } = Typography;
 const COLLAPSED_WIDTH = 64;
 const EXPANDED_WIDTH = 228;
 
-const NAV_ITEMS: MenuProps["items"] = [
+const BASE_NAV: MenuProps["items"] = [
   { key: "/dashboard",        icon: <HomeOutlined />,              label: <Link href="/dashboard">Dashboard</Link> },
   { key: "/pipeline",         icon: <FundOutlined />,              label: <Link href="/pipeline">Pipeline</Link> },
   { key: "/proposals",        icon: <FileTextOutlined />,          label: <Link href="/proposals">My Proposals</Link> },
@@ -53,6 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [plan, setPlan] = useState<string>("free");
   const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [showExpiredBanner, setShowExpiredBanner] = useState(true);
+  const [navItems, setNavItems] = useState<MenuProps["items"]>(BASE_NAV);
 
   const siderWidth = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
@@ -61,6 +64,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     supabase.auth.getUser().then(async ({ data }) => {
       setUser(data.user);
       if (!data.user) return;
+
+      // Check feature flags and build nav dynamically
+      isFeatureEnabled("capacity_planning").then(hasCapacity => {
+        if (hasCapacity) {
+          setNavItems([
+            ...BASE_NAV!,
+            { type: "divider" as const },
+            {
+              key: "/capacity",
+              icon: <HeatMapOutlined />,
+              label: <Link href="/capacity">Capacity <span style={{ fontSize: 10, background: "#0ea5e920", color: "#0369a1", padding: "1px 6px", borderRadius: 8, marginLeft: 4 }}>Beta</span></Link>,
+            },
+          ]);
+        }
+      });
+
       // Load trial + plan
       const [{ data: profile }, { data: sub }] = await Promise.all([
         supabase.from("profiles").select("trial_ends_at").eq("id", data.user.id).maybeSingle(),
@@ -103,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const activeKey =
     path === "/dashboard"
       ? "/dashboard"
-      : (NAV_ITEMS ?? [])
+      : (navItems ?? [])
           .map(i => (i as { key: string }).key)
           .filter(k => k !== "/dashboard" && path.startsWith(k))[0] ?? "/dashboard";
 
@@ -271,7 +290,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Menu
             mode="inline"
             selectedKeys={[activeKey]}
-            items={NAV_ITEMS}
+            items={navItems}
             inlineCollapsed={collapsed}
             style={{ border: "none", flex: 1, padding: "0 8px" }}
           />
