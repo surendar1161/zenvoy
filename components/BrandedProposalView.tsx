@@ -9,6 +9,7 @@ import { PricingTiersView } from "@/components/PricingTiersEditor";
 import { AddOnsView } from "@/components/AddOnsPanel";
 import { MilestonesView } from "@/components/MilestoneBuilder";
 import SignatureBlock from "@/components/SignatureBlock";
+import SchedulingEmbed from "@/components/SchedulingEmbed";
 
 export interface ProposalData {
   id: string;
@@ -33,6 +34,8 @@ export interface ProposalData {
   alreadySigned?: boolean;
   signedAt?: string;
   signerName?: string;
+  schedulingLink?: string | null;
+  showScheduling?: boolean;
 }
 
 interface Props {
@@ -280,6 +283,17 @@ export default function BrandedProposalView({ data }: Props) {
           onSigned={() => setSigned(true)}
         />
       </div>
+
+      {/* Scheduling — shown after signing */}
+      {signed && data.schedulingLink && data.showScheduling !== false && (
+        <div className="max-w-4xl mx-auto px-6 sm:px-10 py-12 border-t border-gray-100">
+          <SchedulingEmbed
+            link={data.schedulingLink}
+            clientName={data.clientName || data.clientCompany}
+            primaryColor={brand.primaryColor}
+          />
+        </div>
+      )}
 
       {/* Footer */}
       <div className="border-t border-gray-100 py-10 text-center text-sm text-gray-500">

@@ -10,7 +10,7 @@ import {
   BookOutlined, BarChartOutlined, CreditCardOutlined, TeamOutlined,
   GlobalOutlined, FolderOpenOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   FundOutlined, ThunderboltOutlined, DollarOutlined, RocketOutlined, CloseOutlined,
-  HeatMapOutlined, ClockCircleOutlined,
+  HeatMapOutlined, ClockCircleOutlined, CalendarOutlined,
 } from "@ant-design/icons";
 import RunningTimerIndicator from "@/components/RunningTimerIndicator";
 import { Modal } from "antd";
@@ -38,6 +38,7 @@ const BASE_NAV: MenuProps["items"] = [
   { key: "/invoices",         icon: <DollarOutlined />,            label: <Link href="/invoices">Invoices</Link> },
   { key: "/time-tracking",    icon: <ClockCircleOutlined />,       label: <Link href="/time-tracking">Time Tracking</Link> },
   { key: "/automations",      icon: <ThunderboltOutlined />,       label: <Link href="/automations">Automations</Link> },
+  { key: "/bookings",         icon: <CalendarOutlined />,          label: <Link href="/bookings">Bookings</Link> },
   { key: "/templates",        icon: <AppstoreOutlined />,          label: <Link href="/templates">Templates</Link> },
   { type: "divider" },
   { key: "/contracts",        icon: <SafetyCertificateOutlined />, label: <Link href="/contracts">Contracts</Link> },
@@ -237,6 +238,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             background: "#fff", borderRight: "1px solid #e2e8f0",
             transition: "width 0.2s ease",
             overflow: "hidden",
+            display: "flex", flexDirection: "column",
           }}
           trigger={null}
           breakpoint="md"
@@ -290,13 +292,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Nav */}
-          <Menu
-            mode="inline"
-            selectedKeys={[activeKey]}
-            items={navItems}
-            inlineCollapsed={collapsed}
-            style={{ border: "none", flex: 1, padding: "0 8px" }}
-          />
+          <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+            <Menu
+              mode="inline"
+              selectedKeys={[activeKey]}
+              items={navItems}
+              inlineCollapsed={collapsed}
+              style={{ border: "none", padding: "0 8px" }}
+            />
+          </div>
 
           {/* Trial expired — sidebar upgrade CTA */}
           {isExpiredFree && !collapsed && (
@@ -319,7 +323,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{
             padding: collapsed ? "12px 8px" : "12px 16px",
             borderTop: "1px solid #f1f5f9",
-            position: "absolute", bottom: 0, width: "100%",
+            flexShrink: 0,
           }}>
             <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="topLeft">
               <div style={{

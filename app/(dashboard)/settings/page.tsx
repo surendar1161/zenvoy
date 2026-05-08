@@ -16,7 +16,8 @@ import {
   CheckCircleOutlined, ClockCircleOutlined, StopOutlined,
   BgColorsOutlined, FontSizeOutlined, UploadOutlined, SaveOutlined,
   EyeOutlined, EyeInvisibleOutlined, ArrowRightOutlined, CheckCircleFilled,
-  DollarOutlined, CreditCardOutlined, BellOutlined,
+  DollarOutlined, CreditCardOutlined, BellOutlined, CalendarOutlined,
+  GlobalOutlined, LinkOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import type { BrandKit } from "@/lib/brand";
@@ -83,6 +84,9 @@ function SettingsPage() {
   const [brandPreview, setBrandPreview] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({});
   const [notifLoading, setNotifLoading] = useState(false);
+  const [scheduling, setScheduling] = useState({ enabled: false, link: "", platform: "calendly", timezone: "America/New_York" });
+  const [schedulingSaving, setSchedulingSaving] = useState(false);
+  const [schedPreviewOpen, setSchedPreviewOpen] = useState(false);
 
   function setBrandField<K extends keyof BrandKit>(key: K, value: BrandKit[K]) {
     setBrand(b => ({ ...b, [key]: value }));
@@ -105,6 +109,7 @@ function SettingsPage() {
     setBrand(loadBrand());
     loadMembers();
     loadNotifPrefs();
+    loadScheduling();
   }, [form]);
 
   async function loadNotifPrefs() {
@@ -112,6 +117,40 @@ function SettingsPage() {
       const res = await fetch("/api/notifications/preferences");
       if (res.ok) setNotifPrefs(await res.json());
     } catch {}
+  }
+
+  async function loadScheduling() {
+    try {
+      const supabase = createClient();
+      const { data: { user: me } } = await supabase.auth.getUser();
+      if (!me) return;
+      const { data } = await supabase.from("profiles").select("scheduling_enabled, scheduling_link, scheduling_platform, timezone").eq("id", me.id).maybeSingle();
+      if (data) {
+        setScheduling({
+          enabled: data.scheduling_enabled ?? false,
+          link: data.scheduling_link ?? "",
+          platform: data.scheduling_platform ?? "calendly",
+          timezone: data.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
+      }
+    } catch {}
+  }
+
+  async function saveScheduling() {
+    setSchedulingSaving(true);
+    try {
+      const supabase = createClient();
+      const { data: { user: me } } = await supabase.auth.getUser();
+      if (!me) { setSchedulingSaving(false); return; }
+      await supabase.from("profiles").update({
+        scheduling_enabled: scheduling.enabled,
+        scheduling_link: scheduling.link || null,
+        scheduling_platform: scheduling.platform,
+        timezone: scheduling.timezone,
+      }).eq("id", me.id);
+      msgApi.success("Scheduling settings saved!");
+    } catch { msgApi.error("Failed to save"); }
+    setSchedulingSaving(false);
   }
 
   async function updateNotifPref(key: string, value: boolean) {
@@ -591,6 +630,114 @@ function SettingsPage() {
       ),
     },
     {
+      key: "scheduling",
+      label: <Space><CalendarOutlined />Scheduling</Space>,
+      children: (
+        <div style={{ maxWidth: 600 }}>
+          <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 20 }} styles={{ body: { padding: 28 } }}>
+            <Title level={5} style={{ margin: "0 0 6px" }}><Space><CalendarOutlined style={{ color: "#0ea5e9" }} />Booking Link</Space></Title>
+            <Text type="secondary" style={{ display: "block", marginBottom: 24, fontSize: 13 }}>
+              Paste your scheduling link below. It will appear on accepted proposals and in client portals so clients can book calls without the back-and-forth.
+            </Text>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #f1f5f9", marginBottom: 16 }}>
+              <div>
+                <Text strong style={{ fontSize: 14 }}>Enable scheduling</Text>
+                <Text type="secondary" style={{ display: "block", fontSize: 12 }}>Show "Book a Meeting" on proposals and portals</Text>
+              </div>
+              <Switch checked={scheduling.enabled} onChange={v => setScheduling(s => ({ ...s, enabled: v }))} />
+            </div>
+
+            <Form layout="vertical" size="large">
+              <Form.Item label={<Text strong style={{ fontSize: 13 }}>Platform</Text>}>
+                <Select value={scheduling.platform} onChange={v => setScheduling(s => ({ ...s, platform: v }))}
+                  options={[
+                    { value: "calendly", label: "Calendly" },
+                    { value: "cal_com", label: "Cal.com" },
+                    { value: "acuity", label: "Acuity Scheduling" },
+                    { value: "custom", label: "Other (custom URL)" },
+                  ]}
+                  style={{ borderRadius: 10 }}
+                />
+              </Form.Item>
+
+              <Form.Item label={<Text strong style={{ fontSize: 13 }}>Scheduling Link</Text>}
+                help={scheduling.platform === "calendly" ? "e.g. https://calendly.com/your-name/30min"
+                  : scheduling.platform === "cal_com" ? "e.g. https://cal.com/your-name/30min"
+                  : scheduling.platform === "acuity" ? "e.g. https://app.acuityscheduling.com/schedule/..."
+                  : "Paste any booking page URL"}>
+                <Input
+                  prefix={<LinkOutlined style={{ color: "#94a3b8" }} />}
+                  placeholder="https://..."
+                  value={scheduling.link}
+                  onChange={e => setScheduling(s => ({ ...s, link: e.target.value }))}
+                  style={{ borderRadius: 10, height: 44 }}
+                />
+              </Form.Item>
+
+              <Form.Item label={<Text strong style={{ fontSize: 13 }}>Your Timezone</Text>}>
+                <Select
+                  showSearch
+                  value={scheduling.timezone}
+                  onChange={v => setScheduling(s => ({ ...s, timezone: v }))}
+                  style={{ borderRadius: 10 }}
+                  filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
+                  options={[
+                    "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
+                    "America/Toronto", "America/Vancouver", "America/Sao_Paulo", "America/Mexico_City",
+                    "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Amsterdam", "Europe/Madrid",
+                    "Europe/Rome", "Europe/Zurich", "Europe/Stockholm", "Europe/Warsaw",
+                    "Asia/Dubai", "Asia/Kolkata", "Asia/Singapore", "Asia/Tokyo", "Asia/Shanghai",
+                    "Asia/Hong_Kong", "Asia/Seoul", "Asia/Bangkok",
+                    "Australia/Sydney", "Australia/Melbourne", "Pacific/Auckland",
+                    "Africa/Lagos", "Africa/Cairo", "Africa/Johannesburg",
+                  ].map(tz => ({ value: tz, label: tz.replace(/_/g, " ") }))}
+                />
+              </Form.Item>
+            </Form>
+
+            <Space>
+              <Button type="primary" loading={schedulingSaving} onClick={saveScheduling}
+                style={{ borderRadius: 10, fontWeight: 600 }}>
+                Save Scheduling Settings
+              </Button>
+              {scheduling.link && (
+                <Button onClick={() => setSchedPreviewOpen(true)} style={{ borderRadius: 10 }}>
+                  Preview
+                </Button>
+              )}
+            </Space>
+          </Card>
+
+          <Card style={{ borderRadius: 14, border: "1px solid #dbeafe", background: "#eff6ff" }} styles={{ body: { padding: 18 } }}>
+            <Text strong style={{ color: "#1d4ed8", display: "block", marginBottom: 8 }}>How it works</Text>
+            <Space direction="vertical" size={4}>
+              {[
+                "Your scheduling link appears on proposals after the client signs",
+                "Client portals get a dedicated Schedule tab",
+                "Client name and email are pre-filled automatically",
+                "Supports Calendly, Cal.com, Acuity, or any custom URL",
+              ].map((t, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <Text style={{ color: "#0369a1" }}>•</Text>
+                  <Text style={{ fontSize: 13, color: "#1e40af" }}>{t}</Text>
+                </div>
+              ))}
+            </Space>
+          </Card>
+
+          <Modal open={schedPreviewOpen} onCancel={() => setSchedPreviewOpen(false)}
+            title="Scheduling Preview" width={640} footer={null}>
+            {scheduling.link && (
+              <div style={{ marginTop: 16 }}>
+                <iframe src={scheduling.link} width="100%" height="500" frameBorder="0" style={{ border: "none", borderRadius: 10 }} />
+              </div>
+            )}
+          </Modal>
+        </div>
+      ),
+    },
+    {
       key: "notifications",
       label: <Space><BellOutlined />Notifications</Space>,
       children: (
@@ -611,6 +758,7 @@ function SettingsPage() {
             { key: "proposal_signed", label: "Proposal signed", desc: "When a client signs your proposal" },
             { key: "proposal_accepted", label: "Proposal accepted", desc: "When a client accepts your proposal" },
             { key: "proposal_declined", label: "Proposal declined", desc: "When a client declines your proposal" },
+            { key: "proposal_follow_up", label: "Follow-up reminders", desc: "When a proposal goes unopened for 2+ days (up to 3 reminders)" },
             { key: "contract_signed", label: "Contract signed", desc: "When a client signs your contract" },
             { key: "invoice_sent", label: "Invoice sent", desc: "Confirmation when an invoice is sent" },
             { key: "invoice_paid", label: "Invoice paid", desc: "When a client pays your invoice" },

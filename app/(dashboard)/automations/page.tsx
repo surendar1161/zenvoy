@@ -22,12 +22,14 @@ const TRIGGER_LABELS: Record<string, string> = {
   contract_signed: "Contract Signed", invoice_paid: "Invoice Paid",
   invoice_overdue: "Invoice Overdue", invoice_sent: "Invoice Sent",
   payment_received: "Payment Received", payment_failed: "Payment Failed",
+  proposal_follow_up: "Proposal Follow-up",
 };
 
 const TRIGGER_COLORS: Record<string, string> = {
   proposal_accepted: "green", proposal_viewed: "blue", proposal_signed: "green",
   proposal_declined: "red", contract_signed: "green", invoice_paid: "green",
   invoice_overdue: "red", invoice_sent: "blue", payment_received: "green", payment_failed: "red",
+  proposal_follow_up: "orange",
 };
 
 const ICON_MAP: Record<string, React.ReactNode> = {

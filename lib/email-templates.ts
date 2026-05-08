@@ -98,6 +98,19 @@ export function paymentReceivedEmail(data: { amount?: string; unsubscribeUrl: st
   };
 }
 
+export function proposalFollowUpEmail(data: { clientName: string; proposalTitle: string; daysSinceSent: number; documentId: string; unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: `Reminder: ${data.clientName} hasn't opened your proposal yet`,
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#f59e0b">Proposal Still Unopened</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px">Your proposal <strong>"${data.proposalTitle}"</strong> sent to <strong>${data.clientName}</strong> hasn't been opened yet.</p>
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 16px">It's been ${data.daysSinceSent} day${data.daysSinceSent !== 1 ? "s" : ""} since you sent it. A quick follow-up email to your client often helps — proposals that receive a nudge are 2x more likely to close.</p>
+      ${btn("View Proposal", `${APP_URL}/proposals`)}
+      <p style="color:#94a3b8;font-size:12px;margin:16px 0 0">💡 <strong>Tip:</strong> Resend the proposal with a brief personal message — "Just checking in" works well.</p>
+    `, data.unsubscribeUrl),
+  };
+}
+
 export function invoiceOverdueEmail(data: { clientName: string; invoiceNumber: string; amount: string; daysPastDue: number; unsubscribeUrl: string }): { subject: string; html: string } {
   return {
     subject: `Invoice ${data.invoiceNumber} is overdue (${data.daysPastDue} days)`,

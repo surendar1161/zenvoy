@@ -41,6 +41,13 @@ export default function ProposalViewPage() {
         if (row.view_password) {
           setPasswordRequired(true); setLoading(false); return;
         }
+        // If no per-proposal scheduling link, fall back to freelancer's profile link
+        if (!row.scheduling_link && row.user_id) {
+          const { data: profile } = await supabase.from("profiles").select("scheduling_enabled, scheduling_link").eq("id", row.user_id).maybeSingle();
+          if (profile?.scheduling_enabled && profile?.scheduling_link) {
+            row.scheduling_link = profile.scheduling_link;
+          }
+        }
         setData(buildFromRow(row));
         setLoading(false);
         return;
@@ -169,5 +176,7 @@ function buildFromRow(row: Record<string, unknown>): ProposalData {
     alreadySigned: !!(row.signed_at || row.accepted_at),
     signedAt: (row.signed_at ?? row.accepted_at) as string | undefined,
     signerName: (row.signer_name ?? undefined) as string | undefined,
+    schedulingLink: (row.scheduling_link ?? null) as string | null,
+    showScheduling: row.show_scheduling !== false,
   };
 }

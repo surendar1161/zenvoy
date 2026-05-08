@@ -101,4 +101,22 @@ export const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       },
     ],
   },
+  {
+    id: "follow-up-nudge",
+    name: "Unopened Proposal → Follow-up Reminder",
+    description: "Get reminded when a proposal goes unopened for 2+ days. Creates a task and notification to nudge you to follow up.",
+    icon: "ClockCircleOutlined",
+    trigger_type: "proposal_follow_up",
+    conditions: [],
+    actions: [
+      {
+        type: "create_notification",
+        config: { title: "{{clientName}} hasn't viewed your proposal", body: "It's been {{daysSinceSent}} days. A quick follow-up can boost your close rate." },
+      },
+      {
+        type: "create_task",
+        config: { title: "Follow up with {{clientName}} about proposal" },
+      },
+    ],
+  },
 ];

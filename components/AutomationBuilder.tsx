@@ -17,6 +17,7 @@ const TRIGGER_TYPES = [
   { value: "invoice_sent",       label: "Invoice Sent" },
   { value: "payment_received",   label: "Payment Received" },
   { value: "payment_failed",     label: "Payment Failed" },
+  { value: "proposal_follow_up", label: "Proposal Unopened (Follow-up)" },
 ];
 
 const ACTION_TYPES = [

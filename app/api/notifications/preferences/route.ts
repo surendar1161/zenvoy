@@ -32,8 +32,8 @@ export async function GET(req: NextRequest) {
 
 const ALLOWED_FIELDS = [
   "email_enabled", "proposal_viewed", "proposal_signed", "proposal_accepted",
-  "proposal_declined", "invoice_sent", "invoice_paid", "invoice_overdue",
-  "contract_signed", "payment_received", "payment_failed",
+  "proposal_declined", "proposal_follow_up", "invoice_sent", "invoice_paid",
+  "invoice_overdue", "contract_signed", "payment_received", "payment_failed",
 ];
 
 export async function PUT(req: NextRequest) {

@@ -5,6 +5,7 @@
   "installCommand": "npm install --legacy-peer-deps",
   "regions": ["iad1"],
   "crons": [
-    { "path": "/api/cron/recurring-invoices", "schedule": "0 6 * * *" }
+    { "path": "/api/cron/recurring-invoices", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/proposal-follow-ups", "schedule": "0 */2 * * *" }
   ]
 }

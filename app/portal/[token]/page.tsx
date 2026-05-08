@@ -8,11 +8,13 @@ import {
 import {
   FileOutlined, MessageOutlined, DollarOutlined, HomeOutlined,
   DownloadOutlined, SendOutlined, CheckCircleOutlined, PaperClipOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { BrandKit } from "@/lib/brand";
 import { DEFAULT_BRAND } from "@/lib/brand";
+import SchedulingEmbed from "@/components/SchedulingEmbed";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -24,11 +26,12 @@ interface PInvoice { id: string; invoice_number: string | null; title: string; l
 const FILE_ICONS: Record<string, string> = { contract: "📄", invoice: "💰", design: "🎨", image: "🖼️", document: "📝", general: "📎" };
 const INV_COLOR: Record<string, string> = { draft: "#94a3b8", sent: "#0ea5e9", viewed: "#06b6d4", paid: "#10b981", overdue: "#ef4444" };
 
-const SECTIONS = [
+const BASE_SECTIONS = [
   { key: "overview",  label: "Overview",  icon: <HomeOutlined /> },
   { key: "files",     label: "Files",     icon: <FileOutlined /> },
   { key: "invoices",  label: "Invoices",  icon: <DollarOutlined /> },
   { key: "messages",  label: "Messages",  icon: <MessageOutlined /> },
+  { key: "schedule",  label: "Schedule",  icon: <CalendarOutlined /> },
 ];
 
 export default function ClientPortalPage() {
@@ -42,6 +45,7 @@ export default function ClientPortalPage() {
   const [msgText, setMsgText] = useState("");
   const [clientName, setClientName] = useState("");
   const [sending, setSending] = useState(false);
+  const [schedulingLink, setSchedulingLink] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -69,6 +73,19 @@ export default function ClientPortalPage() {
     setFiles((f ?? []) as PFile[]);
     setMessages((m ?? []) as PMsg[]);
     setInvoices((inv ?? []) as PInvoice[]);
+
+    // Fetch freelancer's scheduling link
+    if (p.user_id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("scheduling_enabled, scheduling_link")
+        .eq("id", p.user_id)
+        .maybeSingle();
+      if (profile?.scheduling_enabled && profile?.scheduling_link) {
+        setSchedulingLink(profile.scheduling_link);
+      }
+    }
+
     setLoading(false);
 
     // Track visit
@@ -144,7 +161,7 @@ export default function ClientPortalPage() {
 
           {/* Nav tabs */}
           <div style={{ display: "flex", gap: 0, borderBottom: "none" }}>
-            {SECTIONS.map(s => (
+            {BASE_SECTIONS.filter(s => s.key !== "schedule" || schedulingLink).map(s => (
               <button key={s.key} onClick={() => setSection(s.key)}
                 style={{
                   padding: "10px 20px", border: "none", cursor: "pointer", fontFamily, fontWeight: 600,
@@ -350,6 +367,15 @@ export default function ClientPortalPage() {
               </Button>
             </div>
           </Card>
+        )}
+
+        {/* ── SCHEDULE ── */}
+        {section === "schedule" && schedulingLink && (
+          <SchedulingEmbed
+            link={schedulingLink}
+            clientName={clientName || portal.client_name || ""}
+            primaryColor={primary}
+          />
         )}
       </div>
 

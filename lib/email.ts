@@ -23,6 +23,7 @@ async function sendViaResend(to: string, from: string, subject: string, html: st
 
 type NotificationType =
   | "proposal_viewed" | "proposal_signed" | "proposal_accepted" | "proposal_declined"
+  | "proposal_follow_up"
   | "contract_signed"
   | "invoice_sent" | "invoice_paid" | "invoice_overdue"
   | "payment_received" | "payment_failed";
@@ -121,6 +122,15 @@ export async function sendNotificationEmail(
       case "payment_received":
         emailContent = templates.paymentReceivedEmail({
           amount: data.amount as string | undefined,
+          unsubscribeUrl,
+        });
+        break;
+      case "proposal_follow_up":
+        emailContent = templates.proposalFollowUpEmail({
+          clientName: (data.clientName as string) ?? "your client",
+          proposalTitle: (data.proposalTitle as string) ?? "Untitled Proposal",
+          daysSinceSent: (data.daysSinceSent as number) ?? 0,
+          documentId: data.documentId as string,
           unsubscribeUrl,
         });
         break;
