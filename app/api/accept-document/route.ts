@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { sendNotificationEmail } from "@/lib/email";
+import { executeAutomations } from "@/lib/automations/engine";
 
 export async function POST(req: NextRequest) {
   const { documentId, documentType, acceptorName, acceptorEmail } = await req.json();
@@ -28,6 +30,17 @@ export async function POST(req: NextRequest) {
       title: `✅ ${acceptorName ?? doc.client_name ?? "Client"} accepted your ${documentType}!`,
       message: `Accepted at ${new Date(now).toLocaleString()}`,
     });
+
+    sendNotificationEmail(doc.user_id, "proposal_accepted", {
+      acceptorName: acceptorName ?? doc.client_name ?? "Client",
+      documentId, documentType,
+    }).catch(console.error);
+
+    executeAutomations(doc.user_id, "proposal_accepted", {
+      acceptorName: acceptorName ?? doc.client_name ?? "Client",
+      clientName: doc.client_name ?? "Client",
+      documentId, documentType,
+    }).catch(console.error);
   }
 
   return NextResponse.json({ ok: true, acceptedAt: now });

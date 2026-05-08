@@ -1,5 +1,7 @@
 import { createClient as createSupabase } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { sendNotificationEmail } from "@/lib/email";
+import { executeAutomations } from "@/lib/automations/engine";
 
 // Use service role if available (bypasses RLS), otherwise use anon key
 // with public signing RLS policies in place
@@ -66,6 +68,16 @@ export async function POST(req: NextRequest) {
       title:         `🎉 ${signerName} signed your ${documentType}!`,
       message:       `Signed at ${new Date(now).toLocaleString()} · IP: ${ip}`,
     });
+
+    const emailType = documentType === "contract" ? "contract_signed" : "proposal_signed";
+    sendNotificationEmail(doc.user_id, emailType, {
+      signerName, documentId, documentType, signedAt: now,
+    }).catch(console.error);
+
+    const triggerType = documentType === "contract" ? "contract_signed" : "proposal_signed";
+    executeAutomations(doc.user_id, triggerType, {
+      signerName, documentId, documentType, signedAt: now, clientName: doc.client_name,
+    }).catch(console.error);
   }
 
   return NextResponse.json({ ok: true, signedAt: now });

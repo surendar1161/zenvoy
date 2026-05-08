@@ -10,8 +10,9 @@ import {
   BookOutlined, BarChartOutlined, CreditCardOutlined, TeamOutlined,
   GlobalOutlined, FolderOpenOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   FundOutlined, ThunderboltOutlined, DollarOutlined, RocketOutlined, CloseOutlined,
-  HeatMapOutlined,
+  HeatMapOutlined, ClockCircleOutlined,
 } from "@ant-design/icons";
+import RunningTimerIndicator from "@/components/RunningTimerIndicator";
 import { Modal } from "antd";
 import { getTrialInfo } from "@/lib/trial";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -35,6 +36,8 @@ const BASE_NAV: MenuProps["items"] = [
   { key: "/projects",         icon: <FolderOpenOutlined />,        label: <Link href="/projects">Projects</Link> },
   { key: "/portals",          icon: <GlobalOutlined />,            label: <Link href="/portals">Client Portals</Link> },
   { key: "/invoices",         icon: <DollarOutlined />,            label: <Link href="/invoices">Invoices</Link> },
+  { key: "/time-tracking",    icon: <ClockCircleOutlined />,       label: <Link href="/time-tracking">Time Tracking</Link> },
+  { key: "/automations",      icon: <ThunderboltOutlined />,       label: <Link href="/automations">Automations</Link> },
   { key: "/templates",        icon: <AppstoreOutlined />,          label: <Link href="/templates">Templates</Link> },
   { type: "divider" },
   { key: "/contracts",        icon: <SafetyCertificateOutlined />, label: <Link href="/contracts">Contracts</Link> },
@@ -357,7 +360,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             height: 60,
           }}>
             <div />
-            <Space>
+            <Space size={12}>
+              <RunningTimerIndicator />
               <Link href="/generate">
                 <Button type="primary" icon={<ThunderboltOutlined />} size="small" style={{ borderRadius: 8, fontWeight: 600 }}>
                   New Proposal

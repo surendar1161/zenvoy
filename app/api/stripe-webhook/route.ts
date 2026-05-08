@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendNotificationEmail } from "@/lib/email";
+import { executeAutomations } from "@/lib/automations/engine";
 
 // Lazy — created per-request so env vars are available at runtime
 const getAdmin = () => createClient(
@@ -65,6 +67,12 @@ export async function POST(req: NextRequest) {
       const sub = await stripe.subscriptions.retrieve(subId);
       const periodEnd = (sub as unknown as { current_period_end: number }).current_period_end;
       await upsertSubscription(userId, session.customer as string, subId, plan ?? "pro", period ?? "monthly", sub.status, periodEnd, sub.cancel_at_period_end);
+      sendNotificationEmail(userId, "payment_received", {
+        amount: session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}` : undefined,
+      }).catch(console.error);
+      executeAutomations(userId, "payment_received", {
+        amount: session.amount_total ? `$${(session.amount_total / 100).toFixed(2)}` : undefined,
+      }).catch(console.error);
       break;
     }
     case "customer.subscription.updated":
@@ -82,6 +90,11 @@ export async function POST(req: NextRequest) {
       const subId = typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id;
       if (subId) {
         await getAdmin().from("subscriptions").update({ status: "past_due" }).eq("stripe_subscription_id", subId);
+        const { data: subRow } = await getAdmin().from("subscriptions").select("user_id").eq("stripe_subscription_id", subId).maybeSingle();
+        if (subRow?.user_id) {
+          sendNotificationEmail(subRow.user_id, "payment_failed", {}).catch(console.error);
+          executeAutomations(subRow.user_id, "payment_failed", {}).catch(console.error);
+        }
       }
       break;
     }

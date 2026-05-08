@@ -7,7 +7,7 @@ import {
 } from "antd";
 import {
   ArrowLeftOutlined, PrinterOutlined, DownloadOutlined, CopyOutlined,
-  CheckCircleOutlined, ClockCircleOutlined,
+  CheckCircleOutlined, ClockCircleOutlined, StopOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -82,6 +82,13 @@ export default function InvoiceDetailPage() {
     }
   }
 
+  async function stopRecurring() {
+    const supabase = createClient();
+    await supabase.from("invoices").update({ is_recurring: false, next_invoice_at: null }).eq("id", id);
+    setInvoice(prev => prev ? { ...prev, is_recurring: false } : prev);
+    msgApi.success("Recurring stopped");
+  }
+
   if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
   if (!invoice) return null;
 
@@ -105,10 +112,13 @@ export default function InvoiceDetailPage() {
             onChange={updateStatus}
             options={["draft","sent","viewed","paid","overdue","cancelled"].map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
           />
+          {invoice.is_recurring && (
+            <Button danger icon={<StopOutlined />} onClick={stopRecurring}>Stop Recurring</Button>
+          )}
           {invoice.payment_link && (
             <Button icon={<CopyOutlined />} onClick={handleCopyLink}>Copy Payment Link</Button>
           )}
-          <Button icon={<DownloadOutlined />} onClick={handlePrint}>Download PDF</Button>
+          <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/pdf/invoice/${id}`, "_blank")}>Download PDF</Button>
           <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}>Print</Button>
         </Space>
       </div>

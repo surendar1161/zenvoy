@@ -9,7 +9,7 @@ import {
 import {
   SearchOutlined, ArrowRightOutlined, SafetyCertificateOutlined,
   DeleteOutlined, EyeOutlined, FileTextOutlined, EditOutlined,
-  CheckCircleOutlined, PlusOutlined, ClockCircleOutlined, FormOutlined,
+  CheckCircleOutlined, PlusOutlined, ClockCircleOutlined, FormOutlined, DownloadOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { CONTRACT_TYPES, CONTRACT_CATEGORIES } from "@/lib/contract-types";
@@ -231,6 +231,10 @@ function ContractsPage() {
                             disabled={c.status === "signed"}
                             onClick={() => { setSignTarget(c); signForm.resetFields(); }}
                           />
+                        </Tooltip>,
+                        <Tooltip key="pdf" title="Download PDF">
+                          <Button type="text" icon={<DownloadOutlined />}
+                            onClick={() => window.open(`/api/pdf/contract/${c.id}`, "_blank")} />
                         </Tooltip>,
                         <Tooltip key="del" title="Delete">
                           <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(c.id)} />

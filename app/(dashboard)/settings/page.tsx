@@ -16,7 +16,7 @@ import {
   CheckCircleOutlined, ClockCircleOutlined, StopOutlined,
   BgColorsOutlined, FontSizeOutlined, UploadOutlined, SaveOutlined,
   EyeOutlined, EyeInvisibleOutlined, ArrowRightOutlined, CheckCircleFilled,
-  DollarOutlined, CreditCardOutlined,
+  DollarOutlined, CreditCardOutlined, BellOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import type { BrandKit } from "@/lib/brand";
@@ -81,6 +81,8 @@ function SettingsPage() {
   const [invForm] = Form.useForm();
   const [brand, setBrand] = useState<BrandKit>(DEFAULT_BRAND);
   const [brandPreview, setBrandPreview] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({});
+  const [notifLoading, setNotifLoading] = useState(false);
 
   function setBrandField<K extends keyof BrandKit>(key: K, value: BrandKit[K]) {
     setBrand(b => ({ ...b, [key]: value }));
@@ -102,7 +104,26 @@ function SettingsPage() {
     });
     setBrand(loadBrand());
     loadMembers();
+    loadNotifPrefs();
   }, [form]);
+
+  async function loadNotifPrefs() {
+    try {
+      const res = await fetch("/api/notifications/preferences");
+      if (res.ok) setNotifPrefs(await res.json());
+    } catch {}
+  }
+
+  async function updateNotifPref(key: string, value: boolean) {
+    setNotifPrefs(prev => ({ ...prev, [key]: value }));
+    try {
+      await fetch("/api/notifications/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: value }),
+      });
+    } catch { msgApi.error("Failed to update preference"); }
+  }
 
   async function loadMembers() {
     const supabase = createClient();
@@ -567,6 +588,50 @@ function SettingsPage() {
             )}
           </Row>
         </div>
+      ),
+    },
+    {
+      key: "notifications",
+      label: <Space><BellOutlined />Notifications</Space>,
+      children: (
+        <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 28 } }}>
+          <Title level={5} style={{ margin: "0 0 6px" }}><Space><BellOutlined style={{ color: "#0ea5e9" }} />Email Notifications</Space></Title>
+          <Text type="secondary" style={{ display: "block", marginBottom: 24, fontSize: 13 }}>
+            Choose which events trigger an email notification. You can also unsubscribe via the link in any notification email.
+          </Text>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #f1f5f9" }}>
+            <div>
+              <Text strong style={{ fontSize: 14 }}>Email notifications enabled</Text>
+              <Text type="secondary" style={{ display: "block", fontSize: 12 }}>Master toggle — disable to stop all email notifications</Text>
+            </div>
+            <Switch checked={notifPrefs.email_enabled !== false} onChange={v => updateNotifPref("email_enabled", v)} />
+          </div>
+          {[
+            { key: "proposal_viewed", label: "Proposal viewed", desc: "When a client opens your proposal" },
+            { key: "proposal_signed", label: "Proposal signed", desc: "When a client signs your proposal" },
+            { key: "proposal_accepted", label: "Proposal accepted", desc: "When a client accepts your proposal" },
+            { key: "proposal_declined", label: "Proposal declined", desc: "When a client declines your proposal" },
+            { key: "contract_signed", label: "Contract signed", desc: "When a client signs your contract" },
+            { key: "invoice_sent", label: "Invoice sent", desc: "Confirmation when an invoice is sent" },
+            { key: "invoice_paid", label: "Invoice paid", desc: "When a client pays your invoice" },
+            { key: "invoice_overdue", label: "Invoice overdue", desc: "When an invoice passes its due date" },
+            { key: "payment_received", label: "Payment received", desc: "When a subscription payment is processed" },
+            { key: "payment_failed", label: "Payment failed", desc: "When a subscription payment fails" },
+          ].map(item => (
+            <div key={item.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f1f5f9" }}>
+              <div>
+                <Text style={{ fontSize: 13 }}>{item.label}</Text>
+                <Text type="secondary" style={{ display: "block", fontSize: 12 }}>{item.desc}</Text>
+              </div>
+              <Switch
+                size="small"
+                checked={notifPrefs[item.key] !== false}
+                disabled={notifPrefs.email_enabled === false}
+                onChange={v => updateNotifPref(item.key, v)}
+              />
+            </div>
+          ))}
+        </Card>
       ),
     },
   ];

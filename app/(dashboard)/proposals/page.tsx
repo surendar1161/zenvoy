@@ -7,7 +7,7 @@ import {
   Tooltip, message, Badge, Select, Spin,
 } from "antd";
 import {
-  FileTextOutlined, CopyOutlined, DeleteOutlined, EyeOutlined,
+  FileTextOutlined, CopyOutlined, DeleteOutlined, EyeOutlined, DownloadOutlined,
   PlusOutlined, DollarOutlined, CalendarOutlined, GlobalOutlined, EditOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -304,8 +304,12 @@ export default function ProposalsPage() {
             onClick={() => preview.proposal_text && copyText(preview.proposal_text)}>
             Copy Text
           </Button>,
+          <Button key="pdf" icon={<DownloadOutlined />}
+            onClick={() => window.open(`/api/pdf/proposal/${preview.id}`, "_blank")}>
+            Download PDF
+          </Button>,
           <a key="web" href={`/proposal/${preview.id}`} target="_blank" rel="noopener noreferrer">
-            <Button type="primary" icon={<EyeOutlined />}>Open Full View & Download</Button>
+            <Button type="primary" icon={<EyeOutlined />}>Open Full View</Button>
           </a>,
         ] : null}
         title={preview ? `${preview.client_name} — ${preview.project_type}` : ""}

@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { sendNotificationEmail } from "@/lib/email";
+import { executeAutomations } from "@/lib/automations/engine";
 
 export async function POST(req: NextRequest) {
   const { documentId, documentType, sectionTimes, durationSec } = await req.json();
@@ -40,6 +42,14 @@ export async function POST(req: NextRequest) {
       title: `${name} viewed your ${documentType}`,
       message: `Opened just now · ${durationSec ? Math.round(durationSec / 60) + " min read" : ""}`,
     });
+
+    sendNotificationEmail(doc.user_id, "proposal_viewed", {
+      clientName: name, documentId, documentType,
+    }).catch(console.error);
+
+    executeAutomations(doc.user_id, "proposal_viewed", {
+      clientName: name, documentId, documentType,
+    }).catch(console.error);
   }
 
   return NextResponse.json({ ok: true });

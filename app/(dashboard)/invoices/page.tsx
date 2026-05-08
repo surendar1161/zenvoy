@@ -51,6 +51,7 @@ export default function InvoicesPage() {
   const [lineItems, setLineItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit_price: 0, amount: 0 }]);
   const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
   const [msgApi, ctx]           = message.useMessage();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => { load(); }, []);
 
@@ -94,6 +95,14 @@ export default function InvoicesPage() {
     const count = invoices.length + 1;
     const invNum = `INV-${String(count).padStart(4, "0")}`;
 
+    const seriesId = values.is_recurring ? crypto.randomUUID() : null;
+    let nextInvoiceAt: string | null = null;
+    if (values.is_recurring && values.recurrence) {
+      const base = values.due_date ? new Date(values.due_date) : new Date();
+      const map: Record<string, number> = { weekly: 7, monthly: 30, quarterly: 91, yearly: 365 };
+      nextInvoiceAt = new Date(base.getTime() + (map[values.recurrence] ?? 30) * 86400000).toISOString();
+    }
+
     const { data, error } = await supabase.from("invoices").insert({
       user_id:        user.id,
       client_id:      selectedClient?.id ?? null,
@@ -109,6 +118,8 @@ export default function InvoicesPage() {
       payment_link:   values.payment_link ?? null,
       is_recurring:   values.is_recurring ?? false,
       recurrence:     values.is_recurring ? values.recurrence : null,
+      recurring_series_id: seriesId,
+      next_invoice_at: nextInvoiceAt,
     }).select("*, clients(name,company,email)").single();
 
     setSaving(false);
@@ -246,6 +257,16 @@ export default function InvoicesPage() {
         ))}
       </Row>
 
+      {/* Filter */}
+      <Space style={{ marginBottom: 16 }} wrap>
+        {["all", "draft", "sent", "viewed", "paid", "overdue", "recurring"].map(s => (
+          <Tag.CheckableTag key={s} checked={statusFilter === s} onChange={() => setStatusFilter(s)}
+            style={{ borderRadius: 20, padding: "4px 14px", fontSize: 13, fontWeight: 600 }}>
+            {s === "all" ? "All" : s === "recurring" ? "Recurring" : s.charAt(0).toUpperCase() + s.slice(1)}
+          </Tag.CheckableTag>
+        ))}
+      </Space>
+
       {/* Table */}
       {loading ? (
         <div style={{ textAlign: "center", padding: 80 }}><Spin size="large" /></div>
@@ -258,7 +279,11 @@ export default function InvoicesPage() {
         </Card>
       ) : (
         <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
-          <Table dataSource={invoices} columns={columns} rowKey="id" pagination={{ pageSize: 20 }} />
+          <Table dataSource={invoices.filter(i =>
+            statusFilter === "all" ? true :
+            statusFilter === "recurring" ? i.is_recurring :
+            i.status === statusFilter
+          )} columns={columns} rowKey="id" pagination={{ pageSize: 20 }} />
         </Card>
       )}
 
