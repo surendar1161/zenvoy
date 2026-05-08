@@ -23,6 +23,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <span style={{ fontWeight: 800, fontSize: 18, color: "#0ea5e9", letterSpacing: "-0.3px" }}>DealPilot</span>
           </Link>
           <Space>
+            <Link href="/blog"><Button type="text" size="middle">Blog</Button></Link>
             <Link href="/pricing"><Button type="text" size="middle">Pricing</Button></Link>
             <Link href="/sign-in"><Button size="middle">Sign In</Button></Link>
             <Link href="/sign-up">
