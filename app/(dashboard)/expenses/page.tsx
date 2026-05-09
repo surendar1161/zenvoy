@@ -267,7 +267,7 @@ export default function ExpensesPage() {
     },
   ];
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
+  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}>{ctx}<Spin size="large" /></div>;
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>

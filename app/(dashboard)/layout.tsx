@@ -106,6 +106,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           };
           setNavItems(prev => {
             const items = [...(prev ?? [])];
+            if (items.some(i => (i as unknown as Record<string, unknown>)?.key === "/capacity")) return items;
             const dividerIdx = items.findIndex(i => (i as unknown as Record<string, unknown>)?.type === "divider");
             if (dividerIdx >= 0) items.splice(dividerIdx, 0, capacityItem);
             else items.push(capacityItem);

@@ -194,7 +194,7 @@ export default function PortalManagePage() {
     return `${(b / 1024 / 1024).toFixed(1)} MB`;
   }
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
+  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}>{ctx}<Spin size="large" /></div>;
   if (!portal) return null;
   const unreadCount = messages.filter(m => m.sender === "client" && !m.read_by_client).length;
 
