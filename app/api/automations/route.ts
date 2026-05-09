@@ -1,21 +1,14 @@
 import { requireAuth } from "@/lib/api-auth";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const MAX_AUTOMATIONS_PER_USER = 50;
-
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
 
 export async function GET(req: NextRequest) {
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
   const { data } = await db
     .from("workflow_automations")
     .select("*")
@@ -29,7 +22,7 @@ export async function POST(req: NextRequest) {
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
 
   // Check limit
   const { count } = await db

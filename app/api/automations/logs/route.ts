@@ -1,13 +1,6 @@
 import { requireAuth } from "@/lib/api-auth";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
 
 export async function GET(req: NextRequest) {
   const { user, error } = await requireAuth(req);
@@ -17,7 +10,7 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 20), 100);
   const offset = Number(url.searchParams.get("offset") ?? 0);
 
-  const db = getAdmin();
+  const db = await createClient();
   const { data, count } = await db
     .from("automation_logs")
     .select("*, workflow_automations(name)", { count: "exact" })

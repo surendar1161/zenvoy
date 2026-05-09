@@ -1,19 +1,12 @@
 import { requireAuth } from "@/lib/api-auth";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
 
 export async function GET(req: NextRequest) {
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
   let { data } = await db.from("notification_preferences")
     .select("*")
     .eq("user_id", user.id)
@@ -52,7 +45,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
   }
 
-  const db = getAdmin();
+  const db = await createClient();
 
   const { data: existing } = await db.from("notification_preferences")
     .select("id")

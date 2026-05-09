@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api-auth";
-import { createClient as createAdmin } from "@supabase/supabase-js";
-
-function admin() {
-  return createAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   const { user, error } = await requireAuth(req);
   if (error) return error;
   const userId = user.id;
-  const db = admin();
+  const db = await createClient();
 
   // Check if already seeded
   const { data: profile } = await db.from("profiles").select("has_demo_data").eq("id", userId).maybeSingle();

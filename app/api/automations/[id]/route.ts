@@ -1,19 +1,12 @@
 import { requireAuth } from "@/lib/api-auth";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
   const { data } = await db
     .from("workflow_automations")
     .select("*")
@@ -29,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
   const body = await req.json();
 
   const allowed = ["name", "description", "enabled", "trigger_type", "conditions", "actions"];
@@ -55,7 +48,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
   await db
     .from("workflow_automations")
     .delete()

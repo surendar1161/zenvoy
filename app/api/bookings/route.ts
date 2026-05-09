@@ -1,19 +1,12 @@
 import { requireAuth } from "@/lib/api-auth";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
 
 export async function GET(req: NextRequest) {
   const { user, error } = await requireAuth(req);
   if (error) return error;
 
-  const db = getAdmin();
+  const db = await createClient();
   const tab = req.nextUrl.searchParams.get("tab") ?? "upcoming";
   const now = new Date().toISOString();
 
@@ -34,7 +27,7 @@ export async function POST(req: NextRequest) {
   if (error) return error;
 
   const body = await req.json();
-  const db = getAdmin();
+  const db = await createClient();
 
   const { data, error: insertErr } = await db.from("bookings").insert({
     user_id: user.id,
