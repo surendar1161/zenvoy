@@ -83,11 +83,20 @@ export default function PortalManagePage() {
     setSending(true);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    const freelancerName = (user?.user_metadata?.full_name as string) ?? "Freelancer";
     await supabase.from("portal_messages").insert({
       portal_id: id, sender: "freelancer",
-      sender_name: (user?.user_metadata?.full_name as string) ?? "Freelancer",
+      sender_name: freelancerName,
       content: msgText.trim(), read_by_client: false,
     });
+    // Notify client via email
+    if (portal?.token) {
+      fetch("/api/portal/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: portal.token, event: "freelancer_message", data: { freelancerName, messagePreview: msgText.trim().slice(0, 200) } }),
+      }).catch(() => {});
+    }
     setMsgText("");
     setSending(false);
   }
@@ -106,6 +115,14 @@ export default function PortalManagePage() {
       storage_path: path, storage_url: publicUrl, category, uploaded_by: "freelancer",
     }).select().single();
     if (row) setFiles(prev => [row as PFile, ...prev]);
+    // Notify client about new file
+    if (portal?.token) {
+      fetch("/api/portal/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: portal.token, event: "freelancer_file_uploaded", data: { fileName: file.name } }),
+      }).catch(() => {});
+    }
     msgApi.success("File uploaded!");
     setUploading(false);
   }
@@ -137,7 +154,18 @@ export default function PortalManagePage() {
       due_date: values.due_date ? values.due_date.toISOString() : null,
       status: "draft",
     }).select().single();
-    if (data) setInvoices(prev => [data as PInvoice, ...prev]);
+    if (data) {
+      setInvoices(prev => [data as PInvoice, ...prev]);
+      // Notify client about new invoice
+      if (portal?.token) {
+        const inv = data as PInvoice;
+        fetch("/api/portal/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: portal.token, event: "invoice_sent", data: { invoiceTitle: inv.title, amount: `${inv.currency} ${inv.total.toLocaleString()}` } }),
+        }).catch(() => {});
+      }
+    }
     setInvoiceOpen(false);
     invForm.resetFields();
     setLineItems([{ description: "", quantity: 1, unit_price: 0, amount: 0 }]);
@@ -227,6 +255,7 @@ export default function PortalManagePage() {
                       description={
                         <Space size={10} wrap>
                           <Tag style={{ borderRadius: 20, fontSize: 11, textTransform: "capitalize" }}>{f.category}</Tag>
+                          {f.uploaded_by === "client" && <Tag color="blue" style={{ borderRadius: 10, fontSize: 11 }}>Client Upload</Tag>}
                           {f.size_bytes && <Text type="secondary" style={{ fontSize: 12 }}>{formatBytes(f.size_bytes)}</Text>}
                           <Text type="secondary" style={{ fontSize: 12 }}>{new Date(f.created_at).toLocaleDateString()}</Text>
                           <Tag style={{ borderRadius: 20, fontSize: 11, color: APPROVAL_COLORS[f.approval_status ?? "pending"], borderColor: `${APPROVAL_COLORS[f.approval_status ?? "pending"]}40`, background: `${APPROVAL_COLORS[f.approval_status ?? "pending"]}12` }}>

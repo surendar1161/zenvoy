@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Button, Card, Col, Empty, Progress, Row, Select,
+  Avatar, Button, Card, Col, Empty, Input, InputNumber, Progress, Row, Select,
   Space, Spin, Tag, Tooltip, Typography, message, Badge,
 } from "antd";
 import {
@@ -10,6 +10,7 @@ import {
   DollarOutlined, ClockCircleOutlined, ArrowRightOutlined,
   CheckCircleOutlined, CloseCircleOutlined, FileTextOutlined,
   SendOutlined, FundOutlined, TrophyOutlined, FireOutlined,
+  SearchOutlined, FilterOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -46,6 +47,10 @@ export default function PipelinePage() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [currency, setCurrency] = useState("USD");
+  const [search, setSearch] = useState("");
+  const [stageFilter, setStageFilter] = useState<string | null>(null);
+  const [budgetMin, setBudgetMin] = useState<number | null>(null);
+  const [budgetMax, setBudgetMax] = useState<number | null>(null);
   const [msgApi, ctx] = message.useMessage();
 
   useEffect(() => { load(); }, []);
@@ -84,6 +89,22 @@ export default function PipelinePage() {
     ? Math.round(proposals.filter(p => ["viewed","accepted"].includes(p.status)).length / proposals.filter(p => p.status !== "draft").length * 100)
     : 0;
 
+  const hasFilters = !!search || !!stageFilter || budgetMin != null || budgetMax != null;
+  const filteredProposals = proposals.filter(p => {
+    if (search) {
+      const q = search.toLowerCase();
+      const matchesSearch =
+        p.client_name.toLowerCase().includes(q) ||
+        (p.client_company ?? "").toLowerCase().includes(q) ||
+        (p.project_type ?? "").toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+    }
+    if (stageFilter && p.status !== stageFilter) return false;
+    if (budgetMin != null && (p.total_budget ?? 0) < budgetMin) return false;
+    if (budgetMax != null && (p.total_budget ?? 0) > budgetMax) return false;
+    return true;
+  });
+
   if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
 
   return (
@@ -108,6 +129,56 @@ export default function PipelinePage() {
           </Button>
         </Link>
       </div>
+
+      {/* Filters */}
+      <Space wrap size={12} style={{ marginBottom: 20 }}>
+        <Input
+          prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
+          placeholder="Search by client, company, or project..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          allowClear
+          style={{ width: 280, borderRadius: 10 }}
+        />
+        <Select
+          placeholder="All stages"
+          allowClear
+          value={stageFilter ?? undefined}
+          onChange={v => setStageFilter(v ?? null)}
+          style={{ width: 160 }}
+          options={STAGES.map(s => ({ value: s.key, label: s.label }))}
+        />
+        <InputNumber
+          placeholder="Min budget"
+          value={budgetMin}
+          onChange={v => setBudgetMin(v)}
+          min={0}
+          style={{ width: 130, borderRadius: 10 }}
+          prefix={<DollarOutlined style={{ color: "#94a3b8" }} />}
+        />
+        <InputNumber
+          placeholder="Max budget"
+          value={budgetMax}
+          onChange={v => setBudgetMax(v)}
+          min={0}
+          style={{ width: 130, borderRadius: 10 }}
+          prefix={<DollarOutlined style={{ color: "#94a3b8" }} />}
+        />
+        {hasFilters && (
+          <>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {filteredProposals.length} of {proposals.length} proposals
+            </Text>
+            <Button
+              size="small"
+              onClick={() => { setSearch(""); setStageFilter(null); setBudgetMin(null); setBudgetMax(null); }}
+              style={{ borderRadius: 8, fontSize: 12 }}
+            >
+              Clear filters
+            </Button>
+          </>
+        )}
+      </Space>
 
       {/* KPI row */}
       <Row gutter={[14, 14]} style={{ marginBottom: 28 }}>
@@ -166,8 +237,8 @@ export default function PipelinePage() {
         <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 28 }} styles={{ body: { padding: "16px 24px" } }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
             {STAGES.map(s => {
-              const count = proposals.filter(p => p.status === s.key).length;
-              const val = proposals.filter(p => p.status === s.key).reduce((sum, p) => sum + (p.total_budget ?? 0), 0);
+              const count = filteredProposals.filter(p => p.status === s.key).length;
+              const val = filteredProposals.filter(p => p.status === s.key).reduce((sum, p) => sum + (p.total_budget ?? 0), 0);
               return (
                 <Space key={s.key} size={6}>
                   <div style={{ width: 10, height: 10, borderRadius: "50%", background: s.color }} />
@@ -180,7 +251,8 @@ export default function PipelinePage() {
           </div>
           <div style={{ display: "flex", height: 8, borderRadius: 8, overflow: "hidden", gap: 2 }}>
             {STAGES.map(s => {
-              const pct = total > 0 ? (proposals.filter(p => p.status === s.key).length / total) * 100 : 0;
+              const filteredTotal = filteredProposals.length;
+              const pct = filteredTotal > 0 ? (filteredProposals.filter(p => p.status === s.key).length / filteredTotal) * 100 : 0;
               return pct > 0 ? (
                 <Tooltip key={s.key} title={`${s.label}: ${Math.round(pct)}%`}>
                   <div style={{ width: `${pct}%`, background: s.color, borderRadius: 4, cursor: "pointer", transition: "opacity 0.2s" }}
@@ -207,10 +279,21 @@ export default function PipelinePage() {
             </Button>
           </Link>
         </Card>
+      ) : hasFilters && filteredProposals.length === 0 ? (
+        <Card style={{ borderRadius: 16, textAlign: "center", border: "2px dashed #e2e8f0" }} styles={{ body: { padding: "60px 40px" } }}>
+          <FilterOutlined style={{ fontSize: 48, color: "#cbd5e1", marginBottom: 12 }} />
+          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No matching proposals</Title>
+          <Text type="secondary" style={{ fontSize: 14, display: "block", marginBottom: 16 }}>
+            Try adjusting your search or filters to find what you're looking for.
+          </Text>
+          <Button onClick={() => { setSearch(""); setStageFilter(null); setBudgetMin(null); setBudgetMax(null); }} style={{ borderRadius: 8 }}>
+            Clear All Filters
+          </Button>
+        </Card>
       ) : (
         <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 16, alignItems: "flex-start" }}>
           {STAGES.map(stage => {
-            const stageProposals = proposals.filter(p => p.status === stage.key);
+            const stageProposals = filteredProposals.filter(p => p.status === stage.key);
             const stageValue = stageProposals.reduce((s, p) => s + (p.total_budget ?? 0), 0);
             return (
               <div key={stage.key} style={{ minWidth: 260, maxWidth: 280, flex: "0 0 260px" }}>

@@ -115,7 +115,7 @@ function SettingsPage() {
   async function loadNotifPrefs() {
     try {
       const res = await fetch("/api/notifications/preferences");
-      if (res.ok) setNotifPrefs(await res.json());
+      if (res.ok) setNotifPrefs(await res.json() ?? {});
     } catch {}
   }
 

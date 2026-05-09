@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const body = await req.json();
   const db = await createClient();
 
-  const allowed = ["title", "description", "scheduled_at", "duration_minutes", "timezone", "status", "meeting_link", "meeting_platform", "client_name", "client_email", "notes"];
+  const allowed = ["title", "description", "scheduled_at", "duration_minutes", "timezone", "status", "meeting_link", "meeting_platform", "client_id", "client_name", "client_email", "notes"];
   const update: Record<string, unknown> = {};
   for (const key of allowed) {
     if (key in body) update[key] = body[key];

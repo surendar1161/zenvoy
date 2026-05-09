@@ -9,9 +9,11 @@ import {
   CalendarOutlined, PlusOutlined, DeleteOutlined, EditOutlined,
   VideoCameraOutlined, LinkOutlined, CheckCircleOutlined,
   CloseCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 import type { TableColumnsType } from "antd";
 import dayjs from "dayjs";
+import ClientSelect, { type ClientOption } from "@/components/ClientSelect";
 
 const { Title, Text } = Typography;
 
@@ -25,6 +27,7 @@ interface Booking {
   status: string;
   meeting_link: string | null;
   meeting_platform: string | null;
+  client_id: string | null;
   client_name: string | null;
   client_email: string | null;
   notes: string | null;
@@ -48,6 +51,7 @@ export default function BookingsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Booking | null>(null);
   const [saving, setSaving] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
 
@@ -62,14 +66,17 @@ export default function BookingsPage() {
 
   function openCreate() {
     setEditTarget(null);
+    setSelectedClient(null);
     form.resetFields();
     setModalOpen(true);
   }
 
   function openEdit(b: Booking) {
     setEditTarget(b);
+    setSelectedClient(b.client_id ? { id: b.client_id, name: b.client_name ?? "", company: null, email: b.client_email, phone: null, avatar_color: "#94a3b8" } : null);
     form.setFieldsValue({
       title: b.title,
+      client_id: b.client_id ?? undefined,
       client_name: b.client_name ?? "",
       client_email: b.client_email ?? "",
       scheduled_at: b.scheduled_at ? dayjs(b.scheduled_at) : null,
@@ -86,6 +93,7 @@ export default function BookingsPage() {
     setSaving(true);
     const payload = {
       title: values.title,
+      client_id: selectedClient?.id ?? null,
       client_name: values.client_name || null,
       client_email: values.client_email || null,
       scheduled_at: values.scheduled_at ? values.scheduled_at.toISOString() : null,
@@ -246,14 +254,27 @@ export default function BookingsPage() {
           <Form.Item name="title" label="Title" rules={[{ required: true }]}>
             <Input placeholder="e.g., Kickoff Call" />
           </Form.Item>
-          <div style={{ display: "flex", gap: 12 }}>
-            <Form.Item name="client_name" label="Client Name" style={{ flex: 1 }}>
-              <Input placeholder="Client name" />
-            </Form.Item>
-            <Form.Item name="client_email" label="Client Email" style={{ flex: 1 }}>
-              <Input placeholder="client@example.com" />
-            </Form.Item>
-          </div>
+          <Form.Item label="Client">
+            <ClientSelect
+              value={selectedClient?.id}
+              size="middle"
+              onSelect={(client: ClientOption | null) => {
+                setSelectedClient(client);
+                form.setFieldsValue({
+                  client_name: client?.name ?? "",
+                  client_email: client?.email ?? "",
+                });
+              }}
+              placeholder="Select a client…"
+            />
+            {selectedClient?.email && (
+              <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: "block" }}>
+                <MailOutlined style={{ marginRight: 4 }} />{selectedClient.email}
+              </Text>
+            )}
+          </Form.Item>
+          <Form.Item name="client_name" hidden><Input /></Form.Item>
+          <Form.Item name="client_email" hidden><Input /></Form.Item>
           <div style={{ display: "flex", gap: 12 }}>
             <Form.Item name="scheduled_at" label="Date & Time" style={{ flex: 1 }}>
               <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: "100%" }} />

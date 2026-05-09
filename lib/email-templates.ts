@@ -122,3 +122,65 @@ export function invoiceOverdueEmail(data: { clientName: string; invoiceNumber: s
     `, data.unsubscribeUrl),
   };
 }
+
+// ── Portal notification emails ──────────────────────────────────────
+
+export function portalFileUploadedEmail(data: { clientName: string; fileName: string; portalTitle: string; portalId: string; unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: `${data.clientName} uploaded a file to "${data.portalTitle}"`,
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#0f172a">New File from Client</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px"><strong>${data.clientName}</strong> uploaded <strong>${data.fileName}</strong> to the portal <strong>${data.portalTitle}</strong>.</p>
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 16px">Review the file and approve or request revisions.</p>
+      ${btn("View Portal", `${APP_URL}/portals/${data.portalId}`)}
+    `, data.unsubscribeUrl),
+  };
+}
+
+export function portalMessageReceivedEmail(data: { clientName: string; messagePreview: string; portalTitle: string; portalId: string; unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: `New message from ${data.clientName}`,
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#0f172a">New Portal Message</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px"><strong>${data.clientName}</strong> sent a message in <strong>${data.portalTitle}</strong>:</p>
+      <div style="background:#f1f5f9;border-radius:10px;padding:12px 16px;margin:12px 0;color:#334155;font-size:14px;line-height:1.5">${data.messagePreview}</div>
+      ${btn("Reply in Portal", `${APP_URL}/portals/${data.portalId}`)}
+    `, data.unsubscribeUrl),
+  };
+}
+
+export function clientFileSharedEmail(data: { freelancerName: string; fileName: string; portalToken: string; unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: `${data.freelancerName} shared a file with you`,
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#0f172a">New File Shared</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px"><strong>${data.freelancerName}</strong> shared <strong>${data.fileName}</strong> with you.</p>
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 16px">View and download the file in your portal.</p>
+      ${btn("View in Portal", `${APP_URL}/portal/${data.portalToken}`)}
+    `, data.unsubscribeUrl),
+  };
+}
+
+export function clientMessageReceivedEmail(data: { freelancerName: string; messagePreview: string; portalToken: string; unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: `New message from ${data.freelancerName}`,
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#0f172a">You Have a New Message</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px"><strong>${data.freelancerName}</strong> sent you a message:</p>
+      <div style="background:#f1f5f9;border-radius:10px;padding:12px 16px;margin:12px 0;color:#334155;font-size:14px;line-height:1.5">${data.messagePreview}</div>
+      ${btn("Reply in Portal", `${APP_URL}/portal/${data.portalToken}`)}
+    `, data.unsubscribeUrl),
+  };
+}
+
+export function clientInvoiceSentEmail(data: { freelancerName: string; invoiceTitle: string; amount: string; portalToken: string; unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: `New invoice from ${data.freelancerName}`,
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#0f172a">New Invoice</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px"><strong>${data.freelancerName}</strong> sent you a new invoice: <strong>${data.invoiceTitle}</strong></p>
+      <p style="color:#0f172a;font-size:18px;font-weight:700;margin:8px 0 16px">${data.amount}</p>
+      ${btn("View & Pay", `${APP_URL}/portal/${data.portalToken}`)}
+    `, data.unsubscribeUrl),
+  };
+}

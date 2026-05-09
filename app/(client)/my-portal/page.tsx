@@ -10,9 +10,12 @@ import {
   SendOutlined, CheckCircleOutlined, ThunderboltFilled, LogoutOutlined,
   ClockCircleOutlined, CheckOutlined, EditOutlined, BellOutlined,
   FolderOpenOutlined, HistoryOutlined, UserOutlined,
+  FileProtectOutlined, SolutionOutlined, InboxOutlined,
 } from "@ant-design/icons";
+import { Upload, Divider } from "antd";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import SignatureBlock from "@/components/SignatureBlock";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -35,6 +38,8 @@ interface PMsg { id: string; sender: string; sender_name: string | null; content
 interface PInvoice { id: string; invoice_number: string | null; title: string; total: number; currency: string; status: string; due_date: string | null; payment_link: string | null; created_at: string; }
 interface ProjectTask { id: string; title: string; status: string; }
 interface Activity { id: string; actor: string; actor_name: string | null; event_type: string; description: string; created_at: string; }
+interface PContract { id: string; title: string | null; contract_type: string | null; party_a_name: string | null; party_b_name: string | null; governing_law: string | null; contract_text: string | null; status: string; signed_at: string | null; signer_name: string | null; created_at: string; }
+interface PProposal { id: string; client_name: string | null; project_type: string | null; proposal_text: string | null; tiers: unknown; total_budget: number | null; currency: string | null; status: string; signed_at: string | null; signer_name: string | null; accepted_at: string | null; created_at: string; freelancer_name: string | null; }
 
 const INV_COLOR: Record<string, string> = { draft: "#94a3b8", sent: "#0ea5e9", viewed: "#06b6d4", paid: "#10b981", overdue: "#ef4444" };
 const FILE_ICONS: Record<string, string> = { contract: "📄", invoice: "💰", design: "🎨", image: "🖼️", document: "📝", general: "📎" };
@@ -52,10 +57,13 @@ export default function MyPortalPage() {
   const [invoices, setInvoices] = useState<PInvoice[]>([]);
   const [tasks, setTasks] = useState<ProjectTask[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [contracts, setContracts] = useState<PContract[]>([]);
+  const [proposals, setProposals] = useState<PProposal[]>([]);
   const [tab, setTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [msgText, setMsgText] = useState("");
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [clientEmail, setClientEmail] = useState("");
   const [clientName, setClientName] = useState("");
@@ -115,6 +123,14 @@ export default function MyPortalPage() {
     setMessages((m ?? []) as PMsg[]);
     setInvoices((inv ?? []) as PInvoice[]);
     setActivity((act ?? []) as Activity[]);
+
+    // Fetch contracts and proposals via portal API
+    const [contractsRes, proposalsRes] = await Promise.all([
+      fetch(`/api/portal/contracts?token=${portal.token}`).then(r => r.ok ? r.json() : []),
+      fetch(`/api/portal/proposals?token=${portal.token}`).then(r => r.ok ? r.json() : []),
+    ]);
+    setContracts(contractsRes as PContract[]);
+    setProposals(proposalsRes as PProposal[]);
 
     // Load project tasks if portal has a linked project
     if (portal.project_id) {
@@ -183,6 +199,32 @@ export default function MyPortalPage() {
     setFiles(prev => prev.map(f => f.id === fileId ? { ...f, approval_status: status, approval_note: note ?? null } : f));
     msgApi.success(status === "approved" ? "File approved!" : "Revision requested");
     setApprovingId(null);
+  }
+
+  async function handleUpload(file: File) {
+    if (!activePortal) return false;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("token", activePortal.token);
+      form.append("category", "general");
+      form.append("clientName", clientName || "Client");
+      const res = await fetch("/api/portal/upload", { method: "POST", body: form });
+      if (!res.ok) {
+        const err = await res.json();
+        msgApi.error(err.error || "Upload failed");
+        return false;
+      }
+      const uploaded = await res.json();
+      setFiles(prev => [uploaded as PFile, ...prev]);
+      msgApi.success("File uploaded successfully");
+    } catch {
+      msgApi.error("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+    return false;
   }
 
   async function signOut() {
@@ -374,6 +416,27 @@ export default function MyPortalPage() {
         </Badge>
       ),
       children: (
+        <div>
+          <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 20 } }}>
+            <Upload.Dragger
+              beforeUpload={handleUpload}
+              showUploadList={false}
+              disabled={uploading}
+              multiple={false}
+              style={{ borderRadius: 12, border: `2px dashed ${primary}40`, background: `${primary}05` }}
+            >
+              <p style={{ marginBottom: 8 }}>
+                <InboxOutlined style={{ fontSize: 36, color: primary }} />
+              </p>
+              <Text strong style={{ fontSize: 14 }}>
+                {uploading ? "Uploading..." : "Click or drag a file to upload"}
+              </Text>
+              <br />
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Share files with your team (max 25 MB)
+              </Text>
+            </Upload.Dragger>
+          </Card>
         <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
           {files.length === 0 ? (
             <Empty style={{ padding: 60 }} description="No files shared yet" />
@@ -422,6 +485,109 @@ export default function MyPortalPage() {
             })
           )}
         </Card>
+        </div>
+      ),
+    },
+    {
+      key: "contracts",
+      label: <Space><FileProtectOutlined />Contracts</Space>,
+      children: (
+        <div>
+          {contracts.length === 0 ? (
+            <Card style={{ borderRadius: 14, textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
+              <Empty description="No contracts available" />
+            </Card>
+          ) : contracts.map(c => (
+            <Card key={c.id} style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+                <div>
+                  <Text strong style={{ fontSize: 16 }}>{c.title || "Contract"}</Text>
+                  {c.contract_type && <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 8, textTransform: "capitalize" }}>{c.contract_type}</Tag>}
+                  <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 4, color: c.status === "signed" ? "#10b981" : "#0ea5e9", borderColor: c.status === "signed" ? "#10b98140" : "#0ea5e940", background: c.status === "signed" ? "#10b98112" : "#0ea5e912", textTransform: "capitalize" }}>{c.status}</Tag>
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
+              </div>
+              <div style={{ display: "flex", gap: 20, marginBottom: 16, flexWrap: "wrap" }}>
+                {c.party_a_name && <Text type="secondary" style={{ fontSize: 13 }}>From: <strong>{c.party_a_name}</strong></Text>}
+                {c.party_b_name && <Text type="secondary" style={{ fontSize: 13 }}>To: <strong>{c.party_b_name}</strong></Text>}
+                {c.governing_law && <Text type="secondary" style={{ fontSize: 13 }}>Law: <strong>{c.governing_law}</strong></Text>}
+              </div>
+              {c.contract_text && (
+                <div style={{ background: "#f8fafc", borderRadius: 10, padding: "16px 20px", marginBottom: 20, fontSize: 14, lineHeight: 1.7, color: "#334155", maxHeight: 400, overflowY: "auto" }}
+                  dangerouslySetInnerHTML={{ __html: c.contract_text.replace(/\n/g, "<br/>") }} />
+              )}
+              <Divider />
+              <SignatureBlock
+                documentId={c.id}
+                documentType="contract"
+                clientName={clientName || undefined}
+                alreadySigned={!!c.signed_at}
+                signedAt={c.signed_at ?? undefined}
+                signerName={c.signer_name ?? undefined}
+                primaryColor={primary}
+                onSigned={() => setContracts(prev => prev.map(x => x.id === c.id ? { ...x, signed_at: new Date().toISOString(), signer_name: clientName || "Client", status: "signed" } : x))}
+              />
+            </Card>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "proposals",
+      label: <Space><SolutionOutlined />Proposals</Space>,
+      children: (
+        <div>
+          {proposals.length === 0 ? (
+            <Card style={{ borderRadius: 14, textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
+              <Empty description="No proposals available" />
+            </Card>
+          ) : proposals.map(p => {
+            const statusColor: Record<string, string> = { sent: "#0ea5e9", viewed: "#06b6d4", accepted: "#10b981" };
+            return (
+              <Card key={p.id} style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+                  <div>
+                    <Text strong style={{ fontSize: 16 }}>{p.project_type || "Proposal"}</Text>
+                    <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 8, color: statusColor[p.status] ?? "#94a3b8", borderColor: `${statusColor[p.status] ?? "#94a3b8"}40`, background: `${statusColor[p.status] ?? "#94a3b8"}12`, textTransform: "capitalize" }}>{p.status}</Tag>
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>{new Date(p.created_at).toLocaleDateString()}</Text>
+                </div>
+                {p.freelancer_name && <Text type="secondary" style={{ fontSize: 13, display: "block", marginBottom: 8 }}>From: <strong>{p.freelancer_name}</strong></Text>}
+                {p.total_budget != null && (
+                  <div style={{ background: "#f0fdf4", borderRadius: 10, padding: "12px 16px", marginBottom: 16, display: "inline-block" }}>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Total Budget</Text>
+                    <div style={{ fontSize: 22, fontWeight: 900, color: "#10b981" }}>{p.currency ?? "USD"} {p.total_budget.toLocaleString()}</div>
+                  </div>
+                )}
+                {p.proposal_text && (
+                  <div style={{ background: "#f8fafc", borderRadius: 10, padding: "16px 20px", marginBottom: 20, fontSize: 14, lineHeight: 1.7, color: "#334155", maxHeight: 400, overflowY: "auto" }}
+                    dangerouslySetInnerHTML={{ __html: p.proposal_text.replace(/\n/g, "<br/>") }} />
+                )}
+                {p.status !== "accepted" && (
+                  <>
+                    <Divider />
+                    <SignatureBlock
+                      documentId={p.id}
+                      documentType="proposal"
+                      clientName={clientName || undefined}
+                      alreadySigned={!!p.signed_at}
+                      signedAt={p.signed_at ?? undefined}
+                      signerName={p.signer_name ?? undefined}
+                      primaryColor={primary}
+                      onSigned={() => setProposals(prev => prev.map(x => x.id === p.id ? { ...x, signed_at: new Date().toISOString(), signer_name: clientName || "Client" } : x))}
+                    />
+                  </>
+                )}
+                {p.status === "accepted" && (
+                  <div style={{ textAlign: "center", color: "#10b981", fontWeight: 700, fontSize: 15, padding: "12px 0" }}>
+                    <CheckCircleOutlined style={{ marginRight: 6 }} />Accepted
+                    {p.accepted_at && <Text type="secondary" style={{ display: "block", fontSize: 12, marginTop: 4 }}>on {new Date(p.accepted_at).toLocaleDateString()}</Text>}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
       ),
     },
     {

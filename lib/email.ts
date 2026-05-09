@@ -26,7 +26,8 @@ type NotificationType =
   | "proposal_follow_up"
   | "contract_signed"
   | "invoice_sent" | "invoice_paid" | "invoice_overdue"
-  | "payment_received" | "payment_failed";
+  | "payment_received" | "payment_failed"
+  | "portal_file_uploaded" | "portal_message_received";
 
 async function getOrCreatePreferences(userId: string) {
   const db = getAdmin();
@@ -143,6 +144,24 @@ export async function sendNotificationEmail(
           unsubscribeUrl,
         });
         break;
+      case "portal_file_uploaded":
+        emailContent = templates.portalFileUploadedEmail({
+          clientName: (data.clientName as string) ?? "Client",
+          fileName: (data.fileName as string) ?? "file",
+          portalTitle: (data.portalTitle as string) ?? "Portal",
+          portalId: (data.portalId as string) ?? "",
+          unsubscribeUrl,
+        });
+        break;
+      case "portal_message_received":
+        emailContent = templates.portalMessageReceivedEmail({
+          clientName: (data.clientName as string) ?? "Client",
+          messagePreview: (data.messagePreview as string) ?? "",
+          portalTitle: (data.portalTitle as string) ?? "Portal",
+          portalId: (data.portalId as string) ?? "",
+          unsubscribeUrl,
+        });
+        break;
       default:
         return;
     }
@@ -165,5 +184,56 @@ export async function sendNotificationEmail(
     }
   } catch (err) {
     console.error(`[email] Failed to send ${type} notification to user ${userId}:`, err);
+  }
+}
+
+export async function sendPortalClientEmail(
+  clientEmail: string,
+  event: string,
+  data: Record<string, string>,
+): Promise<void> {
+  if (!process.env.RESEND_API_KEY || !clientEmail) return;
+
+  try {
+    const unsubscribeUrl = `${APP_URL}/api/unsubscribe?email=${encodeURIComponent(clientEmail)}&type=portal`;
+
+    let emailContent: { subject: string; html: string } | null = null;
+
+    switch (event) {
+      case "freelancer_file_uploaded":
+        emailContent = templates.clientFileSharedEmail({
+          freelancerName: data.freelancerName ?? "Your team",
+          fileName: data.fileName ?? "file",
+          portalToken: data.portalToken ?? "",
+          unsubscribeUrl,
+        });
+        break;
+      case "freelancer_message":
+        emailContent = templates.clientMessageReceivedEmail({
+          freelancerName: data.freelancerName ?? "Your team",
+          messagePreview: data.messagePreview ?? "",
+          portalToken: data.portalToken ?? "",
+          unsubscribeUrl,
+        });
+        break;
+      case "invoice_sent":
+        emailContent = templates.clientInvoiceSentEmail({
+          freelancerName: data.freelancerName ?? "Your team",
+          invoiceTitle: data.invoiceTitle ?? "Invoice",
+          amount: data.amount ?? "",
+          portalToken: data.portalToken ?? "",
+          unsubscribeUrl,
+        });
+        break;
+      default:
+        return;
+    }
+
+    if (!emailContent) return;
+
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "notifications@dealpilot.app";
+    await sendViaResend(clientEmail, `DealPilot <${fromEmail}>`, emailContent.subject, emailContent.html);
+  } catch (err) {
+    console.error(`[email] Failed to send portal email to ${clientEmail}:`, err);
   }
 }

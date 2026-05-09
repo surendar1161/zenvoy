@@ -45,7 +45,7 @@ export default function PricingTiersEditor({ tiers, currency, onChange }: Props)
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {tiers.map((tier, i) => (
-          <div key={tier.id} className={`rounded-xl border-2 p-4 ${colors[i]} ${tier.recommended ? "ring-2 ring-brand-300" : ""}`}>
+          <div key={tier.id} className={`rounded-xl border-2 p-4 overflow-hidden ${colors[i]} ${tier.recommended ? "ring-2 ring-brand-300" : ""}`}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-gray-500 uppercase">{badges[i]}</span>
               <button
@@ -68,14 +68,14 @@ export default function PricingTiersEditor({ tiers, currency, onChange }: Props)
               onChange={e => update(tier.id, "name", e.target.value)}
             />
             <input
-              className="input text-xs mb-3"
+              className="input text-xs mb-3 w-full"
               placeholder="Tagline…"
               value={tier.tagline}
               onChange={e => update(tier.id, "tagline", e.target.value)}
             />
 
-            <div className="flex gap-2 mb-4">
-              <div className="flex-1">
+            <div className="flex gap-2 mb-4 min-w-0">
+              <div className="flex-1 min-w-0">
                 <label className="text-xs text-gray-500 mb-1 block">Price ({currency})</label>
                 <input
                   className="input text-sm font-bold"
@@ -85,8 +85,8 @@ export default function PricingTiersEditor({ tiers, currency, onChange }: Props)
                   onChange={e => update(tier.id, "price", Number(e.target.value))}
                 />
               </div>
-              <div className="w-20">
-                <label className="text-xs text-gray-500 mb-1 block">Deposit %</label>
+              <div className="w-24 flex-shrink-0">
+                <label className="text-xs text-gray-500 mb-1 block truncate">Deposit %</label>
                 <select className="input text-xs" value={tier.depositPercent}
                   onChange={e => update(tier.id, "depositPercent", Number(e.target.value))}>
                   {[25, 30, 40, 50, 60].map(p => <option key={p}>{p}%</option>)}

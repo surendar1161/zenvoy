@@ -27,6 +27,7 @@ const ALLOWED_FIELDS = [
   "email_enabled", "proposal_viewed", "proposal_signed", "proposal_accepted",
   "proposal_declined", "proposal_follow_up", "invoice_sent", "invoice_paid",
   "invoice_overdue", "contract_signed", "payment_received", "payment_failed",
+  "portal_file_uploaded", "portal_message_received", "portal_invoice_sent",
 ];
 
 export async function PUT(req: NextRequest) {

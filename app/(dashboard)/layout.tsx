@@ -10,7 +10,7 @@ import {
   BookOutlined, BarChartOutlined, CreditCardOutlined, TeamOutlined,
   GlobalOutlined, FolderOpenOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   FundOutlined, ThunderboltOutlined, DollarOutlined, RocketOutlined, CloseOutlined,
-  HeatMapOutlined, ClockCircleOutlined, CalendarOutlined,
+  HeatMapOutlined, ClockCircleOutlined, CalendarOutlined, WalletOutlined,
 } from "@ant-design/icons";
 import RunningTimerIndicator from "@/components/RunningTimerIndicator";
 import { Modal } from "antd";
@@ -29,25 +29,52 @@ const COLLAPSED_WIDTH = 64;
 const EXPANDED_WIDTH = 228;
 
 const BASE_NAV: MenuProps["items"] = [
-  { key: "/dashboard",        icon: <HomeOutlined />,              label: <Link href="/dashboard">Dashboard</Link> },
-  { key: "/pipeline",         icon: <FundOutlined />,              label: <Link href="/pipeline">Pipeline</Link> },
-  { key: "/proposals",        icon: <FileTextOutlined />,          label: <Link href="/proposals">My Proposals</Link> },
-  { key: "/clients",          icon: <TeamOutlined />,              label: <Link href="/clients">Clients</Link> },
-  { key: "/projects",         icon: <FolderOpenOutlined />,        label: <Link href="/projects">Projects</Link> },
-  { key: "/portals",          icon: <GlobalOutlined />,            label: <Link href="/portals">Client Portals</Link> },
-  { key: "/invoices",         icon: <DollarOutlined />,            label: <Link href="/invoices">Invoices</Link> },
-  { key: "/time-tracking",    icon: <ClockCircleOutlined />,       label: <Link href="/time-tracking">Time Tracking</Link> },
-  { key: "/automations",      icon: <ThunderboltOutlined />,       label: <Link href="/automations">Automations</Link> },
-  { key: "/bookings",         icon: <CalendarOutlined />,          label: <Link href="/bookings">Bookings</Link> },
-  { key: "/templates",        icon: <AppstoreOutlined />,          label: <Link href="/templates">Templates</Link> },
+  { key: "/dashboard", icon: <HomeOutlined />, label: <Link href="/dashboard">Dashboard</Link> },
+  { key: "/pipeline",  icon: <FundOutlined />,  label: <Link href="/pipeline">Pipeline</Link> },
+  {
+    key: "grp-clients",
+    icon: <TeamOutlined />,
+    label: "Clients & Projects",
+    children: [
+      { key: "/proposals", icon: <FileTextOutlined />,  label: <Link href="/proposals">My Proposals</Link> },
+      { key: "/clients",   icon: <TeamOutlined />,      label: <Link href="/clients">Clients</Link> },
+      { key: "/projects",  icon: <FolderOpenOutlined />, label: <Link href="/projects">Projects</Link> },
+      { key: "/portals",   icon: <GlobalOutlined />,     label: <Link href="/portals">Client Portals</Link> },
+    ],
+  },
+  {
+    key: "grp-finance",
+    icon: <DollarOutlined />,
+    label: "Finance",
+    children: [
+      { key: "/invoices",      icon: <DollarOutlined />,       label: <Link href="/invoices">Invoices</Link> },
+      { key: "/expenses",      icon: <WalletOutlined />,       label: <Link href="/expenses">Expenses</Link> },
+      { key: "/time-tracking", icon: <ClockCircleOutlined />,  label: <Link href="/time-tracking">Time Tracking</Link> },
+    ],
+  },
+  {
+    key: "grp-tools",
+    icon: <AppstoreOutlined />,
+    label: "Tools",
+    children: [
+      { key: "/automations", icon: <ThunderboltOutlined />,       label: <Link href="/automations">Automations</Link> },
+      { key: "/bookings",    icon: <CalendarOutlined />,          label: <Link href="/bookings">Bookings</Link> },
+      { key: "/templates",   icon: <AppstoreOutlined />,          label: <Link href="/templates">Templates</Link> },
+      { key: "/contracts",   icon: <SafetyCertificateOutlined />, label: <Link href="/contracts">Contracts</Link> },
+    ],
+  },
+  {
+    key: "grp-insights",
+    icon: <BarChartOutlined />,
+    label: "Insights",
+    children: [
+      { key: "/content-library", icon: <BookOutlined />,    label: <Link href="/content-library">Content Library</Link> },
+      { key: "/analytics",       icon: <BarChartOutlined />, label: <Link href="/analytics">Analytics</Link> },
+    ],
+  },
   { type: "divider" },
-  { key: "/contracts",        icon: <SafetyCertificateOutlined />, label: <Link href="/contracts">Contracts</Link> },
-  { type: "divider" },
-  { key: "/content-library",  icon: <BookOutlined />,              label: <Link href="/content-library">Content Library</Link> },
-  { key: "/analytics",        icon: <BarChartOutlined />,          label: <Link href="/analytics">Analytics</Link> },
-  { type: "divider" },
-  { key: "/subscription",     icon: <CreditCardOutlined />,        label: <Link href="/subscription">Subscription</Link> },
-  { key: "/settings",         icon: <SettingOutlined />,           label: <Link href="/settings">Settings</Link> },
+  { key: "/subscription", icon: <CreditCardOutlined />, label: <Link href="/subscription">Subscription</Link> },
+  { key: "/settings",     icon: <SettingOutlined />,     label: <Link href="/settings">Settings</Link> },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -72,15 +99,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       // Check feature flags and build nav dynamically
       isFeatureEnabled("capacity_planning").then(hasCapacity => {
         if (hasCapacity) {
-          setNavItems([
-            ...BASE_NAV!,
-            { type: "divider" as const },
-            {
-              key: "/capacity",
-              icon: <HeatMapOutlined />,
-              label: <Link href="/capacity">Capacity <span style={{ fontSize: 10, background: "#0ea5e920", color: "#0369a1", padding: "1px 6px", borderRadius: 8, marginLeft: 4 }}>Beta</span></Link>,
-            },
-          ]);
+          const capacityItem = {
+            key: "/capacity",
+            icon: <HeatMapOutlined />,
+            label: <Link href="/capacity">Capacity <span style={{ fontSize: 10, background: "#0ea5e920", color: "#0369a1", padding: "1px 6px", borderRadius: 8, marginLeft: 4 }}>Beta</span></Link>,
+          };
+          setNavItems(prev => {
+            const items = [...(prev ?? [])];
+            const dividerIdx = items.findIndex(i => (i as unknown as Record<string, unknown>)?.type === "divider");
+            if (dividerIdx >= 0) items.splice(dividerIdx, 0, capacityItem);
+            else items.push(capacityItem);
+            return items;
+          });
         }
       });
 
@@ -123,12 +153,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.refresh();
   }
 
+  const allNavKeys = (navItems ?? []).flatMap(i => {
+    const item = i as unknown as Record<string, unknown>;
+    if (item?.children) return (item.children as { key: string }[]).map(c => c.key);
+    return [item?.key as string];
+  }).filter(Boolean);
+
   const activeKey =
     path === "/dashboard"
       ? "/dashboard"
-      : (navItems ?? [])
-          .map(i => (i as { key: string }).key)
-          .filter(k => k !== "/dashboard" && path.startsWith(k))[0] ?? "/dashboard";
+      : allNavKeys.filter(k => k !== "/dashboard" && path.startsWith(k))[0] ?? "/dashboard";
+
+  const defaultOpenKeys = (navItems ?? [])
+    .filter(i => {
+      const item = i as unknown as Record<string, unknown>;
+      if (!item?.children || !item?.key) return false;
+      return (item.children as { key: string }[]).some(c => path.startsWith(c.key));
+    })
+    .map(i => (i as unknown as { key: string }).key);
 
   const initials = user?.user_metadata?.full_name
     ? (user.user_metadata.full_name as string).split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -146,6 +188,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ConfigProvider theme={antdTheme}>
+      <style>{`
+        .ant-layout-sider-children {
+          display: flex !important;
+          flex-direction: column !important;
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+      `}</style>
       {/* Trial expired — full-screen modal (shown once per session) */}
       <Modal
         open={showExpiredModal}
@@ -296,6 +346,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu
               mode="inline"
               selectedKeys={[activeKey]}
+              defaultOpenKeys={defaultOpenKeys}
               items={navItems}
               inlineCollapsed={collapsed}
               style={{ border: "none", padding: "0 8px" }}
