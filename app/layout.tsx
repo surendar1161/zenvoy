@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
@@ -38,13 +39,11 @@ export const metadata: Metadata = {
     siteName: APP_NAME,
     title: `${APP_NAME} — ${TAGLINE}`,
     description: DESCRIPTION,
-    images: [{ url: `${APP_URL}/og-image.png`, width: 1200, height: 630, alt: `${APP_NAME} — AI Proposal Software` }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${APP_NAME} — ${TAGLINE}`,
     description: DESCRIPTION,
-    images: [`${APP_URL}/og-image.png`],
     creator: "@dealpilot",
   },
   alternates: { canonical: APP_URL },
@@ -87,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <AntdRegistry>{children}</AntdRegistry>
+        <Analytics />
       </body>
     </html>
   );

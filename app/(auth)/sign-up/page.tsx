@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -52,6 +53,7 @@ export default function SignUpPage() {
       setError(error.message);
       setLoading(false);
     } else {
+      trackEvent("signup_email");
       // Seed demo data in background — don't block the UI
       fetch("/api/seed-demo", { method: "POST" }).catch(() => {});
       setSignedUpEmail(email);
@@ -62,6 +64,7 @@ export default function SignUpPage() {
   async function signInWithGoogle() {
     if (!hasSupabase) { msgApi.warning("Supabase not configured."); return; }
     setGoogleLoading(true);
+    trackEvent("signup_google");
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",

@@ -13,6 +13,7 @@ import { PLANS, getPlan } from "@/lib/plans";
 import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
 import type { Plan, BillingPeriod } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -81,7 +82,10 @@ function SubscriptionContent() {
       });
       const { url, error } = await res.json();
       if (error) throw new Error(error);
-      if (url) window.location.href = url;
+      if (url) {
+        trackEvent("checkout_started", { plan, billing: yearly ? "yearly" : "monthly" });
+        window.location.href = url;
+      }
     } catch (e) {
       msgApi.error((e as Error).message);
     } finally {
