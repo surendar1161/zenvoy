@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   const stripe = new Stripe(stripeKey, {
-    apiVersion: "2026-03-25.dahlia",
+    apiVersion: Stripe.API_VERSION,
   });
 
   const { amount, currency, description, freelancerName, clientName } = await req.json();

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No subscription found" }, { status: 404 });
   }
 
-  const stripe = new Stripe(stripeKey, { apiVersion: "2026-03-25.dahlia" });
+  const stripe = new Stripe(stripeKey, { apiVersion: Stripe.API_VERSION });
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   const portal = await stripe.billingPortal.sessions.create({

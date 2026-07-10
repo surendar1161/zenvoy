@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) return NextResponse.json({ milestones: [] });
 
-  const stripe = new Stripe(stripeKey, { apiVersion: "2026-03-25.dahlia" });
+  const stripe = new Stripe(stripeKey, { apiVersion: Stripe.API_VERSION });
 
   const { milestones, totalBudget, currency, freelancerName, clientName } = await req.json() as {
     milestones: Milestone[];
