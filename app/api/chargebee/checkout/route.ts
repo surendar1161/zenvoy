@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
     console.error("Chargebee checkout error:", JSON.stringify({
       site: result.site,
       planId: result.planId,
-      catalog: result.catalog,
       detail: result.detail,
     }));
     return NextResponse.json(

@@ -33,16 +33,7 @@ export const isChargebeeConfigured =
   !!process.env.CHARGEBEE_API_KEY &&
   !process.env.CHARGEBEE_API_KEY.includes("placeholder");
 
-/** Product Catalog 2.0 item prices (default) or legacy plan IDs. */
-export type ChargebeeCatalog = "items" | "plans";
-
-export function getChargebeeCatalog(): ChargebeeCatalog {
-  const catalog = process.env.CHARGEBEE_CATALOG?.toLowerCase();
-  if (catalog === "plans" || catalog === "legacy") return "plans";
-  return "items";
-}
-
-// IDs must match Chargebee exactly — Item Price IDs (PC 2.0) or Plan IDs (legacy).
+// Product Catalog 2.0 item price IDs — must match Chargebee → Plans → Pricing → Plan Price Point ID.
 export const CHARGEBEE_PLANS = {
   pro_monthly:       process.env.CHARGEBEE_PRO_MONTHLY_PLAN_ID      ?? "pro-monthly",
   pro_yearly:        process.env.CHARGEBEE_PRO_YEARLY_PLAN_ID        ?? "pro-yearly",
@@ -58,13 +49,8 @@ function chargebeeAuthHeader(apiKey: string) {
   return "Basic " + Buffer.from(`${apiKey}:`).toString("base64");
 }
 
-function isResourceNotFound(data: { api_error_code?: string }) {
-  return data.api_error_code === "resource_not_found";
-}
-
 function buildCheckoutBody(params: {
-  catalog: ChargebeeCatalog;
-  planId: string;
+  itemPriceId: string;
   redirectUrl: string;
   cancelUrl: string;
   userId: string;
@@ -75,19 +61,14 @@ function buildCheckoutBody(params: {
   fullName?: string | null;
 }) {
   const body = new URLSearchParams({
+    "subscription_items[item_price_id][0]": params.itemPriceId,
+    "subscription_items[quantity][0]": "1",
     redirect_url: params.redirectUrl,
     cancel_url: params.cancelUrl,
     "subscription[meta_data][supabase_user_id]": params.userId,
     "subscription[meta_data][plan]": params.plan,
     "subscription[meta_data][billing_period]": params.billingPeriod,
   });
-
-  if (params.catalog === "plans") {
-    body.set("subscription[plan_id]", params.planId);
-  } else {
-    body.set("subscription_items[item_price_id][0]", params.planId);
-    body.set("subscription_items[quantity][0]", "1");
-  }
 
   if (params.customerId) {
     body.set("customer[id]", params.customerId);
@@ -103,36 +84,11 @@ function buildCheckoutBody(params: {
   return body;
 }
 
-async function requestCheckout(
-  site: string,
-  apiKey: string,
-  catalog: ChargebeeCatalog,
-  body: URLSearchParams,
-) {
-  const endpoint = catalog === "plans"
-    ? "hosted_pages/checkout_new"
-    : "hosted_pages/checkout_new_for_items";
-
-  const res = await fetch(`https://${site}.chargebee.com/api/v2/${endpoint}`, {
-    method: "POST",
-    headers: {
-      Authorization: chargebeeAuthHeader(apiKey),
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
-  });
-
-  const data = await res.json();
-  return { res, data, catalog };
-}
-
-export function chargebeeNotFoundMessage(planId: string, site: string, catalog: ChargebeeCatalog) {
+export function chargebeeItemPriceNotFoundMessage(itemPriceId: string, site: string) {
   return (
-    `${planId} not found as a Chargebee item price on site "${site}". ` +
-    `Plan IDs (e.g. pro-monthly) are not the same as Price Point IDs. ` +
-    `Open each plan in Chargebee → Pricing → copy "Plan Price Point ID", ` +
-    `then set CHARGEBEE_*_PLAN_ID in Vercel to those values. ` +
-    `If price points are missing, click Set Price on each plan first.`
+    `${itemPriceId} not found as a Chargebee item price on site "${site}". ` +
+    `Open each plan in Chargebee → Pricing → set USD price → copy "Plan Price Point ID", ` +
+    `then set CHARGEBEE_*_PLAN_ID in Vercel to match.`
   );
 }
 
@@ -149,40 +105,48 @@ export async function createChargebeeCheckoutSession(params: {
   redirectUrl: string;
   cancelUrl: string;
 }) {
-  const preferredCatalog = getChargebeeCatalog();
-  const catalogsToTry: ChargebeeCatalog[] =
-    preferredCatalog === "plans" ? ["plans"] : ["items", "plans"];
+  const body = buildCheckoutBody({
+    itemPriceId: params.planId,
+    redirectUrl: params.redirectUrl,
+    cancelUrl: params.cancelUrl,
+    userId: params.userId,
+    plan: params.plan,
+    billingPeriod: params.billingPeriod,
+    customerId: params.customerId,
+    email: params.email,
+    fullName: params.fullName,
+  });
 
-  let lastResult: { res: Response; data: Record<string, unknown>; catalog: ChargebeeCatalog } | null = null;
+  const res = await fetch(`https://${params.site}.chargebee.com/api/v2/hosted_pages/checkout_new_for_items`, {
+    method: "POST",
+    headers: {
+      Authorization: chargebeeAuthHeader(params.apiKey),
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
 
-  for (const catalog of catalogsToTry) {
-    const body = buildCheckoutBody({ ...params, catalog });
-    const result = await requestCheckout(params.site, params.apiKey, catalog, body);
-    lastResult = result;
+  const data = await res.json() as Record<string, unknown>;
 
-    if (result.res.ok && result.data.hosted_page?.url) {
-      return {
-        ok: true as const,
-        url: result.data.hosted_page.url as string,
-        hostedPageId: result.data.hosted_page.id as string,
-        catalog,
-      };
-    }
-
-    if (!isResourceNotFound(result.data)) break;
+  if (res.ok && data.hosted_page && typeof data.hosted_page === "object" && "url" in data.hosted_page) {
+    const hostedPage = data.hosted_page as { url: string; id: string };
+    return {
+      ok: true as const,
+      url: hostedPage.url,
+      hostedPageId: hostedPage.id,
+    };
   }
 
-  const catalog = lastResult?.catalog ?? preferredCatalog;
+  const apiMessage = typeof data.message === "string" ? data.message : undefined;
   const message =
-    (lastResult?.data.message as string | undefined) ??
-    chargebeeNotFoundMessage(params.planId, params.site, catalog);
+    apiMessage ??
+    chargebeeItemPriceNotFoundMessage(params.planId, params.site);
 
   return {
     ok: false as const,
-    status: lastResult?.res.status ?? 500,
+    status: res.status,
     error: message,
-    detail: lastResult?.data,
-    catalog,
+    detail: data,
     planId: params.planId,
     site: params.site,
   };
