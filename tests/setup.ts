@@ -4,11 +4,11 @@ const SUPABASE_URL  = "https://ubutaehhczggyhyjgqjp.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVidXRhZWhoY3pnZ3loeWpncWpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjcwNjcsImV4cCI6MjA5MTMwMzA2N30.V44I9WPTDB8HucV7IPBiP5PVHI1uZq3LWHR1VWqgTek";
 
 // Freelancer — full dashboard access
-export const FREELANCER_EMAIL    = "surendar1160+1@gmail.com";
+export const FREELANCER_EMAIL    = "surendar1160@gmail.com";
 export const FREELANCER_PASSWORD = process.env.FREELANCER_PASSWORD ?? "";
 
-// Client — portal-only access
-export const CLIENT_EMAIL    = "surendar1160+2@gmail.com";
+// Client — portal-only access (create this user if client tests are needed)
+export const CLIENT_EMAIL    = "surendar1160+client@gmail.com";
 export const CLIENT_PASSWORD = process.env.CLIENT_PASSWORD ?? "";
 
 export function makeClient() {

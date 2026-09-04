@@ -10,15 +10,27 @@ function getAdmin() {
   );
 }
 
-async function sendViaResend(to: string, from: string, subject: string, html: string): Promise<boolean> {
+async function sendViaResend(to: string, from: string, subject: string, html: string): Promise<{ ok: boolean; error?: string }> {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return false;
+  if (!key) return { ok: false, error: "Email delivery is not configured on this server." };
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from, to: [to], subject, html }),
   });
-  return res.ok;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    return { ok: false, error: body || `Email provider returned ${res.status}` };
+  }
+  return { ok: true };
+}
+
+export function isEmailDeliveryConfigured(): boolean {
+  return !!process.env.RESEND_API_KEY;
+}
+
+export function getEmailFromAddress(): string {
+  return process.env.RESEND_FROM_EMAIL || "notifications@dealpilot.app";
 }
 
 type NotificationType =
@@ -168,9 +180,13 @@ export async function sendNotificationEmail(
 
     if (!emailContent) return;
 
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "notifications@dealpilot.app";
+    const fromEmail = getEmailFromAddress();
 
-    await sendViaResend(email, `DealPilot <${fromEmail}>`, emailContent.subject, emailContent.html);
+    const result = await sendViaResend(email, `DealPilot <${fromEmail}>`, emailContent.subject, emailContent.html);
+    if (!result.ok) {
+      console.error(`[email] Resend failed for ${type}:`, result.error);
+      return;
+    }
 
     // Mark the most recent notification as emailed
     if (data.documentId) {
@@ -231,9 +247,32 @@ export async function sendPortalClientEmail(
 
     if (!emailContent) return;
 
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "notifications@dealpilot.app";
-    await sendViaResend(clientEmail, `DealPilot <${fromEmail}>`, emailContent.subject, emailContent.html);
+    const fromEmail = getEmailFromAddress();
+    const result = await sendViaResend(clientEmail, `DealPilot <${fromEmail}>`, emailContent.subject, emailContent.html);
+    if (!result.ok) {
+      console.error(`[email] Resend failed for portal ${event}:`, result.error);
+    }
   } catch (err) {
     console.error(`[email] Failed to send portal email to ${clientEmail}:`, err);
+  }
+}
+
+export async function sendTestNotificationEmail(
+  userId: string,
+  email: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isEmailDeliveryConfigured()) {
+    return { ok: false, error: "Email delivery is not configured on this server." };
+  }
+
+  try {
+    const prefs = await getOrCreatePreferences(userId);
+    const unsubscribeUrl = `${APP_URL}/api/unsubscribe?token=${prefs?.unsubscribe_token ?? ""}&type=test`;
+    const emailContent = templates.testEmail({ unsubscribeUrl });
+    const fromEmail = getEmailFromAddress();
+    return await sendViaResend(email, `DealPilot <${fromEmail}>`, emailContent.subject, emailContent.html);
+  } catch (err) {
+    console.error(`[email] Failed to send test email to ${email}:`, err);
+    return { ok: false, error: "Failed to send test email." };
   }
 }

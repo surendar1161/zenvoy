@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import {
   Avatar, Button, Card, Col, ColorPicker, Descriptions, Divider,
   Form, Input, Modal, Radio, Row, Select, Space, Switch, Table,
-  Tabs, Tag, Typography, Upload, message,
+  Tabs, Tag, Typography, Upload, message, Alert,
 } from "antd";
 import type { Color } from "antd/es/color-picker";
 import type { TableColumnsType } from "antd";
@@ -87,6 +87,13 @@ function SettingsPage() {
   const [scheduling, setScheduling] = useState({ enabled: false, link: "", platform: "calendly", timezone: "America/New_York" });
   const [schedulingSaving, setSchedulingSaving] = useState(false);
   const [schedPreviewOpen, setSchedPreviewOpen] = useState(false);
+  const [emailHealth, setEmailHealth] = useState<{
+    configured: boolean;
+    fromEmail: string;
+    emailEnabled: boolean;
+    userEmail: string | null;
+  } | null>(null);
+  const [testEmailLoading, setTestEmailLoading] = useState(false);
 
   function setBrandField<K extends keyof BrandKit>(key: K, value: BrandKit[K]) {
     setBrand(b => ({ ...b, [key]: value }));
@@ -109,8 +116,33 @@ function SettingsPage() {
     setBrand(loadBrand());
     loadMembers();
     loadNotifPrefs();
+    loadEmailHealth();
     loadScheduling();
   }, [form]);
+
+  async function loadEmailHealth() {
+    try {
+      const res = await fetch("/api/notifications/email-health");
+      if (res.ok) setEmailHealth(await res.json());
+    } catch {}
+  }
+
+  async function sendTestEmail() {
+    setTestEmailLoading(true);
+    try {
+      const res = await fetch("/api/notifications/test-email", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        msgApi.error(data.error ?? "Failed to send test email");
+        return;
+      }
+      msgApi.success(`Test email sent to ${emailHealth?.userEmail ?? "your inbox"}`);
+    } catch {
+      msgApi.error("Failed to send test email");
+    } finally {
+      setTestEmailLoading(false);
+    }
+  }
 
   async function loadNotifPrefs() {
     try {
@@ -743,9 +775,53 @@ function SettingsPage() {
       children: (
         <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 28 } }}>
           <Title level={5} style={{ margin: "0 0 6px" }}><Space><BellOutlined style={{ color: "#0ea5e9" }} />Email Notifications</Space></Title>
-          <Text type="secondary" style={{ display: "block", marginBottom: 24, fontSize: 13 }}>
+          <Text type="secondary" style={{ display: "block", marginBottom: 16, fontSize: 13 }}>
             Choose which events trigger an email notification. You can also unsubscribe via the link in any notification email.
           </Text>
+
+          {!emailHealth?.configured && (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16, borderRadius: 10 }}
+              message="Email delivery is not configured"
+              description="Proposal views, signatures, and follow-up reminders cannot be sent by email on this deployment. In-app notifications still work. Contact your administrator if you expected email alerts."
+            />
+          )}
+
+          {emailHealth?.configured && emailHealth.emailEnabled === false && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 16, borderRadius: 10 }}
+              message="Email notifications are turned off"
+              description="You've disabled the master email toggle below. Turn it on to receive alerts when clients view or sign your documents."
+            />
+          )}
+
+          {emailHealth?.configured && (
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+              padding: "14px 16px", marginBottom: 20, borderRadius: 12,
+              border: "1px solid #dbeafe", background: "#eff6ff",
+            }}>
+              <div>
+                <Text strong style={{ fontSize: 14, display: "block" }}>Email delivery status</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Sends from {emailHealth.fromEmail}
+                  {emailHealth.userEmail ? ` · Test goes to ${emailHealth.userEmail}` : ""}
+                </Text>
+              </div>
+              <Button
+                loading={testEmailLoading}
+                onClick={sendTestEmail}
+                disabled={!emailHealth.userEmail}
+                style={{ borderRadius: 8, fontWeight: 600 }}
+              >
+                Send test email
+              </Button>
+            </div>
+          )}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #f1f5f9" }}>
             <div>
               <Text strong style={{ fontSize: 14 }}>Email notifications enabled</Text>

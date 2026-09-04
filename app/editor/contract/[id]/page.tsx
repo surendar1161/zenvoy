@@ -12,6 +12,8 @@ interface Contract {
   id: string; contract_type_name: string;
   party_a_name: string; party_b_name: string;
   contract_text: string | null;
+  status: string;
+  signed_at: string | null;
 }
 
 export default function ContractEditorPage() {
@@ -22,7 +24,7 @@ export default function ContractEditorPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const { data } = await supabase.from("contracts").select("id,contract_type_name,party_a_name,party_b_name,contract_text").eq("id", id).single();
+      const { data } = await supabase.from("contracts").select("id,contract_type_name,party_a_name,party_b_name,contract_text,status,signed_at").eq("id", id).single();
       setContract(data as Contract);
       setLoading(false);
     }
@@ -30,12 +32,36 @@ export default function ContractEditorPage() {
   }, [id]);
 
   async function handleSave(html: string) {
+    // Prevent editing signed contracts
+    if (contract?.status === "signed" || contract?.signed_at) {
+      throw new Error("Cannot edit a signed contract. Contract is legally binding and immutable.");
+    }
+    
     const supabase = createClient();
-    await supabase.from("contracts").update({ contract_text: html }).eq("id", id);
+    const { error } = await supabase.from("contracts").update({ contract_text: html }).eq("id", id);
+    
+    if (error) throw error;
   }
 
   if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Spin size="large" /></div>;
   if (!contract) return <Result status="404" title="Contract not found" extra={<Button href="/contracts">Back</Button>} />;
+
+  // Show warning if contract is signed
+  if (contract.status === "signed" || contract.signed_at) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <Result
+          status="warning"
+          title="Contract is Signed"
+          subTitle="This contract has been legally signed and cannot be edited. Any modifications would invalidate the signatures."
+          extra={[
+            <Button key="back" href="/contracts?tab=my-contracts">Back to Contracts</Button>,
+            <Button key="view" type="primary" href={`/contract/${id}`}>View Contract</Button>,
+          ]}
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -47,6 +73,7 @@ export default function ContractEditorPage() {
         onSave={handleSave}
         backHref="/contracts?tab=my-contracts"
         backLabel="My Contracts"
+        readOnly={contract.status === "signed" || !!contract.signed_at}
       />
     </div>
   );

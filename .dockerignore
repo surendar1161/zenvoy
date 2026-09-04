@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+mobile
+
+# Next.js
+.next
+out
+
+# Git & IDE
+.git
+.gitignore
+.cursor
+*.md
+!docker/README.md
+
+# Env (inject at runtime)
+.env
+.env.*
+!.env.docker.example
+
+# Tests & dev artifacts
+coverage
+*.log
+npm-debug.log*
+.DS_Store
+tsconfig.tsbuildinfo
+
+# Legacy / unused in container
+frontend
+backend
+terminals
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore

@@ -116,6 +116,11 @@ export function canCreateProposal(plan: Plan, currentCount: number): boolean {
   return limit === "unlimited" || currentCount < limit;
 }
 
+export function canCreateContract(plan: Plan, currentCount: number): boolean {
+  const limit = getPlan(plan).limits.contracts;
+  return limit === "unlimited" || currentCount < limit;
+}
+
 // Stripe price IDs — set these after creating products in Stripe dashboard
 // or they'll be created inline via price_data
 export const STRIPE_PRICES = {

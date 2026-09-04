@@ -460,7 +460,7 @@ function TemplatesBrowser({
 function ContractCard({ contract, color }: { contract: (typeof CONTRACT_TYPES)[0]; color: string }) {
   return (
     <Col xs={24} sm={12} lg={8}>
-      <Link href={`/contracts/generate/${contract.id}`}>
+      <Link href={`/contracts/generate-quick/${contract.id}`}>
         <Card
           hoverable
           size="small"

@@ -13,6 +13,7 @@ import {
   HeatMapOutlined, ClockCircleOutlined, CalendarOutlined, WalletOutlined,
 } from "@ant-design/icons";
 import RunningTimerIndicator from "@/components/RunningTimerIndicator";
+import UsageMeter from "@/components/UsageMeter";
 import { Modal } from "antd";
 import { getTrialInfo } from "@/lib/trial";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -21,6 +22,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { antdTheme } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import type { UsageSummary } from "@/lib/usage";
 
 const { Sider, Header, Content } = Layout;
 const { Text } = Typography;
@@ -31,6 +33,24 @@ const EXPANDED_WIDTH = 228;
 const BASE_NAV: MenuProps["items"] = [
   { key: "/dashboard", icon: <HomeOutlined />, label: <Link href="/dashboard">Dashboard</Link> },
   { key: "/pipeline",  icon: <FundOutlined />,  label: <Link href="/pipeline">Pipeline</Link> },
+  { type: "divider" },
+  { 
+    key: "/generate", 
+    icon: <ThunderboltOutlined />, 
+    label: <Link href="/generate">New Proposal</Link>,
+    style: { background: "linear-gradient(135deg, #eff6ff 0%, transparent 100%)" },
+  },
+  { 
+    key: "/contracts", 
+    icon: <SafetyCertificateOutlined />, 
+    label: <Link href="/contracts">Contracts</Link> 
+  },
+  { 
+    key: "/website-analyzer", 
+    icon: <RocketOutlined />, 
+    label: <Link href="/website-analyzer">Website Analyzer <span style={{ fontSize: 10, background: "#10b98120", color: "#059669", padding: "1px 6px", borderRadius: 8, marginLeft: 4 }}>NEW</span></Link> 
+  },
+  { type: "divider" },
   {
     key: "grp-clients",
     icon: <TeamOutlined />,
@@ -60,7 +80,6 @@ const BASE_NAV: MenuProps["items"] = [
       { key: "/automations", icon: <ThunderboltOutlined />,       label: <Link href="/automations">Automations</Link> },
       { key: "/bookings",    icon: <CalendarOutlined />,          label: <Link href="/bookings">Bookings</Link> },
       { key: "/templates",   icon: <AppstoreOutlined />,          label: <Link href="/templates">Templates</Link> },
-      { key: "/contracts",   icon: <SafetyCertificateOutlined />, label: <Link href="/contracts">Contracts</Link> },
     ],
   },
   {
@@ -87,6 +106,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [showExpiredBanner, setShowExpiredBanner] = useState(true);
   const [navItems, setNavItems] = useState<MenuProps["items"]>(BASE_NAV);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
 
   const siderWidth = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
@@ -124,6 +144,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const p = sub?.plan ?? "free";
       setTrialEndsAt(t);
       setPlan(p);
+
+      fetch("/api/usage")
+        .then(res => res.ok ? res.json() : null)
+        .then(data => { if (data) setUsage(data as UsageSummary); })
+        .catch(() => {});
+
       // Show expired modal once per session if trial expired + no paid plan
       if (p === "free" && t) {
         const trial = getTrialInfo(t);
@@ -353,6 +379,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               style={{ border: "none", padding: "0 8px" }}
             />
           </div>
+
+          <UsageMeter usage={usage} collapsed={collapsed} />
 
           {/* Trial expired — sidebar upgrade CTA */}
           {isExpiredFree && !collapsed && (

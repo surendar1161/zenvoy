@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   Alert, Badge, Button, Card, Col, Result, Row, Space, Statistic,
-  Switch, Tag, Typography, message, Divider, Spin,
+  Switch, Tag, Typography, message, Divider, Spin, Progress,
 } from "antd";
 import {
   CheckCircleFilled, CloseCircleOutlined, ThunderboltFilled,
@@ -14,6 +14,8 @@ import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
 import type { Plan, BillingPeriod } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import type { UsageSummary } from "@/lib/usage";
+import { isAtLimit, usageLabel, usagePercent } from "@/lib/usage";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -43,6 +45,7 @@ function SubscriptionContent() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [yearly, setYearly] = useState(false);
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
   const [msgApi, ctx] = message.useMessage();
   const supabase = createClient();
 
@@ -64,6 +67,10 @@ function SubscriptionContent() {
       const { data: profile } = await supabase.from("profiles").select("trial_ends_at").eq("id", user.id).maybeSingle();
       setTrialEndsAt(profile?.trial_ends_at ?? null);
     }
+    try {
+      const res = await fetch("/api/usage");
+      if (res.ok) setUsage(await res.json());
+    } catch {}
     setLoading(false);
   }
 
@@ -321,22 +328,63 @@ function SubscriptionContent() {
 
       {/* Usage stats */}
       <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginTop: 32 }} styles={{ body: { padding: 28 } }}>
-        <Title level={5} style={{ margin: "0 0 20px" }}>Usage This Month</Title>
-        <Row gutter={[24, 16]}>
+        <Title level={5} style={{ margin: "0 0 4px" }}>Usage This Month</Title>
+        <Text type="secondary" style={{ fontSize: 13, display: "block", marginBottom: 20 }}>
+          {usage?.periodLabel ?? "Current month"} · Resets on the 1st
+        </Text>
+        <Row gutter={[24, 20]}>
           {[
-            { label: "Proposals",  icon: "📄", limit: currentPlan.limits.proposals },
-            { label: "Contracts",  icon: "📋", limit: currentPlan.limits.contracts },
-            { label: "Team Members", icon: "👥", limit: currentPlan.limits.teamMembers },
-          ].map(item => (
-            <Col key={item.label} xs={24} sm={8}>
-              <Statistic
-                title={<Space>{item.icon}<Text type="secondary" style={{ fontSize: 13 }}>{item.label}</Text></Space>}
-                value={item.limit === "unlimited" ? "∞ Unlimited" : `of ${item.limit}`}
-                valueStyle={{ fontSize: 20, fontWeight: 700, color: "#0ea5e9" }}
-              />
-            </Col>
-          ))}
+            { label: "Proposals", icon: "📄", data: usage?.proposals ?? { used: 0, limit: currentPlan.limits.proposals } },
+            { label: "Contracts", icon: "📋", data: usage?.contracts ?? { used: 0, limit: currentPlan.limits.contracts } },
+            { label: "Team Members", icon: "👥", data: usage?.teamMembers ?? { used: 1, limit: currentPlan.limits.teamMembers } },
+          ].map(item => {
+            const atLimit = isAtLimit(item.data);
+            const pct = usagePercent(item.data.used, item.data.limit);
+            const unlimited = item.data.limit === "unlimited";
+
+            return (
+              <Col key={item.label} xs={24} sm={8}>
+                <div style={{ padding: "16px 18px", borderRadius: 12, border: "1px solid #f1f5f9", background: "#f8fafc" }}>
+                  <Space style={{ marginBottom: 8 }}>
+                    <span>{item.icon}</span>
+                    <Text type="secondary" style={{ fontSize: 13 }}>{item.label}</Text>
+                  </Space>
+                  <Statistic
+                    value={unlimited ? item.data.used : usageLabel(item.data)}
+                    suffix={unlimited ? <Text type="secondary" style={{ fontSize: 14 }}>· Unlimited</Text> : undefined}
+                    valueStyle={{
+                      fontSize: 22,
+                      fontWeight: 700,
+                      color: atLimit ? "#ef4444" : "#0ea5e9",
+                    }}
+                  />
+                  {!unlimited && (
+                    <Progress
+                      percent={pct}
+                      size="small"
+                      strokeColor={atLimit ? "#ef4444" : pct >= 80 ? "#f59e0b" : "#0ea5e9"}
+                      style={{ marginTop: 8 }}
+                    />
+                  )}
+                </div>
+              </Col>
+            );
+          })}
         </Row>
+        {usage && !usage.hasUnlimitedUsage && (isAtLimit(usage.proposals) || isAtLimit(usage.contracts)) && (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginTop: 20, borderRadius: 10 }}
+            message="You've hit a free plan limit"
+            description="Upgrade to Pro for unlimited proposals and contracts, or wait until the 1st of next month when limits reset."
+            action={
+              <Button size="small" type="primary" onClick={() => upgrade("pro")} style={{ borderRadius: 8 }}>
+                Upgrade to Pro
+              </Button>
+            }
+          />
+        )}
       </Card>
 
       {/* Money back guarantee */}

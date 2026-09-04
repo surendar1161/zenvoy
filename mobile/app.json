@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "DealPilot",
+    "slug": "dealpilot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "dealpilot",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0369a1"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.dealpilot.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0369a1"
+      },
+      "package": "app.dealpilot.mobile"
+    },
+    "plugins": ["expo-router", "expo-font"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

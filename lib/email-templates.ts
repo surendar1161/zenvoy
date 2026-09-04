@@ -173,6 +173,18 @@ export function clientMessageReceivedEmail(data: { freelancerName: string; messa
   };
 }
 
+export function testEmail(data: { unsubscribeUrl: string }): { subject: string; html: string } {
+  return {
+    subject: "DealPilot email test — you're all set!",
+    html: layout(`
+      <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#0f172a">Email notifications work</h2>
+      <p style="color:#475569;font-size:14px;line-height:1.6;margin:0 0 8px">This is a test email from DealPilot. If you're reading this, proposal views, signatures, and follow-up reminders can reach your inbox.</p>
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 16px">You can customize which events send email in Settings → Notifications.</p>
+      ${btn("Open Dashboard", `${APP_URL}/dashboard`)}
+    `, data.unsubscribeUrl),
+  };
+}
+
 export function clientInvoiceSentEmail(data: { freelancerName: string; invoiceTitle: string; amount: string; portalToken: string; unsubscribeUrl: string }): { subject: string; html: string } {
   return {
     subject: `New invoice from ${data.freelancerName}`,

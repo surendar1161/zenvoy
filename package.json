@@ -11,7 +11,10 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "seed": "npx tsx tests/07-seed-data.ts",
-    "seed:demo": "npx tsx scripts/seed-demo.ts"
+    "seed:demo": "npx tsx scripts/seed-demo.ts",
+    "mobile": "cd mobile && npm start",
+    "mobile:ios": "cd mobile && npm run ios",
+    "mobile:android": "cd mobile && npm run android"
   },
   "keywords": [],
   "author": "",
