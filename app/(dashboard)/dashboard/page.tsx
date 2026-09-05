@@ -3,17 +3,20 @@
 import { useEffect, useState } from "react";
 import {
   Avatar, Badge, Button, Card, Col, Empty, List, Modal, Progress,
-  Row, Space, Statistic, Tag, Typography, Spin, message,
+  Row, Space, Statistic, Tag, Typography, Spin, message, FloatButton, Tooltip,
 } from "antd";
 import {
   ThunderboltOutlined, FileTextOutlined, SafetyCertificateOutlined,
   TeamOutlined, DollarOutlined, EyeOutlined, CheckCircleOutlined,
   ArrowRightOutlined, ClockCircleOutlined, BellOutlined, WarningOutlined,
-  RiseOutlined, DeleteOutlined, ExperimentOutlined,
+  RiseOutlined, DeleteOutlined, ExperimentOutlined, PlusOutlined,
+  TrophyOutlined, FireOutlined, LineChartOutlined, RocketOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
+import { DESIGN_TOKENS } from "@/lib/design-tokens";
 
 const { Title, Text } = Typography;
 
@@ -47,12 +50,14 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasDemoData, setHasDemoData] = useState(false);
   const [deletingDemo, setDeletingDemo] = useState(false);
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
+  const [fabOpen, setFabOpen] = useState(false);
 
   useEffect(() => {
     load();
@@ -342,35 +347,364 @@ export default function DashboardPage() {
             ))}
           </Row>
 
-          {/* ── Proposal pipeline ── */}
+          {/* ── Revenue Forecast & Today's Focus ── */}
+          <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+            {/* Revenue Forecast */}
+            <Col xs={24} lg={12}>
+              <Card
+                style={{
+                  borderRadius: 16,
+                  border: "1px solid #e2e8f0",
+                  background: "linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)",
+                  height: "100%",
+                }}
+                styles={{ body: { padding: 24 } }}
+              >
+                <Space direction="vertical" size={16} style={{ width: "100%" }}>
+                  <Space align="center" style={{ justifyContent: "space-between", width: "100%" }}>
+                    <Space>
+                      <Avatar
+                        size={40}
+                        style={{ background: "#10b98115", color: "#059669" }}
+                        icon={<LineChartOutlined />}
+                      />
+                      <div>
+                        <Text strong style={{ fontSize: 15, display: "block" }}>
+                          Revenue Forecast
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          Based on your pipeline
+                        </Text>
+                      </div>
+                    </Space>
+                  </Space>
+
+                  {(() => {
+                    const pipelineValue = (data.proposals.sent + data.proposals.viewed) * 
+                      (data.revenue / Math.max(data.proposals.accepted, 1));
+                    const potentialRevenue = Math.round(pipelineValue * (convRate / 100));
+                    const onTrackAmount = data.revenue + potentialRevenue;
+
+                    return (
+                      <>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+                            <Text
+                              style={{
+                                fontSize: 32,
+                                fontWeight: 900,
+                                color: "#059669",
+                                lineHeight: 1,
+                              }}
+                            >
+                              ${onTrackAmount.toLocaleString()}
+                            </Text>
+                            <Space size={4}>
+                              <RiseOutlined style={{ color: "#10b981", fontSize: 14 }} />
+                              <Text style={{ color: "#10b981", fontSize: 13, fontWeight: 600 }}>
+                                Potential
+                              </Text>
+                            </Space>
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 13 }}>
+                            ${data.revenue.toLocaleString()} won + ${potentialRevenue.toLocaleString()} in pipeline
+                          </Text>
+                        </div>
+
+                        <div
+                          style={{
+                            background: "#f8fafc",
+                            borderRadius: DESIGN_TOKENS.borderRadius.md,
+                            padding: "12px 16px",
+                          }}
+                        >
+                          <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <Text style={{ fontSize: 12, color: "#64748b" }}>Pipeline Value</Text>
+                              <Text strong style={{ fontSize: 13 }}>
+                                ${Math.round(pipelineValue).toLocaleString()}
+                              </Text>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <Text style={{ fontSize: 12, color: "#64748b" }}>
+                                Expected Close ({convRate}%)
+                              </Text>
+                              <Text strong style={{ fontSize: 13, color: "#10b981" }}>
+                                ${potentialRevenue.toLocaleString()}
+                              </Text>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <Text style={{ fontSize: 12, color: "#64748b" }}>
+                                Active Proposals
+                              </Text>
+                              <Text strong style={{ fontSize: 13 }}>
+                                {data.proposals.sent + data.proposals.viewed}
+                              </Text>
+                            </div>
+                          </Space>
+                        </div>
+
+                        {convRate < 25 && data.proposals.total > 3 && (
+                          <div
+                            style={{
+                              background: "#fffbeb",
+                              border: "1px solid #fef3c7",
+                              borderRadius: DESIGN_TOKENS.borderRadius.sm,
+                              padding: "10px 14px",
+                            }}
+                          >
+                            <Space size={8}>
+                              <FireOutlined style={{ color: "#f59e0b", fontSize: 14 }} />
+                              <Text style={{ fontSize: 12, color: "#92400e" }}>
+                                <strong>Tip:</strong> Your conversion rate is low. Consider following up on
+                                viewed proposals or adjusting your pricing.
+                              </Text>
+                            </Space>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </Space>
+              </Card>
+            </Col>
+
+            {/* Today's Focus */}
+            <Col xs={24} lg={12}>
+              <Card
+                style={{
+                  borderRadius: 16,
+                  border: "1px solid #e2e8f0",
+                  background: "linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)",
+                  height: "100%",
+                }}
+                styles={{ body: { padding: 24 } }}
+              >
+                <Space direction="vertical" size={16} style={{ width: "100%" }}>
+                  <Space align="center" style={{ justifyContent: "space-between", width: "100%" }}>
+                    <Space>
+                      <Avatar
+                        size={40}
+                        style={{ background: "#0ea5e915", color: "#0369a1" }}
+                        icon={<TrophyOutlined />}
+                      />
+                      <div>
+                        <Text strong style={{ fontSize: 15, display: "block" }}>
+                          Today's Focus
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {data.needsAttention.length === 0
+                            ? "All caught up! 🎉"
+                            : `${data.needsAttention.length} item${data.needsAttention.length !== 1 ? "s" : ""} need attention`}
+                        </Text>
+                      </div>
+                    </Space>
+                    {data.needsAttention.length > 0 && (
+                      <Badge
+                        count={data.needsAttention.length}
+                        style={{ background: "#f59e0b" }}
+                      />
+                    )}
+                  </Space>
+
+                  {data.needsAttention.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "20px 0" }}>
+                      <CheckCircleOutlined
+                        style={{ fontSize: 48, color: "#10b981", marginBottom: 12 }}
+                      />
+                      <Text
+                        style={{ display: "block", color: "#64748b", fontSize: 13 }}
+                      >
+                        No follow-ups needed. Great work!
+                      </Text>
+                    </div>
+                  ) : (
+                    <List
+                      size="small"
+                      dataSource={data.needsAttention.slice(0, 3)}
+                      renderItem={(item, index) => (
+                        <List.Item
+                          style={{
+                            padding: "12px 14px",
+                            background: "#ffffff",
+                            borderRadius: DESIGN_TOKENS.borderRadius.sm,
+                            border: "1px solid #f1f5f9",
+                            marginBottom: index < 2 ? 8 : 0,
+                          }}
+                          actions={[
+                            <Button
+                              key="action"
+                              type="primary"
+                              size="small"
+                              style={{
+                                borderRadius: DESIGN_TOKENS.borderRadius.sm,
+                                fontSize: 12,
+                                height: 28,
+                              }}
+                              onClick={() => router.push(`/proposals`)}
+                            >
+                              Follow Up
+                            </Button>,
+                          ]}
+                        >
+                          <List.Item.Meta
+                            avatar={
+                              <div
+                                style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: "50%",
+                                  background:
+                                    item.status === "sent" ? "#f59e0b" : "#0ea5e9",
+                                  marginTop: 6,
+                                }}
+                              />
+                            }
+                            title={
+                              <Text strong style={{ fontSize: 13 }}>
+                                {item.client_name}
+                              </Text>
+                            }
+                            description={
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {item.reason}
+                              </Text>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  )}
+
+                  {data.needsAttention.length > 3 && (
+                    <Button
+                      type="link"
+                      size="small"
+                      onClick={() => router.push("/proposals")}
+                      style={{ padding: 0, fontSize: 12 }}
+                    >
+                      View {data.needsAttention.length - 3} more{" "}
+                      <ArrowRightOutlined />
+                    </Button>
+                  )}
+                </Space>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* ── Enhanced Proposal Pipeline ── */}
           <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 24 }} styles={{ body: { padding: 24 } }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-              <Title level={5} style={{ margin: 0 }}>Proposal Pipeline</Title>
+              <Space>
+                <RocketOutlined style={{ color: "#0ea5e9", fontSize: 18 }} />
+                <Title level={5} style={{ margin: 0 }}>Proposal Pipeline</Title>
+              </Space>
               <Link href="/proposals">
                 <Button type="link" icon={<ArrowRightOutlined />} style={{ padding: 0 }}>View all</Button>
               </Link>
             </div>
-            <Row gutter={[16, 16]}>
-              {[
-                { label: "Draft",    count: data.proposals.draft,    color: "#94a3b8" },
-                { label: "Sent",     count: data.proposals.sent,     color: "#0ea5e9" },
-                { label: "Viewed",   count: data.proposals.viewed,   color: "#06b6d4" },
-                { label: "Won",      count: data.proposals.accepted, color: "#10b981" },
-                { label: "Declined", count: data.proposals.declined, color: "#ef4444" },
-              ].map(stage => (
-                <Col key={stage.label} xs={12} sm={4} style={{ textAlign: "center" }}>
-                  <div style={{
-                    width: 52, height: 52, borderRadius: "50%",
-                    background: `${stage.color}15`, border: `2px solid ${stage.color}40`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    margin: "0 auto 8px",
-                  }}>
-                    <Text style={{ fontWeight: 900, fontSize: 18, color: stage.color }}>{stage.count}</Text>
-                  </div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>{stage.label}</Text>
-                </Col>
-              ))}
-            </Row>
+            {/* Visual Funnel */}
+            <div style={{ position: "relative", marginBottom: 20 }}>
+              <Row gutter={[12, 16]} align="middle">
+                {[
+                  { label: "Draft", count: data.proposals.draft, color: "#94a3b8", icon: "📝" },
+                  { label: "Sent", count: data.proposals.sent, color: "#0ea5e9", icon: "📤" },
+                  { label: "Viewed", count: data.proposals.viewed, color: "#06b6d4", icon: "👁️" },
+                  { label: "Won", count: data.proposals.accepted, color: "#10b981", icon: "✅" },
+                  { label: "Declined", count: data.proposals.declined, color: "#ef4444", icon: "❌" },
+                ].map((stage, idx) => (
+                  <Col key={stage.label} xs={24} sm={24 / 5} style={{ textAlign: "center" }}>
+                    <div style={{ position: "relative" }}>
+                      {/* Arrow connector (except for last item) */}
+                      {idx < 4 && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "25px",
+                            left: "calc(50% + 30px)",
+                            width: "calc(100% - 60px)",
+                            height: "2px",
+                            background: "#e2e8f0",
+                            zIndex: 0,
+                            display: window.innerWidth < 576 ? "none" : "block",
+                          }}
+                        >
+                          <div
+                            style={{
+                              position: "absolute",
+                              right: -4,
+                              top: -3,
+                              width: 0,
+                              height: 0,
+                              borderLeft: "4px solid #e2e8f0",
+                              borderTop: "4px solid transparent",
+                              borderBottom: "4px solid transparent",
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Stage circle */}
+                      <div
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: "50%",
+                          background: `${stage.color}15`,
+                          border: `3px solid ${stage.color}`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "0 auto 8px",
+                          position: "relative",
+                          zIndex: 1,
+                          boxShadow: `0 2px 8px ${stage.color}25`,
+                        }}
+                      >
+                        <Text style={{ fontSize: 20 }}>{stage.icon}</Text>
+                      </div>
+                      
+                      {/* Count */}
+                      <Text
+                        strong
+                        style={{
+                          display: "block",
+                          fontSize: 18,
+                          fontWeight: 900,
+                          color: stage.color,
+                          marginBottom: 2,
+                        }}
+                      >
+                        {stage.count}
+                      </Text>
+                      
+                      {/* Label */}
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {stage.label}
+                      </Text>
+                      
+                      {/* Percentage (for non-draft stages) */}
+                      {idx > 0 && data.proposals.total > 0 && (
+                        <div style={{ marginTop: 4 }}>
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: stage.color,
+                              background: `${stage.color}10`,
+                              padding: "2px 6px",
+                              borderRadius: 10,
+                              fontWeight: 600,
+                            }}
+                          >
+                            {Math.round((stage.count / data.proposals.total) * 100)}%
+                          </Text>
+                        </div>
+                      )}
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            </div>
             {/* Progress bar */}
             <div style={{ marginTop: 20 }}>
               <div style={{ display: "flex", gap: 2, borderRadius: 8, overflow: "hidden", height: 8 }}>
@@ -389,41 +723,6 @@ export default function DashboardPage() {
           </Card>
 
           <Row gutter={[24, 24]}>
-            {/* ── Needs attention ── */}
-            <Col xs={24} lg={12}>
-              <Card
-                title={<Space><WarningOutlined style={{ color: "#f59e0b" }} /><span>Needs Attention</span>{data.needsAttention.length > 0 && <Badge count={data.needsAttention.length} color="#f59e0b" />}</Space>}
-                style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%" }}
-                styles={{ body: { padding: 0 } }}
-              >
-                {data.needsAttention.length === 0 ? (
-                  <Empty description={<Text type="secondary">All caught up! No follow-ups needed.</Text>}
-                    style={{ padding: "32px 20px" }}
-                    image={<CheckCircleOutlined style={{ fontSize: 48, color: "#10b981" }} />}
-                    imageStyle={{ height: 60 }} />
-                ) : (
-                  <List
-                    dataSource={data.needsAttention}
-                    renderItem={item => (
-                      <List.Item style={{ padding: "14px 20px" }}>
-                        <List.Item.Meta
-                          avatar={
-                            <Avatar style={{ background: item.status === "sent" ? "#fff7ed" : "#eff6ff", color: item.status === "sent" ? "#f59e0b" : "#0ea5e9" }}
-                              icon={item.status === "sent" ? <ClockCircleOutlined /> : <EyeOutlined />} />
-                          }
-                          title={<Text strong style={{ fontSize: 14 }}>{item.client_name}</Text>}
-                          description={<Text type="secondary" style={{ fontSize: 12 }}>{item.reason}</Text>}
-                        />
-                        <Link href={`/generate`}>
-                          <Button size="small" style={{ borderRadius: 8, fontSize: 12 }}>Follow up</Button>
-                        </Link>
-                      </List.Item>
-                    )}
-                  />
-                )}
-              </Card>
-            </Col>
-
             {/* ── Recent activity ── */}
             <Col xs={24} lg={12}>
               <Card
@@ -563,6 +862,46 @@ export default function DashboardPage() {
           </Row>
         </>
       )}
+
+      {/* ── Floating Action Button ── */}
+      <FloatButton.Group
+        open={fabOpen}
+        trigger="click"
+        onClick={() => setFabOpen(!fabOpen)}
+        style={{ right: 24, bottom: 24 }}
+        icon={<PlusOutlined />}
+        tooltip="Quick Actions"
+        type="primary"
+      >
+        <Tooltip title="Create Proposal" placement="left">
+          <FloatButton
+            icon={<ThunderboltOutlined />}
+            onClick={() => router.push("/generate")}
+            style={{ background: "#0ea5e9" }}
+          />
+        </Tooltip>
+        <Tooltip title="New Contract" placement="left">
+          <FloatButton
+            icon={<SafetyCertificateOutlined />}
+            onClick={() => router.push("/contracts")}
+            style={{ background: "#10b981" }}
+          />
+        </Tooltip>
+        <Tooltip title="Add Client" placement="left">
+          <FloatButton
+            icon={<TeamOutlined />}
+            onClick={() => router.push("/clients")}
+            style={{ background: "#7c3aed" }}
+          />
+        </Tooltip>
+        <Tooltip title="Website Analyzer" placement="left">
+          <FloatButton
+            icon={<RocketOutlined />}
+            onClick={() => router.push("/website-analyzer")}
+            style={{ background: "#f59e0b" }}
+          />
+        </Tooltip>
+      </FloatButton.Group>
     </div>
   );
 }
