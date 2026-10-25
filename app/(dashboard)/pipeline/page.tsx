@@ -2,24 +2,26 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Button, Card, Col, Empty, Input, InputNumber, Progress, Row, Select,
-  Space, Spin, Tag, Tooltip, Typography, message, Badge,
+  Avatar, Button, Card, Input, InputNumber, Select,
+  Space, Tag, Tooltip, Typography, message, Badge,
 } from "antd";
 import {
   ThunderboltOutlined, PlusOutlined, EyeOutlined,
-  DollarOutlined, ClockCircleOutlined, ArrowRightOutlined,
+  DollarOutlined, ClockCircleOutlined,
   CheckCircleOutlined, CloseCircleOutlined, FileTextOutlined,
   SendOutlined, FundOutlined, TrophyOutlined, FireOutlined,
   SearchOutlined, FilterOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
+import { ButtonLink } from "@/components/site/ui";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const STAGES = [
   { key: "draft",    label: "Draft",    color: "#94a3b8", bg: "#f1f5f9", icon: <FileTextOutlined />,      desc: "Created, not sent" },
@@ -105,30 +107,26 @@ export default function PipelinePage() {
     return true;
   });
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}>{ctx}<Spin size="large" /></div>;
+  if (loading) {
+    return (
+      <Page wide>
+        {ctx}
+        <div className="mb-8 space-y-3"><div className="dp-skel h-8 w-56" /><div className="dp-skel h-4 w-80" /></div>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">{[0,1,2,3,4].map(i => <div key={i} className="dp-skel h-28 rounded-3xl" />)}</div>
+      </Page>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: 1300, margin: "0 auto", padding: "32px 28px" }}>
+    <Page wide>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <FundOutlined style={{ fontSize: 26, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Deal Pipeline</Title>
-            <Tag color="blue" style={{ borderRadius: 20, fontWeight: 700 }}>{total} proposals</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>
-            Track every deal from draft to closed — see where revenue is at risk.
-          </Text>
-        </div>
-        <Link href="/generate">
-          <Button type="primary" icon={<PlusOutlined />} size="large" style={{ borderRadius: 10, fontWeight: 600 }}>
-            New Proposal
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Pipeline"
+        sub="Track every deal from draft to closed, and see where revenue is at risk."
+        count={total ? `${total} proposals` : undefined}
+        action={<ButtonLink href="/generate"><PlusOutlined /> New proposal</ButtonLink>}
+      />
 
       {/* Filters */}
       <Space wrap size={12} style={{ marginBottom: 20 }}>
@@ -180,57 +178,13 @@ export default function PipelinePage() {
         )}
       </Space>
 
-      {/* KPI row */}
-      <Row gutter={[14, 14]} style={{ marginBottom: 28 }}>
-        {[
-          {
-            icon: <DollarOutlined style={{ fontSize: 22, color: "#0ea5e9" }} />,
-            label: "Pipeline Value",
-            value: `${currency} ${pipelineVal.toLocaleString()}`,
-            sub: `${active.length} active proposals`,
-            color: "#0ea5e9", bg: "#eff6ff",
-          },
-          {
-            icon: <TrophyOutlined style={{ fontSize: 22, color: "#10b981" }} />,
-            label: "Won This Month",
-            value: `${currency} ${wonVal.toLocaleString()}`,
-            sub: `${won.length} deals closed`,
-            color: "#10b981", bg: "#f0fdf4",
-          },
-          {
-            icon: <FireOutlined style={{ fontSize: 22, color: "#f59e0b" }} />,
-            label: "Win Rate",
-            value: `${winRate}%`,
-            sub: `${won.length} of ${total} proposals`,
-            color: "#f59e0b", bg: "#fffbeb",
-          },
-          {
-            icon: <EyeOutlined style={{ fontSize: 22, color: "#8b5cf6" }} />,
-            label: "Open Rate",
-            value: `${viewedPct}%`,
-            sub: "sent proposals viewed",
-            color: "#8b5cf6", bg: "#f5f3ff",
-          },
-          {
-            icon: <ThunderboltOutlined style={{ fontSize: 22, color: "#0369a1" }} />,
-            label: "Avg Deal Size",
-            value: avgDeal > 0 ? `${currency} ${avgDeal.toLocaleString()}` : "—",
-            sub: "from won proposals",
-            color: "#0369a1", bg: "#eff6ff",
-          },
-        ].map(k => (
-          <Col key={k.label} xs={12} sm={8} md={8} lg={5}>
-            <Card style={{ borderRadius: 14, border: `1.5px solid ${k.color}20`, background: k.bg, height: "100%" }} styles={{ body: { padding: 18 } }}>
-              <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                {k.icon}
-                <div style={{ fontSize: 22, fontWeight: 900, color: k.color, lineHeight: 1.2 }}>{k.value}</div>
-                <Text type="secondary" style={{ fontSize: 11 }}>{k.label}</Text>
-                <Text style={{ fontSize: 11, color: k.color }}>{k.sub}</Text>
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <Stat icon={<DollarOutlined />} tone="brand" label="Pipeline" value={`${currency} ${pipelineVal.toLocaleString()}`} sub={`${active.length} active`} />
+        <Stat icon={<TrophyOutlined />} tone="emerald" label="Won" value={`${currency} ${wonVal.toLocaleString()}`} sub={`${won.length} deals closed`} />
+        <Stat icon={<FireOutlined />} tone="amber" label="Win rate" value={`${winRate}%`} sub={`${won.length} of ${total}`} />
+        <Stat icon={<EyeOutlined />} tone="violet" label="Open rate" value={`${viewedPct}%`} sub="of sent proposals" />
+        <Stat icon={<ThunderboltOutlined />} tone="brand" label="Avg deal" value={avgDeal > 0 ? `${currency} ${avgDeal.toLocaleString()}` : "—"} sub="from won proposals" />
+      </div>
 
       {/* Win rate progress bar */}
       {total > 0 && (
@@ -267,29 +221,13 @@ export default function PipelinePage() {
 
       {/* Kanban columns */}
       {total === 0 ? (
-        <Card style={{ borderRadius: 16, textAlign: "center", border: "2px dashed #e2e8f0" }} styles={{ body: { padding: "80px 40px" } }}>
-          <FundOutlined style={{ fontSize: 64, color: "#cbd5e1", marginBottom: 16 }} />
-          <Title level={3} style={{ color: "#64748b", margin: "0 0 8px" }}>No proposals yet</Title>
-          <Text type="secondary" style={{ fontSize: 15, display: "block", marginBottom: 28 }}>
-            Create your first proposal to start tracking your deal pipeline.
-          </Text>
-          <Link href="/generate">
-            <Button type="primary" size="large" icon={<PlusOutlined />} style={{ borderRadius: 12, height: 48, fontWeight: 700 }}>
-              Create First Proposal
-            </Button>
-          </Link>
-        </Card>
+        <EmptyState icon={<FundOutlined />} title="No proposals yet" body="Create your first proposal to start tracking your deal pipeline.">
+          <ButtonLink href="/generate" size="lg"><PlusOutlined /> Create first proposal</ButtonLink>
+        </EmptyState>
       ) : hasFilters && filteredProposals.length === 0 ? (
-        <Card style={{ borderRadius: 16, textAlign: "center", border: "2px dashed #e2e8f0" }} styles={{ body: { padding: "60px 40px" } }}>
-          <FilterOutlined style={{ fontSize: 48, color: "#cbd5e1", marginBottom: 12 }} />
-          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No matching proposals</Title>
-          <Text type="secondary" style={{ fontSize: 14, display: "block", marginBottom: 16 }}>
-            Try adjusting your search or filters to find what you're looking for.
-          </Text>
-          <Button onClick={() => { setSearch(""); setStageFilter(null); setBudgetMin(null); setBudgetMax(null); }} style={{ borderRadius: 8 }}>
-            Clear All Filters
-          </Button>
-        </Card>
+        <EmptyState icon={<FilterOutlined />} title="No matching proposals" body="Try a different search, stage, or budget range.">
+          <button type="button" onClick={() => { setSearch(""); setStageFilter(null); setBudgetMin(null); setBudgetMax(null); }} className="text-[14px] font-semibold text-brand-600">Clear filters</button>
+        </EmptyState>
       ) : (
         <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 16, alignItems: "flex-start" }}>
           {STAGES.map(stage => {
@@ -337,7 +275,7 @@ export default function PipelinePage() {
           })}
         </div>
       )}
-    </div>
+    </Page>
   );
 }
 

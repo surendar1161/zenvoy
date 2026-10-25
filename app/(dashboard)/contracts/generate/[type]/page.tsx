@@ -9,9 +9,10 @@ import {
 } from "antd";
 import {
   ArrowLeftOutlined, ArrowRightOutlined, ThunderboltOutlined,
-  CopyOutlined, DownloadOutlined, SafetyCertificateOutlined, WarningOutlined,
+  CopyOutlined, DownloadOutlined, SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
+import { Page, PageHeader, Banner } from "@/components/app/ui";
 import dynamic from "next/dynamic";
 import { getContractType } from "@/lib/contract-types";
 const DocumentEditor = dynamic(() => import("@/components/DocumentEditor"), { ssr: false });
@@ -167,30 +168,20 @@ export default function ContractGeneratePage() {
   const canProceedStep1 = contract.fields.filter(f => f.required).every(f => fields[f.key]);
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 28px" }}>
+    <Page>
       {ctx}
 
-      {/* Back + header */}
-      <div style={{ marginBottom: 28 }}>
-        <Link href="/contracts">
-          <Button type="text" icon={<ArrowLeftOutlined />} style={{ padding: "4px 0", color: "#64748b", marginBottom: 12 }}>
-            All Contracts
-          </Button>
-        </Link>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
-            {contract.icon}
-          </div>
-          <div>
-            <Space align="center">
-              <Title level={3} style={{ margin: 0, fontWeight: 800 }}>{contract.name}</Title>
-              {contract.badge && <Tag color={contract.badge === "Hot" ? "red" : "green"}>{contract.badge}</Tag>}
-              <Tag style={{ borderRadius: 20, color, border: "none", background: `${color}15` }}>{contract.category}</Tag>
-            </Space>
-            <Text type="secondary" style={{ fontSize: 13 }}>{contract.description.slice(0, 100)}…</Text>
-          </div>
-        </div>
-      </div>
+      <Link href="/contracts">
+        <Button type="text" icon={<ArrowLeftOutlined />} style={{ padding: "4px 0", color: "#64748b", marginBottom: 8 }}>
+          All Contracts
+        </Button>
+      </Link>
+      <PageHeader
+        title={contract.name}
+        sub={`${contract.description.slice(0, 100)}…`}
+        count={contract.category}
+        action={contract.badge ? <Tag color={contract.badge === "Hot" ? "red" : "green"}>{contract.badge}</Tag> : undefined}
+      />
 
       {/* Steps */}
       <Steps
@@ -205,17 +196,14 @@ export default function ContractGeneratePage() {
 
       {/* Legal notes */}
       {contract.legalNotes.length > 0 && currentStep < 3 && (
-        <Alert
-          type="warning"
-          showIcon
-          icon={<WarningOutlined />}
-          message="Jurisdiction & Compliance Notes"
-          description={
+        <Banner
+          tone="amber"
+          title="Jurisdiction & Compliance Notes"
+          body={
             <ul style={{ margin: "4px 0 0 16px", padding: 0 }}>
               {contract.legalNotes.map((n, i) => <li key={i} style={{ fontSize: 13 }}>{n}</li>)}
             </ul>
           }
-          style={{ marginBottom: 24, borderRadius: 12 }}
         />
       )}
 
@@ -529,17 +517,15 @@ export default function ContractGeneratePage() {
                 </Link>
               </div>
 
-            <Alert
-                type="warning"
-                showIcon
-                message="Legal Review Required"
-                description="This AI-generated contract is for informational purposes only. Have it reviewed by a licensed attorney before signing."
-                style={{ borderRadius: 10 }}
+            <Banner
+                tone="amber"
+                title="Legal disclaimer"
+                body="This AI-generated contract is for informational purposes only. Have it reviewed by a licensed attorney before signing."
               />
             </>
           )}
         </div>
       )}
-    </div>
+    </Page>
   );
 }

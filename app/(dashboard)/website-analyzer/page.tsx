@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Button, Card, Input, Form, Typography, Alert, Spin, Progress,
-  Row, Col, Tag, Space, Statistic, List, Tabs, message
+  Row, Col, Tag, Space, List, Tabs, message
 } from "antd";
 import {
   SearchOutlined, ThunderboltOutlined, CheckCircleOutlined,
@@ -11,8 +11,9 @@ import {
   RocketOutlined, BulbOutlined, DollarOutlined,
 } from "@ant-design/icons";
 import { createClient } from "@/lib/supabase/client";
+import { Page, PageHeader, Stat } from "@/components/app/ui";
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
 interface AnalysisResult {
   id: string;
@@ -96,32 +97,14 @@ export default function WebsiteAnalyzerPage() {
     return "#f5222d";
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors: Record<string, string> = {
-      urgent: "red",
-      high: "orange",
-      medium: "gold",
-      low: "green",
-    };
-    return colors[priority] || "default";
-  };
-
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 28px" }}>
+    <Page wide>
       {ctx}
 
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <Space align="center" style={{ marginBottom: 8 }}>
-          <RocketOutlined style={{ fontSize: 28, color: "#0ea5e9" }} />
-          <Title level={2} style={{ margin: 0, fontWeight: 800 }}>
-            Website Analyzer
-          </Title>
-        </Space>
-        <Text type="secondary" style={{ fontSize: 15 }}>
-          Analyze any website to discover opportunities and estimate project value
-        </Text>
-      </div>
+      <PageHeader
+        title="Website Analyzer"
+        sub="Analyze any website to discover opportunities and estimate project value"
+      />
 
       {/* Analysis Form */}
       <Card
@@ -193,72 +176,31 @@ export default function WebsiteAnalyzerPage() {
       {/* Analysis Results */}
       {result && (
         <>
-          {/* Overview Cards */}
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-            <Col xs={12} md={6}>
-              <Card
-                style={{
-                  borderRadius: 14,
-                  border: "1.5px solid #e2e8f0",
-                  textAlign: "center",
-                }}
-              >
-                <Statistic
-                  title="Opportunity Score"
-                  value={result.opportunity_score}
-                  suffix="/ 100"
-                  valueStyle={{ color: getScoreColor(result.opportunity_score) }}
-                />
-                <Tag
-                  color={getPriorityColor(result.priority_level)}
-                  style={{ marginTop: 8 }}
-                >
-                  {result.priority_level?.toUpperCase()} PRIORITY
-                </Tag>
-              </Card>
-            </Col>
-            <Col xs={12} md={6}>
-              <Card
-                style={{
-                  borderRadius: 14,
-                  border: "1.5px solid #e2e8f0",
-                  textAlign: "center",
-                }}
-              >
-                <Statistic
-                  title="Issues Found"
-                  value={result.issues_found}
-                  prefix={<WarningOutlined />}
-                  valueStyle={{ color: "#ff7a45" }}
-                />
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  {result.critical_issues} critical
-                </Text>
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card
-                style={{
-                  borderRadius: 14,
-                  border: "1.5px solid #e2e8f0",
-                  textAlign: "center",
-                }}
-              >
-                <Space direction="vertical" size={4}>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    ESTIMATED PROJECT VALUE
-                  </Text>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
-                    ${result.estimated_budget_min?.toLocaleString()} - $
-                    {result.estimated_budget_max?.toLocaleString()}
-                  </div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Based on issues and opportunity score
-                  </Text>
-                </Space>
-              </Card>
-            </Col>
-          </Row>
+          <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <Stat
+              icon={<RocketOutlined />}
+              tone="brand"
+              label="Opportunity Score"
+              value={<>{result.opportunity_score}<span className="ml-1 text-[15px] font-semibold text-ink-400">/100</span></>}
+              sub={result.priority_level ? `${result.priority_level.toUpperCase()} priority` : undefined}
+            />
+            <Stat
+              icon={<WarningOutlined />}
+              tone="amber"
+              label="Issues Found"
+              value={result.issues_found}
+              sub={`${result.critical_issues} critical`}
+            />
+            <div className="col-span-2">
+              <Stat
+                icon={<DollarOutlined />}
+                tone="emerald"
+                label="Estimated project value"
+                value={`$${result.estimated_budget_min?.toLocaleString()} – $${result.estimated_budget_max?.toLocaleString()}`}
+                sub="Based on issues and opportunity score"
+              />
+            </div>
+          </div>
 
           {/* Lighthouse Scores */}
           <Card
@@ -392,7 +334,7 @@ export default function WebsiteAnalyzerPage() {
           </Card>
         </>
       )}
-    </div>
+    </Page>
   );
 }
 

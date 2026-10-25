@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Badge, Button, Card, Col, DatePicker, Empty, Form, Input,
-  Modal, Progress, Row, Select, Space, Spin, Statistic, Table, Tag,
+  Avatar, Badge, Button, Card, Col, DatePicker, Form, Input,
+  Modal, Progress, Row, Select, Space, Table, Tag,
   Typography, message, Tooltip, Dropdown,
 } from "antd";
 import type { MenuProps, TableColumnsType } from "antd";
@@ -15,8 +15,10 @@ import {
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import dayjs from "dayjs";
+import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -264,44 +266,22 @@ export default function ProjectsPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "36px 28px" }}>
+    <Page wide>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 4 }}>
-            <FolderOpenOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Projects</Title>
-            <Tag style={{ borderRadius: 20 }}>{projects.length} total</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Track all your client projects, deadlines, and task progress.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large" onClick={openCreate}
-          style={{ borderRadius: 10, fontWeight: 600 }}>
-          New Project
-        </Button>
-      </div>
+      <PageHeader
+        title="Projects"
+        sub="Track all your client projects, deadlines, and task progress."
+        count={projects.length ? `${projects.length} total` : undefined}
+        action={<BrandButton onClick={openCreate}><PlusOutlined /> New Project</BrandButton>}
+      />
 
-      {/* Stats */}
-      <Row gutter={[14, 14]} style={{ marginBottom: 24 }}>
-        {[
-          { label: "Total",     value: projects.length, color: "#0ea5e9", icon: <ProjectOutlined /> },
-          { label: "Active",    value: active,          color: "#10b981", icon: <ClockCircleOutlined /> },
-          { label: "Completed", value: completed,       color: "#7c3aed", icon: <CheckCircleOutlined /> },
-          { label: "Overdue",   value: overdue,         color: "#ef4444", icon: <CalendarOutlined /> },
-        ].map(s => (
-          <Col key={s.label} xs={12} sm={6}>
-            <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 18 } }}>
-              <Space>
-                <Avatar size={36} style={{ background: `${s.color}15`, color: s.color }} icon={s.icon} />
-                <Statistic title={<Text type="secondary" style={{ fontSize: 12 }}>{s.label}</Text>}
-                  value={s.value} valueStyle={{ color: s.color, fontWeight: 800, fontSize: 22 }} />
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<ProjectOutlined />} tone="brand" label="Total" value={projects.length} />
+        <Stat icon={<ClockCircleOutlined />} tone="emerald" label="Active" value={active} />
+        <Stat icon={<CheckCircleOutlined />} tone="violet" label="Completed" value={completed} />
+        <Stat icon={<CalendarOutlined />} tone="rose" label="Overdue" value={overdue} />
+      </div>
 
       {/* Filters */}
       <Space wrap style={{ marginBottom: 20 }}>
@@ -318,14 +298,11 @@ export default function ProjectsPage() {
 
       {/* Project list */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 80 }}><Spin size="large" /></div>
+        <div className="dp-skel h-72 rounded-3xl" />
       ) : filtered.length === 0 ? (
-        <Card style={{ borderRadius: 16, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "70px 40px" } }}>
-          <FolderOpenOutlined style={{ fontSize: 56, color: "#cbd5e1", marginBottom: 16 }} />
-          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No projects yet</Title>
-          <Text type="secondary" style={{ display: "block", marginBottom: 24 }}>Create your first project to start tracking tasks, deadlines, and progress.</Text>
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ borderRadius: 10, fontWeight: 600 }}>Create First Project</Button>
-        </Card>
+        <EmptyState icon={<FolderOpenOutlined />} title="No projects yet" body="Create your first project to start tracking tasks, deadlines, and progress.">
+          <BrandButton onClick={openCreate}><PlusOutlined /> Create First Project</BrandButton>
+        </EmptyState>
       ) : (
         <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
           <Table
@@ -417,6 +394,6 @@ export default function ProjectsPage() {
           </Row>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

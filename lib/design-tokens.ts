@@ -56,6 +56,11 @@ export const DESIGN_TOKENS = {
     purpleLight: '#8b5cf6',
     purplePale: '#ede9fe',
     
+    // "Calm Flight" additions
+    ink: '#0b1220',
+    canvas: '#f5f8fc',
+    line: '#e4e9f1',
+
     // Gray Scale
     gray: {
       50: '#f8fafc',
@@ -72,7 +77,7 @@ export const DESIGN_TOKENS = {
     
     // Semantic Colors
     background: '#ffffff',
-    backgroundSecondary: '#f8fafc',
+    backgroundSecondary: '#f5f8fc',
     backgroundTertiary: '#f1f5f9',
     
     text: {
@@ -84,7 +89,7 @@ export const DESIGN_TOKENS = {
     },
     
     border: {
-      default: '#e2e8f0',
+      default: '#e4e9f1',
       light: '#f1f5f9',
       medium: '#cbd5e1',
       dark: '#94a3b8',
@@ -109,9 +114,10 @@ export const DESIGN_TOKENS = {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   borderRadius: {
     none: 0,
-    sm: 8,
-    md: 12,
-    lg: 16,
+    sm: 10,
+    md: 14,
+    lg: 20,
+    xl: 28,
     full: 9999,
   },
 
@@ -125,7 +131,7 @@ export const DESIGN_TOKENS = {
       thick: '2px',
     },
     style: 'solid',
-    color: '#e2e8f0', // maps to colors.border.default
+    color: '#e4e9f1', // maps to colors.border.line
   },
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -133,8 +139,8 @@ export const DESIGN_TOKENS = {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   typography: {
     fontFamily: {
-      base: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      base: 'var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      heading: 'var(--font-display), var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       mono: '"SF Mono", "Monaco", "Inconsolata", "Fira Code", "Courier New", monospace',
     },
     
@@ -173,8 +179,8 @@ export const DESIGN_TOKENS = {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   shadow: {
     none: 'none',
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    sm: '0 1px 2px 0 rgba(11, 18, 32, 0.05)',
+    base: '0 1px 2px rgba(11,18,32,.04), 0 4px 16px rgba(11,18,32,.05)',
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -242,11 +248,11 @@ export const DESIGN_TOKENS = {
         large: 32,
       },
       borderRadius: {
-        small: 12,
-        medium: 16,
-        large: 20,
+        small: 14,
+        medium: 20,
+        large: 24,
       },
-      border: '1px solid #e2e8f0',
+      border: '1px solid #e4e9f1',
     },
     
     // Modal

@@ -3,19 +3,18 @@ import { sanitizeHtml } from "@/lib/sanitize";
 
 import { useEffect, useState } from "react";
 import {
-  Button, Card, Col, Row, Typography, Space, Tag, Empty, Modal,
-  Tooltip, message, Badge, Select, Spin,
+  Button, Card, Col, Row, Space, Modal,
+  Tooltip, message, Select, Input,
 } from "antd";
 import {
   FileTextOutlined, CopyOutlined, DeleteOutlined, EyeOutlined, DownloadOutlined,
   PlusOutlined, DollarOutlined, CalendarOutlined, GlobalOutlined, EditOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Input } from "antd";
 import Link from "next/link";
 import { listProposals, deleteProposal } from "@/lib/db";
-
-const { Title, Text } = Typography;
+import { Page, PageHeader, StatusPill, EmptyState } from "@/components/app/ui";
+import { ButtonLink } from "@/components/site/ui";
 
 function renderProposalMd(text: string): string {
   const blocks = text.split(/\n\n+/);
@@ -67,11 +66,6 @@ function inline(t: string): string {
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/`(.+?)`/g, "<code style='background:#f1f5f9;padding:1px 5px;border-radius:3px;font-size:12px'>$1</code>");
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  draft: "default", sent: "blue", viewed: "cyan",
-  accepted: "green", declined: "red", expired: "orange",
-};
 
 type Proposal = {
   id: string;
@@ -139,85 +133,64 @@ export default function ProposalsPage() {
   });
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 36, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>My Proposals</Title>
-          <Text type="secondary" style={{ fontSize: 15 }}>Track, manage, and follow up on all your proposals.</Text>
-        </div>
-        <Link href="/generate">
-          <Button type="primary" icon={<PlusOutlined />} size="large" style={{ borderRadius: 10, fontWeight: 600 }}>
-            New Proposal
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Proposals"
+        sub="Track, manage, and follow up on every proposal."
+        count={proposals.length ? `${proposals.length} total` : undefined}
+        action={<ButtonLink href="/generate"><PlusOutlined /> New proposal</ButtonLink>}
+      />
 
-      {/* Search + filter */}
       {proposals.length > 0 && (
-        <Space wrap style={{ marginBottom: 20 }}>
+        <div className="mb-5 flex flex-wrap items-center gap-3">
           <Input
-            prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
-            placeholder="Search client or project…"
+            prefix={<SearchOutlined className="text-ink-300" />}
+            placeholder="Search client or project"
             value={search}
             onChange={e => setSearch(e.target.value)}
             allowClear
-            style={{ width: 260, borderRadius: 10 }}
+            className="!w-[260px]"
           />
           <Select
             placeholder="All statuses"
             allowClear
             value={statusFilter ?? undefined}
             onChange={v => setStatusFilter(v ?? null)}
-            style={{ width: 160 }}
+            className="!w-[160px]"
             options={[
-              { value: "draft",    label: "Draft" },
-              { value: "sent",     label: "Sent" },
-              { value: "viewed",   label: "Viewed" },
+              { value: "draft", label: "Draft" },
+              { value: "sent", label: "Sent" },
+              { value: "viewed", label: "Viewed" },
               { value: "accepted", label: "Accepted" },
               { value: "declined", label: "Declined" },
-              { value: "expired",  label: "Expired" },
+              { value: "expired", label: "Expired" },
             ]}
           />
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            {filtered.length} of {proposals.length} proposals
-          </Text>
-        </Space>
+          <span className="text-[13px] text-ink-400">{filtered.length} of {proposals.length}</span>
+        </div>
       )}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "80px 0" }}><Spin size="large" /></div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map(i => <div key={i} className="dp-skel h-48 rounded-3xl" />)}
+        </div>
       ) : proposals.length === 0 ? (
-        <Card style={{ borderRadius: 16, textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-          <Empty
-            image={<FileTextOutlined style={{ fontSize: 64, color: "#cbd5e1" }} />}
-            imageStyle={{ height: 80 }}
-            description={
-              <div>
-                <Title level={4} style={{ color: "#64748b", marginBottom: 8 }}>No proposals yet</Title>
-                <Text type="secondary">Generate your first AI proposal to see it here.</Text>
-              </div>
-            }
-          >
-            <Link href="/generate">
-              <Button type="primary" icon={<PlusOutlined />} size="large">Generate First Proposal</Button>
-            </Link>
-          </Empty>
-        </Card>
+        <EmptyState icon={<FileTextOutlined />} title="No proposals yet" body="Generate your first AI proposal and it will show up here.">
+          <ButtonLink href="/generate" size="lg"><PlusOutlined /> Generate first proposal</ButtonLink>
+        </EmptyState>
       ) : filtered.length === 0 ? (
-        <Card style={{ borderRadius: 16, textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
-          <Text type="secondary" style={{ fontSize: 15, display: "block" }}>
-            No proposals match your search. <Button type="link" onClick={() => { setSearch(""); setStatusFilter(null); }} style={{ padding: 0 }}>Clear filters</Button>
-          </Text>
-        </Card>
+        <EmptyState icon={<SearchOutlined />} title="No matches" body="Nothing matches that search or status.">
+          <button type="button" onClick={() => { setSearch(""); setStatusFilter(null); }} className="text-[14px] font-semibold text-brand-600">Clear filters</button>
+        </EmptyState>
       ) : (
         <Row gutter={[16, 16]}>
           {filtered.map(p => (
             <Col key={p.id} xs={24} sm={12} lg={8}>
               <Card
                 hoverable
-                style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%" }}
-                styles={{ body: { padding: 24 } }}
+                className="h-full"
+                styles={{ body: { padding: 22 } }}
                 actions={[
                   <Tooltip key="copy" title="Copy proposal text">
                     <Button type="text" icon={<CopyOutlined />}
@@ -243,36 +216,26 @@ export default function ProposalsPage() {
                 ]}
               >
                 <Space direction="vertical" style={{ width: "100%" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                    <div>
-                      <Text strong style={{ fontSize: 15, display: "block", marginBottom: 2 }}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate text-[15px] font-semibold text-ink">
                         {p.client_name}{p.client_company ? ` · ${p.client_company}` : ""}
-                      </Text>
-                      <Text type="secondary" style={{ fontSize: 13 }}>{p.project_type ?? "—"}</Text>
+                      </div>
+                      <div className="text-[13px] text-ink-400">{p.project_type ?? "—"}</div>
                     </div>
-                    <Badge status={STATUS_COLORS[p.status] as "default" | "success" | "error" | "warning" | "processing"}>
-                      <Tag color={STATUS_COLORS[p.status]} style={{ borderRadius: 20, fontSize: 11, textTransform: "capitalize" }}>
-                        {p.status}
-                      </Tag>
-                    </Badge>
+                    <StatusPill status={p.status} />
                   </div>
 
-                  <Space size={16}>
-                    {p.total_budget && (
-                      <Space size={4}>
-                        <DollarOutlined style={{ color: "#10b981", fontSize: 13 }} />
-                        <Text style={{ fontSize: 13, color: "#10b981", fontWeight: 600 }}>
-                          {p.currency ?? "USD"} {p.total_budget.toLocaleString()}
-                        </Text>
-                      </Space>
-                    )}
-                    <Space size={4}>
-                      <CalendarOutlined style={{ color: "#94a3b8", fontSize: 13 }} />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {new Date(p.created_at).toLocaleDateString()}
-                      </Text>
-                    </Space>
-                  </Space>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
+                    {p.total_budget ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
+                        <DollarOutlined /> {p.currency ?? "USD"} {p.total_budget.toLocaleString()}
+                      </span>
+                    ) : null}
+                    <span className="inline-flex items-center gap-1 text-ink-400">
+                      <CalendarOutlined /> {new Date(p.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
 
                   <Select
                     size="small"
@@ -323,6 +286,6 @@ export default function ProposalsPage() {
           />
         )}
       </Modal>
-    </div>
+    </Page>
   );
 }

@@ -2,21 +2,23 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Button, Card, Col, Empty, Form, Input, InputNumber, Modal,
+  Avatar, Button, Card, Col, Form, Input, InputNumber, Modal,
   Progress, Row, Select, Space, Spin, Tag, Tooltip, Typography, message,
   Badge, Popconfirm,
 } from "antd";
 import {
   PlusOutlined, UserOutlined, ProjectOutlined, EditOutlined,
   DeleteOutlined, TeamOutlined, CheckCircleOutlined, WarningOutlined,
-  LockOutlined,
+  LockOutlined, ClockCircleOutlined,
 } from "@ant-design/icons";
 import { createClient } from "@/lib/supabase/client";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
+import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 const AVATAR_COLORS = [
@@ -183,19 +185,17 @@ export default function CapacityPage() {
   // ── Feature gate ──────────────────────────────────────────────────────────────
   if (allowed === null || loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
-        <Spin size="large" />
-      </div>
+      <Page wide>
+        <div className="flex justify-center py-24"><Spin size="large" /></div>
+      </Page>
     );
   }
 
   if (!allowed) {
     return (
-      <div style={{ padding: "80px 40px", textAlign: "center" }}>
-        <LockOutlined style={{ fontSize: 48, color: "#94a3b8", marginBottom: 16 }} />
-        <Title level={4} style={{ color: "#475569" }}>Capacity Planning</Title>
-        <Text type="secondary">This feature is not available on your current plan.</Text>
-      </div>
+      <Page wide>
+        <EmptyState icon={<LockOutlined />} title="Capacity Planning" body="This feature is not available on your current plan." />
+      </Page>
     );
   }
 
@@ -206,55 +206,27 @@ export default function CapacityPage() {
   const available       = members.filter(m => m.utilization_pct < 50).length;
 
   return (
-    <div style={{ padding: "32px 40px", maxWidth: 1200 }}>
+    <Page wide>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            <Title level={3} style={{ margin: 0 }}>📊 Capacity Planning</Title>
-            <Tag color="blue" style={{ borderRadius: 20, fontSize: 11 }}>Beta</Tag>
-          </div>
-          <Text type="secondary">Track team workload, project assignments, and availability at a glance.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingMember(null); memberForm.resetFields(); setMemberModal(true); }}
-          style={{ borderRadius: 8, fontWeight: 600 }}>
-          Add Team Member
-        </Button>
+      <PageHeader
+        title="Capacity Planning"
+        sub="Track team workload, project assignments, and availability at a glance."
+        count="Beta"
+        action={<BrandButton onClick={() => { setEditingMember(null); memberForm.resetFields(); setMemberModal(true); }}><PlusOutlined /> Add Team Member</BrandButton>}
+      />
+
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<TeamOutlined />} tone="brand" label="Team Members" value={members.length} />
+        <Stat icon={<ClockCircleOutlined />} tone="violet" label="Total Capacity" value={`${totalCapacity}h/wk`} />
+        <Stat icon={<ProjectOutlined />} tone="amber" label="Allocated" value={`${totalAllocated}h/wk`} />
+        <Stat icon={overCapacity > 0 ? <WarningOutlined /> : <CheckCircleOutlined />} tone={overCapacity > 0 ? "rose" : "emerald"} label="Over Capacity" value={overCapacity} />
       </div>
 
-      {/* KPI cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 28 }}>
-        {[
-          { label: "Team Members",     value: members.length, color: "#0ea5e9", icon: "👥" },
-          { label: "Total Capacity",   value: `${totalCapacity}h/wk`, color: "#7c3aed", icon: "⏱" },
-          { label: "Allocated",        value: `${totalAllocated}h/wk`, color: "#f59e0b", icon: "📋" },
-          { label: "Over Capacity",    value: overCapacity, color: overCapacity > 0 ? "#ef4444" : "#10b981", icon: overCapacity > 0 ? "⚠️" : "✅" },
-        ].map(c => (
-          <Col key={c.label} xs={12} md={6}>
-            <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: "16px 20px" } }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 24 }}>{c.icon}</span>
-                <div>
-                  <div style={{ fontSize: 10, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>{c.label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: c.color }}>{c.value}</div>
-                </div>
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      {/* Team members */}
       {members.length === 0 ? (
-        <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", textAlign: "center", padding: "48px 0" }}>
-          <TeamOutlined style={{ fontSize: 48, color: "#e2e8f0", marginBottom: 16 }} />
-          <Title level={5} style={{ color: "#94a3b8" }}>No team members yet</Title>
-          <Text type="secondary">Add your team to start planning capacity and project assignments.</Text>
-          <br /><br />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setMemberModal(true)}>Add First Team Member</Button>
-        </Card>
+        <EmptyState icon={<TeamOutlined />} title="No team members yet" body="Add your team to start planning capacity and project assignments.">
+          <BrandButton onClick={() => setMemberModal(true)}><PlusOutlined /> Add First Team Member</BrandButton>
+        </EmptyState>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {members.map(member => {
@@ -453,6 +425,6 @@ export default function CapacityPage() {
           </div>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

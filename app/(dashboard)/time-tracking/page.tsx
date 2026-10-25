@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Button, Card, Checkbox, Col, DatePicker, Empty, Input, InputNumber,
+  Button, Card, Checkbox, Col, DatePicker, Input, InputNumber,
   Radio, Row, Select, Space, Spin, Switch, Table, Tag, Tooltip, Typography, message, Modal,
 } from "antd";
 import type { TableColumnsType } from "antd";
@@ -17,10 +17,12 @@ import type { TimeEntryData } from "@/components/TimeEntryModal";
 import InvoiceFromTimeEntries from "@/components/InvoiceFromTimeEntries";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
+import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
 dayjs.extend(isoWeek);
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface Project { id: string; name: string; client_id: string | null; default_hourly_rate: number | null; }
 
@@ -383,51 +385,32 @@ export default function TimeTrackingPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <ClockCircleOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Time Tracking</Title>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Track time, manage entries, and invoice clients for your work.</Text>
-        </div>
-        <Space>
-          {selectedIds.length > 0 && (
-            <Button type="primary" icon={<DollarOutlined />} onClick={() => setInvoiceOpen(true)} style={{ borderRadius: 10, fontWeight: 600, background: "#10b981", borderColor: "#10b981" }}>
-              Invoice {selectedIds.length} Entries
-            </Button>
-          )}
-          <Button icon={<PlusOutlined />} size="large" onClick={() => { setEditEntry(null); setModalOpen(true); }} style={{ borderRadius: 10, fontWeight: 600 }}>
-            Add Manual Entry
-          </Button>
-        </Space>
-      </div>
+      <PageHeader
+        title="Time Tracking"
+        sub="Track time, manage entries, and invoice clients for your work."
+        action={
+          <>
+            {selectedIds.length > 0 && (
+              <BrandButton onClick={() => setInvoiceOpen(true)}>
+                <DollarOutlined /> Invoice {selectedIds.length} Entries
+              </BrandButton>
+            )}
+            <BrandButton variant="secondary" onClick={() => { setEditEntry(null); setModalOpen(true); }}>
+              <PlusOutlined /> Add Manual Entry
+            </BrandButton>
+          </>
+        }
+      />
 
-      {/* Stats */}
-      <Row gutter={[14, 14]} style={{ marginBottom: 24 }}>
-        {[
-          { label: "Total Hours", value: `${(totalMins / 60).toFixed(1)}h`, color: "#0ea5e9", bg: "#eff6ff", icon: <ClockCircleOutlined /> },
-          { label: "Billable Amount", value: `$${totalBillableAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: "#10b981", bg: "#f0fdf4", icon: <DollarOutlined /> },
-          { label: "Billable Entries", value: String(billableEntries), color: "#7c3aed", bg: "#faf5ff", icon: <CheckCircleOutlined /> },
-          { label: "Total Entries", value: String(filtered.length), color: "#f59e0b", bg: "#fffbeb", icon: <CalendarOutlined /> },
-        ].map(s => (
-          <Col key={s.label} xs={12} sm={6}>
-            <Card style={{ borderRadius: 14, border: `1.5px solid ${s.color}25`, background: s.bg }} styles={{ body: { padding: 18 } }}>
-              <Space>
-                <span style={{ color: s.color, fontSize: 18 }}>{s.icon}</span>
-                <div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: s.color }}>{s.value}</div>
-                  <Text type="secondary" style={{ fontSize: 11 }}>{s.label}</Text>
-                </div>
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<ClockCircleOutlined />} tone="brand" label="Total Hours" value={`${(totalMins / 60).toFixed(1)}h`} />
+        <Stat icon={<DollarOutlined />} tone="emerald" label="Billable Amount" value={`$${totalBillableAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
+        <Stat icon={<CheckCircleOutlined />} tone="violet" label="Billable Entries" value={String(billableEntries)} />
+        <Stat icon={<CalendarOutlined />} tone="amber" label="Total Entries" value={String(filtered.length)} />
+      </div>
 
       {/* Running Timer Banner */}
       {runningEntry && (
@@ -539,15 +522,10 @@ export default function TimeTrackingPage() {
       {loading ? (
         <div style={{ textAlign: "center", padding: 80 }}><Spin size="large" /></div>
       ) : filtered.length === 0 && !runningEntry ? (
-        <Card style={{ borderRadius: 16, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-          <ClockCircleOutlined style={{ fontSize: 64, color: "#cbd5e1", marginBottom: 16 }} />
-          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No time entries yet</Title>
-          <Text type="secondary" style={{ display: "block", marginBottom: 24 }}>Start a timer or add a manual entry to begin tracking your time.</Text>
-          <Space>
-            <Button type="primary" size="large" icon={<PlayCircleFilled />} onClick={() => { setQuickDesc(""); startTimer(); }} style={{ borderRadius: 12 }}>Start Timer</Button>
-            <Button size="large" icon={<PlusOutlined />} onClick={() => { setEditEntry(null); setModalOpen(true); }} style={{ borderRadius: 12 }}>Add Entry</Button>
-          </Space>
-        </Card>
+        <EmptyState icon={<ClockCircleOutlined />} title="No time entries yet" body="Start a timer or add a manual entry to begin tracking your time.">
+          <BrandButton onClick={() => { setQuickDesc(""); startTimer(); }}><PlayCircleFilled /> Start Timer</BrandButton>
+          <BrandButton variant="secondary" onClick={() => { setEditEntry(null); setModalOpen(true); }}><PlusOutlined /> Add Entry</BrandButton>
+        </EmptyState>
       ) : view === "daily" ? (
         /* Daily View */
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -652,6 +630,6 @@ export default function TimeTrackingPage() {
           50% { opacity: 0.4; }
         }
       `}</style>
-    </div>
+    </Page>
   );
 }

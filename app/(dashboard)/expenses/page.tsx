@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  Button, Card, Col, DatePicker, Empty, Form, Input,
+  Button, Card, Col, DatePicker, Form, Input,
   InputNumber, Modal, Row, Select, Space, Spin, Switch,
   Table, Tag, Tooltip, Typography, Upload, message,
 } from "antd";
@@ -16,8 +16,10 @@ import { createClient } from "@/lib/supabase/client";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
 import dayjs from "dayjs";
+import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const CURRENCIES = ["USD", "GBP", "EUR", "AUD", "CAD", "INR", "SGD", "AED"];
 
@@ -270,39 +272,21 @@ export default function ExpensesPage() {
   if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}>{ctx}<Spin size="large" /></div>;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+    <Page>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-        <Space size={12}>
-          <WalletOutlined style={{ fontSize: 28, color: "#0ea5e9" }} />
-          <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Expenses</Title>
-          <Tag style={{ borderRadius: 20, fontSize: 12 }}>{expenses.length}</Tag>
-        </Space>
-        <Button type="primary" icon={<PlusOutlined />} size="large"
-          onClick={openCreate}
-          style={{ borderRadius: 10, fontWeight: 600, height: 44 }}>
-          Add Expense
-        </Button>
-      </div>
+      <PageHeader
+        title="Expenses"
+        count={expenses.length}
+        action={<BrandButton onClick={openCreate}><PlusOutlined /> Add Expense</BrandButton>}
+      />
 
-      {/* Summary stats */}
-      <Row gutter={[14, 14]} style={{ marginBottom: 20 }}>
-        {[
-          { label: "This Month", value: `${currency} ${thisMonth.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: "#ef4444" },
-          { label: "This Year", value: `${currency} ${thisYear.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: "#f59e0b" },
-          { label: "Avg Monthly", value: `${currency} ${avgMonthly.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: "#8b5cf6" },
-          { label: "Categories", value: String(categoriesUsed), color: "#0ea5e9" },
-        ].map(s => (
-          <Col key={s.label} xs={12} sm={6}>
-            <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0", textAlign: "center" }} styles={{ body: { padding: 18 } }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>{s.label}</Text>
-              <div style={{ fontSize: 20, fontWeight: 900, color: s.color, marginTop: 4 }}>{s.value}</div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<WalletOutlined />} tone="rose" label="This Month" value={`${currency} ${thisMonth.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
+        <Stat icon={<WalletOutlined />} tone="amber" label="This Year" value={`${currency} ${thisYear.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
+        <Stat icon={<WalletOutlined />} tone="violet" label="Avg Monthly" value={`${currency} ${avgMonthly.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
+        <Stat icon={<WalletOutlined />} tone="brand" label="Categories" value={String(categoriesUsed)} />
+      </div>
 
       {/* Filters */}
       <Space wrap size={12} style={{ marginBottom: 16 }}>
@@ -329,12 +313,9 @@ export default function ExpensesPage() {
 
       {/* Table */}
       {expenses.length === 0 ? (
-        <Card style={{ borderRadius: 16, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
-          <WalletOutlined style={{ fontSize: 56, color: "#cbd5e1", marginBottom: 16 }} />
-          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No expenses yet</Title>
-          <Text type="secondary" style={{ display: "block", marginBottom: 20 }}>Start tracking your business expenses for tax reports and profit visibility.</Text>
-          <Button type="primary" icon={<PlusOutlined />} size="large" onClick={openCreate} style={{ borderRadius: 10 }}>Add Your First Expense</Button>
-        </Card>
+        <EmptyState icon={<WalletOutlined />} title="No expenses yet" body="Start tracking your business expenses for tax reports and profit visibility.">
+          <BrandButton onClick={openCreate}><PlusOutlined /> Add Your First Expense</BrandButton>
+        </EmptyState>
       ) : (
         <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
           <Table
@@ -450,6 +431,6 @@ export default function ExpensesPage() {
           </Card>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

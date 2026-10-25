@@ -1,41 +1,28 @@
 "use client";
 
-import { ConfigProvider, Layout, Button, Space } from "antd";
-import { ThunderboltFilled } from "@ant-design/icons";
-import Link from "next/link";
+import { ConfigProvider } from "antd";
+import { usePathname } from "next/navigation";
 import { antdTheme } from "@/lib/theme";
+import Nav from "@/components/site/Nav";
+import Footer from "@/components/site/Footer";
 
-const { Header, Content, Footer } = Layout;
-
+/**
+ * Shared shell for every public marketing page ("Calm Flight").
+ * - Home (`/`) lays out its own hero beneath a transparent floating nav.
+ * - All other public pages get a solid glass nav and top offset automatically,
+ *   so legacy page content keeps working until each page is restyled.
+ */
 export default function PublicShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   return (
     <ConfigProvider theme={antdTheme}>
-      <Layout style={{ minHeight: "100vh", background: "#f8fafc" }}>
-        <Header style={{
-          position: "sticky", top: 0, zIndex: 100,
-          background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
-          borderBottom: "1px solid #e2e8f0",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 32px", height: 64,
-        }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <ThunderboltFilled style={{ color: "#0ea5e9", fontSize: 22 }} />
-            <span style={{ fontWeight: 800, fontSize: 18, color: "#0ea5e9", letterSpacing: "-0.3px" }}>DealPilot</span>
-          </Link>
-          <Space>
-            <Link href="/blog"><Button type="text" size="middle">Blog</Button></Link>
-            <Link href="/pricing"><Button type="text" size="middle">Pricing</Button></Link>
-            <Link href="/sign-in"><Button size="middle">Sign In</Button></Link>
-            <Link href="/sign-up">
-              <Button type="primary" size="middle" icon={<ThunderboltFilled />}>Get Started Free</Button>
-            </Link>
-          </Space>
-        </Header>
-        <Content>{children}</Content>
-        <Footer style={{ textAlign: "center", background: "#fff", borderTop: "1px solid #e2e8f0", color: "#94a3b8", fontSize: 13 }}>
-          Built with Claude AI · Stripe · Supabase · Ant Design · Vercel
-        </Footer>
-      </Layout>
+      <div className="dp min-h-screen">
+        <Nav solid={!isHome} />
+        <div className={isHome ? "" : "pt-[76px]"}>{children}</div>
+        <Footer />
+      </div>
     </ConfigProvider>
   );
 }

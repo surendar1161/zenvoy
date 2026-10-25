@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import {
   Alert, Badge, Button, Card, Col, Result, Row, Space, Statistic,
-  Switch, Tag, Typography, message, Divider, Spin, Progress,
+  Tag, Typography, message, Spin, Progress,
 } from "antd";
 import {
   CheckCircleFilled, CloseCircleOutlined, ThunderboltFilled,
-  CreditCardOutlined, SettingOutlined, ArrowRightOutlined, StarFilled,
+  CreditCardOutlined, SettingOutlined, ArrowRightOutlined,
 } from "@ant-design/icons";
 import { PLANS, getPlan } from "@/lib/plans";
 import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
@@ -18,6 +18,8 @@ import type { UsageSummary } from "@/lib/usage";
 import { isAtLimit, usageLabel, usagePercent } from "@/lib/usage";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { Page, PageHeader } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
 const { Title, Text } = Typography;
 
@@ -131,13 +133,10 @@ function SubscriptionContent() {
   const trial = getTrialInfo(trialEndsAt);
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
 
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>Subscription & Billing</Title>
-        <Text type="secondary" style={{ fontSize: 15 }}>Manage your plan, billing, and usage.</Text>
-      </div>
+      <PageHeader title="Subscription & Billing" sub="Manage your plan, billing, and usage." />
 
       {/* Trial banner */}
       {(trial.isOnTrial || trial.isExpired) && !isPaid && (
@@ -227,10 +226,9 @@ function SubscriptionContent() {
                 Manage Billing
               </Button>
             ) : (
-              <Button type="primary" icon={<ArrowRightOutlined />} onClick={() => upgrade("pro")}
-                style={{ borderRadius: 10, fontWeight: 600, background: "#0ea5e9", borderColor: "#0ea5e9" }}>
-                Upgrade to Pro
-              </Button>
+              <BrandButton onClick={() => upgrade("pro")}>
+                <ArrowRightOutlined /> Upgrade to Pro
+              </BrandButton>
             )}
           </Col>
         </Row>
@@ -242,52 +240,59 @@ function SubscriptionContent() {
         )}
       </Card>
 
-      {/* Billing toggle */}
       {!isPaid && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 32 }}>
-          <Text style={{ fontWeight: yearly ? 400 : 700 }}>Monthly</Text>
-          <Switch checked={yearly} onChange={setYearly} style={{ background: yearly ? "#0ea5e9" : "#94a3b8" }} />
-          <Text style={{ fontWeight: yearly ? 700 : 400 }}>
-            Yearly <Tag color="green" style={{ borderRadius: 20, fontSize: 11, marginLeft: 4 }}>Save up to 21%</Tag>
-          </Text>
+        <div className="mb-8 flex justify-center">
+          <div className="inline-flex rounded-full border border-line bg-white p-1 shadow-soft" role="group" aria-label="Billing period">
+            {[{ l: "Monthly", v: false }, { l: "Yearly", v: true }].map(o => (
+              <button key={o.l} type="button" onClick={() => setYearly(o.v)} aria-pressed={yearly === o.v}
+                className={`rounded-full px-5 py-2 text-[14px] font-semibold transition-all duration-300 ${yearly === o.v ? "bg-ink text-white shadow-soft" : "text-ink-500 hover:text-ink"}`}>
+                {o.l}
+                {o.v && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10.5px] font-bold text-emerald-700">Save 25%</span>}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Plan cards */}
-      <Row gutter={[20, 20]}>
+      <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
         {PLANS.map(plan => {
           const isCurrent = sub?.plan === plan.id;
           const price = yearly ? plan.yearlyPrice : plan.monthlyPrice;
+          const pop = !!plan.popular;
 
           return (
-            <Col key={plan.id} xs={24} md={8}>
-              <Card
-                style={{
-                  borderRadius: 18,
-                  border: `2px solid ${isCurrent ? plan.color : plan.popular ? `${plan.color}50` : "#e2e8f0"}`,
-                  height: "100%",
-                  background: isCurrent ? `${plan.color}06` : "#fff",
-                  boxShadow: plan.popular ? `0 8px 30px ${plan.color}20` : undefined,
-                }}
-                styles={{ body: { padding: 24 } }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                  <div>
-                    <Title level={5} style={{ margin: "0 0 4px", fontWeight: 800 }}>{plan.name}</Title>
-                    <Text type="secondary" style={{ fontSize: 13 }}>{plan.tagline}</Text>
-                  </div>
-                  {isCurrent && <Tag color={plan.color} style={{ borderRadius: 20, fontWeight: 700 }}>Current</Tag>}
-                  {!isCurrent && plan.popular && <StarFilled style={{ color: "#f59e0b" }} />}
+            <div
+              key={plan.id}
+              className={`relative flex h-full flex-col rounded-3xl p-6 sm:p-7 ${
+                pop
+                  ? "bg-gradient-to-b from-ink to-ink-800 text-white shadow-float ring-1 ring-brand-400/40"
+                  : "border border-line bg-white text-ink shadow-soft"
+              } ${isCurrent && !pop ? "ring-2 ring-brand-400" : ""}`}
+            >
+              {pop && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-500 to-violet-600 px-4 py-1 text-[11.5px] font-bold uppercase tracking-wider text-white">
+                  Most popular
+                </span>
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="font-display text-[20px] font-bold">{plan.name}</div>
+                  <div className={`text-[13.5px] ${pop ? "text-ink-300" : "text-ink-400"}`}>{plan.tagline}</div>
                 </div>
+                {isCurrent && (
+                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${pop ? "bg-white/15 text-white" : "bg-brand-50 text-brand-700"}`}>Current</span>
+                )}
+              </div>
 
-                <div style={{ marginBottom: 20 }}>
-                  <span style={{ fontSize: 40, fontWeight: 900, color: "#0f172a" }}>${price}</span>
-                  <span style={{ color: "#94a3b8", fontSize: 14 }}>/mo</span>
-                  {yearly && plan.yearlyTotal > 0 && (
-                    <Text type="secondary" style={{ display: "block", fontSize: 12 }}>Billed ${plan.yearlyTotal}/yr</Text>
-                  )}
-                </div>
+              <div className="mt-6 flex items-end gap-1">
+                <span className="font-display text-[44px] font-extrabold leading-none tabular-nums">${price}</span>
+                <span className={`pb-1.5 text-[14px] ${pop ? "text-ink-300" : "text-ink-400"}`}>/mo</span>
+              </div>
+              <div className={`mt-1 min-h-5 text-[12.5px] ${pop ? "text-ink-300" : "text-ink-400"}`}>
+                {yearly && plan.yearlyTotal > 0 ? `Billed $${plan.yearlyTotal}/yr` : ""}
+              </div>
 
+              <div className="mt-5">
                 {isCurrent ? (
                   <Button block disabled style={{ borderRadius: 10, height: 40 }}>Current Plan</Button>
                 ) : plan.id === "free" ? (
@@ -299,32 +304,37 @@ function SubscriptionContent() {
                   <Button
                     type="primary" block loading={upgrading === plan.id}
                     onClick={() => upgrade(plan.id as Plan)}
-                    style={{ borderRadius: 10, height: 40, fontWeight: 700, background: plan.color, borderColor: plan.color }}
+                    style={{
+                      borderRadius: 10, height: 40, fontWeight: 700,
+                      background: pop ? "#ffffff" : plan.color,
+                      borderColor: pop ? "#ffffff" : plan.color,
+                      color: pop ? "#0B1220" : "#ffffff",
+                    }}
                   >
                     {sub?.plan === "pro" && plan.id === "business" ? "Upgrade to Business" : "Get " + plan.name}
                   </Button>
                 )}
+              </div>
 
-                <Divider style={{ margin: "20px 0 14px" }} />
-                <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                  {plan.features.slice(0, 6).map(f => (
-                    <Space key={f} align="start" size={6}>
-                      <CheckCircleFilled style={{ color: plan.color, fontSize: 13, marginTop: 2, flexShrink: 0 }} />
-                      <Text style={{ fontSize: 13 }}>{f}</Text>
-                    </Space>
-                  ))}
-                  {plan.notIncluded?.slice(0, 3).map(f => (
-                    <Space key={f} align="start" size={6}>
-                      <CloseCircleOutlined style={{ color: "#e2e8f0", fontSize: 13, marginTop: 2, flexShrink: 0 }} />
-                      <Text type="secondary" style={{ fontSize: 13 }}>{f}</Text>
-                    </Space>
-                  ))}
-                </Space>
-              </Card>
-            </Col>
+              <div className={`my-5 border-t ${pop ? "border-white/15" : "border-line"}`} />
+              <div className="space-y-2">
+                {plan.features.slice(0, 6).map(f => (
+                  <div key={f} className="flex items-start gap-2">
+                    <CheckCircleFilled style={{ color: pop ? "#7dd3fc" : plan.color, fontSize: 13, marginTop: 2, flexShrink: 0 }} />
+                    <span className={`text-[13px] ${pop ? "text-ink-200" : "text-ink"}`}>{f}</span>
+                  </div>
+                ))}
+                {plan.notIncluded?.slice(0, 3).map(f => (
+                  <div key={f} className="flex items-start gap-2">
+                    <CloseCircleOutlined style={{ color: pop ? "rgba(255,255,255,0.28)" : "#e2e8f0", fontSize: 13, marginTop: 2, flexShrink: 0 }} />
+                    <span className={`text-[13px] ${pop ? "text-ink-300" : "text-ink-400"}`}>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           );
         })}
-      </Row>
+      </div>
 
       {/* Usage stats */}
       <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginTop: 32 }} styles={{ body: { padding: 28 } }}>
@@ -393,7 +403,7 @@ function SubscriptionContent() {
           ✓ Cancel anytime · No hidden fees · Billed via Chargebee
         </Text>
       </div>
-    </div>
+    </Page>
   );
 }
 

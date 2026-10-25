@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { industryGroups } from "@/lib/templates";
 import { FREELANCER_TEMPLATES } from "@/lib/templates-by-type";
+import { Page, PageHeader } from "@/components/app/ui";
 
 const { Title, Text } = Typography;
 
@@ -23,13 +24,11 @@ export default function TemplatesPage() {
   const industryTotal = industryGroups.reduce((s, g) => s + g.templates.length, 0);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
-      <div style={{ marginBottom: 36 }}>
-        <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>Templates</Title>
-        <Text type="secondary" style={{ fontSize: 15 }}>
-          {FREELANCER_TEMPLATES.length} freelancer-type + {industryTotal} industry templates. Click any to use it.
-        </Text>
-      </div>
+    <Page>
+      <PageHeader
+        title="Templates"
+        sub={`${FREELANCER_TEMPLATES.length} freelancer-type + ${industryTotal} industry templates. Click any to use it.`}
+      />
 
       {/* F17 — Freelancer type templates */}
       <div style={{ marginBottom: 40 }}>
@@ -137,6 +136,6 @@ export default function TemplatesPage() {
           </div>
         ))}
       </div>
-    </div>
+    </Page>
   );
 }

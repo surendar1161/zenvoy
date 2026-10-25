@@ -1,9 +1,6 @@
 "use client";
 
-import { Card, Typography } from "antd";
 import { CheckCircleFilled, CloseCircleOutlined } from "@ant-design/icons";
-
-const { Text } = Typography;
 
 interface Competitor {
   name: string;
@@ -22,21 +19,14 @@ interface ComparisonTableProps {
 
 export default function ComparisonTable({ competitors, features }: ComparisonTableProps) {
   return (
-    <Card style={{ borderRadius: 20, border: "1px solid #e2e8f0", overflow: "hidden" }} styles={{ body: { padding: 0 } }}>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+    <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-soft">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse">
           <thead>
-            <tr style={{ borderBottom: "2px solid #e2e8f0" }}>
-              <th style={{ padding: "16px 20px", textAlign: "left", fontSize: 14, fontWeight: 700, color: "#334155" }}>Feature</th>
+            <tr className="border-b border-line">
+              <th className="px-5 py-4 text-left text-[13px] font-bold text-ink-500">Feature</th>
               {competitors.map(c => (
-                <th key={c.name} style={{
-                  padding: "16px 16px",
-                  textAlign: "center",
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: c.highlight ? "#0369a1" : "#334155",
-                  background: c.highlight ? "#f0f9ff" : undefined,
-                }}>
+                <th key={c.name} className={`px-4 py-4 text-center text-[14px] font-extrabold ${c.highlight ? "bg-brand-50 text-brand-700" : "text-ink"}`}>
                   {c.name}
                 </th>
               ))}
@@ -44,22 +34,18 @@ export default function ComparisonTable({ competitors, features }: ComparisonTab
           </thead>
           <tbody>
             {features.map((f, i) => (
-              <tr key={f.name} style={{ borderBottom: i < features.length - 1 ? "1px solid #f1f5f9" : undefined }}>
-                <td style={{ padding: "13px 20px", fontSize: 14, color: "#475569" }}>{f.name}</td>
+              <tr key={f.name} className={i < features.length - 1 ? "border-b border-line/80" : ""}>
+                <td className="px-5 py-3.5 text-[14px] text-ink-600">{f.name}</td>
                 {competitors.map(c => {
                   const val = f.values[c.name];
                   return (
-                    <td key={c.name} style={{
-                      padding: "13px 16px",
-                      textAlign: "center",
-                      background: c.highlight ? "#f0f9ff" : undefined,
-                    }}>
+                    <td key={c.name} className={`px-4 py-3.5 text-center ${c.highlight ? "bg-brand-50/60" : ""}`}>
                       {val === true ? (
-                        <CheckCircleFilled style={{ color: "#10b981", fontSize: 18 }} />
+                        <CheckCircleFilled className="text-[18px] text-emerald-500" />
                       ) : val === false ? (
-                        <CloseCircleOutlined style={{ color: "#e2e8f0", fontSize: 18 }} />
+                        <CloseCircleOutlined className="text-[18px] text-ink-200" />
                       ) : (
-                        <Text style={{ fontSize: 13, color: "#475569" }}>{val}</Text>
+                        <span className="text-[13px] text-ink-600">{val}</span>
                       )}
                     </td>
                   );
@@ -69,6 +55,6 @@ export default function ComparisonTable({ competitors, features }: ComparisonTab
           </tbody>
         </table>
       </div>
-    </Card>
+    </div>
   );
 }

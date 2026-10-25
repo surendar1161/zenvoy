@@ -35,6 +35,7 @@ const PRESET_PALETTES = [
 ];
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { Page, PageHeader } from "@/components/app/ui";
 
 const { Title, Text } = Typography;
 
@@ -861,14 +862,13 @@ function SettingsPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
-      <div style={{ marginBottom: 28 }}>
-        <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>Settings</Title>
-        <Text type="secondary" style={{ fontSize: 15 }}>Manage your account, team, and API configuration.</Text>
-      </div>
+      <PageHeader title="Settings" sub="Manage your account, team, and API configuration." />
 
-      <Tabs size="large" items={tabItems} defaultActiveKey={defaultTab} />
+      <div className="rounded-3xl border border-line bg-white px-4 py-3 sm:px-6 sm:py-4">
+        <Tabs size="large" items={tabItems} defaultActiveKey={defaultTab} />
+      </div>
 
       {/* Invite Modal */}
       <Modal
@@ -935,6 +935,6 @@ function SettingsPage() {
           </div>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

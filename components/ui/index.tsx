@@ -56,7 +56,7 @@ export function StandardCard({
 // STANDARD BUTTON
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-interface StandardButtonProps extends ButtonProps {
+interface StandardButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'small' | 'medium' | 'large' | 'xlarge';
 }
 
@@ -160,7 +160,7 @@ export function ProgressCard({
 // STANDARD TAG
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-interface StandardTagProps extends TagProps {
+interface StandardTagProps extends Omit<TagProps, 'variant'> {
   variant?: 'small' | 'medium' | 'large';
 }
 

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Badge, Button, Card, Col, Dropdown, Empty, Input, Modal,
-  Row, Select, Space, Statistic, Tag, Typography, message, Form,
-  Tooltip, Progress,
+  Avatar, Button, Card, Col, Dropdown, Input, Modal,
+  Row, Select, Tag, message, Form,
+  Tooltip,
 } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -15,8 +15,9 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const STATUS_OPTIONS = [
@@ -199,66 +200,43 @@ export default function ClientsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "36px 28px" }}>
+    <Page wide>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <TeamOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Clients</Title>
-            <Tag style={{ borderRadius: 20 }}>{clients.length} total</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Track your clients, proposals, contracts, and revenue in one place.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large" onClick={openCreate}
-          style={{ borderRadius: 10, fontWeight: 600 }}>
-          Add Client
-        </Button>
+      <PageHeader
+        title="Clients"
+        sub="Track clients, proposals, contracts, and revenue in one place."
+        count={clients.length ? `${clients.length} total` : undefined}
+        action={<BrandButton onClick={openCreate}><PlusOutlined /> Add client</BrandButton>}
+      />
+
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<TeamOutlined />} tone="brand" label="Total" value={clients.length} />
+        <Stat icon={<UserOutlined />} tone="emerald" label="Active" value={activeCount} />
+        <Stat icon={<FilterOutlined />} tone="amber" label="Leads" value={leadCount} />
+        <Stat icon={<DollarOutlined />} tone="violet" label="Revenue" value={`$${totalRevenue.toLocaleString()}`} />
       </div>
 
-      {/* Stats row */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 28 }}>
-        {[
-          { title: "Total Clients",  value: clients.length, icon: <TeamOutlined />,   color: "#0ea5e9" },
-          { title: "Active",         value: activeCount,    icon: <UserOutlined />,    color: "#10b981" },
-          { title: "Leads",          value: leadCount,      icon: <FilterOutlined />,  color: "#f59e0b" },
-          { title: "Total Revenue",  value: `$${totalRevenue.toLocaleString()}`, icon: <DollarOutlined />, color: "#7c3aed" },
-        ].map(s => (
-          <Col key={s.title} xs={24} sm={12} lg={6}>
-            <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 20 } }}>
-              <Space>
-                <Avatar style={{ background: `${s.color}15`, color: s.color }} icon={s.icon} />
-                <Statistic
-                  title={<Text type="secondary" style={{ fontSize: 12 }}>{s.title}</Text>}
-                  value={s.value}
-                  valueStyle={{ color: s.color, fontWeight: 800, fontSize: 22 }}
-                />
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      {/* Filters */}
-      <Space style={{ marginBottom: 20 }} wrap>
-        <Input prefix={<SearchOutlined style={{ color: "#94a3b8" }} />} placeholder="Search clients…"
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <Input prefix={<SearchOutlined className="text-ink-300" />} placeholder="Search clients"
           value={search} onChange={e => setSearch(e.target.value)}
-          style={{ width: 280, borderRadius: 10 }} allowClear />
+          className="!w-[280px]" allowClear />
         <Select placeholder="All statuses" allowClear value={statusFilter ?? undefined}
-          onChange={v => setStatusFilter(v ?? null)} style={{ width: 160 }}
-          options={STATUS_OPTIONS.map(s => ({ value: s.value, label: <Space><span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, display: "inline-block" }} />{s.label}</Space> }))} />
-      </Space>
+          onChange={v => setStatusFilter(v ?? null)} className="!w-[160px]"
+          options={STATUS_OPTIONS.map(s => ({ value: s.value, label: s.label }))} />
+      </div>
 
       {/* Client grid */}
-      {loading ? null : filtered.length === 0 ? (
-        <Card style={{ borderRadius: 16, textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-          <Empty image={<TeamOutlined style={{ fontSize: 64, color: "#cbd5e1" }} />} imageStyle={{ height: 80 }}
-            description={<><Title level={4} style={{ color: "#64748b" }}>No clients yet</Title><Text type="secondary">Add your first client to track proposals, contracts, and revenue.</Text></>}>
-            <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add First Client</Button>
-          </Empty>
-        </Card>
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map(i => <div key={i} className="dp-skel h-52 rounded-3xl" />)}
+        </div>
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={<TeamOutlined />} title={clients.length ? "No matches" : "No clients yet"} body={clients.length ? "Try a different name, company, or status." : "Add your first client to track proposals, contracts, and revenue."}>
+          {clients.length
+            ? <button type="button" onClick={() => { setSearch(""); setStatusFilter(null); }} className="text-[14px] font-semibold text-brand-600">Clear filters</button>
+            : <BrandButton onClick={openCreate}><PlusOutlined /> Add first client</BrandButton>}
+        </EmptyState>
       ) : (
         <Row gutter={[16, 16]}>
           {filtered.map(client => {
@@ -266,97 +244,69 @@ export default function ClientsPage() {
             return (
               <Col key={client.id} xs={24} sm={12} lg={8}>
                 <Card
-                  style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%", transition: "box-shadow 0.2s" }}
+                  className="h-full overflow-hidden"
                   styles={{ body: { padding: 0 } }}
                   hoverable
                 >
                   {/* Card header */}
-                  <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid #f1f5f9" }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                      <Link href={`/clients/${client.id}`} style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none", flex: 1, minWidth: 0 }}>
+                  <div className="border-b border-line px-5 pb-4 pt-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link href={`/clients/${client.id}`} className="flex min-w-0 flex-1 items-center gap-3 no-underline">
                         <Avatar size={44} style={{ background: client.avatar_color, fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
                           {getInitials(client.name)}
                         </Avatar>
-                        <div style={{ minWidth: 0 }}>
-                          <Text strong style={{ fontSize: 15, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#0f172a" }}>
-                            {client.name}
-                          </Text>
-                          {client.company && (
-                            <Text type="secondary" style={{ fontSize: 13, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {client.company}
-                            </Text>
-                          )}
+                        <div className="min-w-0">
+                          <div className="truncate text-[15px] font-semibold text-ink">{client.name}</div>
+                          {client.company && <div className="truncate text-[13px] text-ink-400">{client.company}</div>}
                         </div>
                       </Link>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        <Badge dot color={statusCfg.color}>
-                          <Tag style={{ borderRadius: 20, fontSize: 11, color: statusCfg.color, borderColor: `${statusCfg.color}40`, background: `${statusCfg.color}12`, margin: 0 }}>
-                            {statusCfg.label}
-                          </Tag>
-                        </Badge>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold" style={{ color: statusCfg.color, background: `${statusCfg.color}18` }}>
+                          {statusCfg.label}
+                        </span>
                         <Dropdown menu={clientMenu(client)} trigger={["click"]} placement="bottomRight">
-                          <Button type="text" icon={<EllipsisOutlined />} size="small" style={{ borderRadius: 6 }} />
+                          <Button type="text" icon={<EllipsisOutlined />} size="small" />
                         </Dropdown>
                       </div>
                     </div>
                   </div>
 
-                  {/* Contact info */}
-                  <div style={{ padding: "14px 20px 10px" }}>
-                    <Space direction="vertical" size={6} style={{ width: "100%" }}>
-                      {client.email && (
-                        <Space size={6}>
-                          <MailOutlined style={{ color: "#94a3b8", fontSize: 13 }} />
-                          <Text style={{ fontSize: 13 }}>{client.email}</Text>
-                        </Space>
-                      )}
-                      {client.phone && (
-                        <Space size={6}>
-                          <PhoneOutlined style={{ color: "#94a3b8", fontSize: 13 }} />
-                          <Text style={{ fontSize: 13 }}>{client.phone}</Text>
-                        </Space>
-                      )}
-                      {(client.city || client.country) && (
-                        <Space size={6}>
-                          <GlobalOutlined style={{ color: "#94a3b8", fontSize: 13 }} />
-                          <Text style={{ fontSize: 13 }}>{[client.city, client.country].filter(Boolean).join(", ")}</Text>
-                        </Space>
-                      )}
-                    </Space>
-                  </div>
-
-                  {/* Metrics */}
-                  <div style={{ padding: "12px 20px 16px", borderTop: "1px solid #f8fafc" }}>
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        <Text type="secondary" style={{ fontSize: 11, display: "block" }}>DEALS</Text>
-                        <Text strong style={{ fontSize: 16, color: "#0ea5e9" }}>{client.deal_count}</Text>
-                      </Col>
-                      <Col span={12}>
-                        <Text type="secondary" style={{ fontSize: 11, display: "block" }}>REVENUE</Text>
-                        <Text strong style={{ fontSize: 16, color: "#10b981" }}>
-                          ${(client.total_revenue ?? 0).toLocaleString()}
-                        </Text>
-                      </Col>
-                    </Row>
-                    {client.tags?.length > 0 && (
-                      <Space wrap style={{ marginTop: 10 }}>
-                        {client.tags.slice(0, 3).map(t => (
-                          <Tag key={t} style={{ borderRadius: 20, fontSize: 11, padding: "0 8px" }}>{t}</Tag>
-                        ))}
-                        {client.tags.length > 3 && <Tag style={{ borderRadius: 20, fontSize: 11 }}>+{client.tags.length - 3}</Tag>}
-                      </Space>
+                  <div className="space-y-1.5 px-5 py-3.5 text-[13px] text-ink-700">
+                    {client.email && <div className="flex items-center gap-2"><MailOutlined className="text-ink-300" />{client.email}</div>}
+                    {client.phone && <div className="flex items-center gap-2"><PhoneOutlined className="text-ink-300" />{client.phone}</div>}
+                    {(client.city || client.country) && (
+                      <div className="flex items-center gap-2"><GlobalOutlined className="text-ink-300" />{[client.city, client.country].filter(Boolean).join(", ")}</div>
                     )}
                   </div>
 
-                  {/* Quick actions */}
-                  <div style={{ padding: "10px 16px 14px", borderTop: "1px solid #f1f5f9", display: "flex", gap: 8 }}>
-                    <Link href={`/clients/${client.id}`} style={{ flex: 1 }}>
-                      <Button block size="small" style={{ borderRadius: 8, fontWeight: 600 }}>View Profile</Button>
+                  <div className="border-t border-line px-5 py-3.5">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-300">Deals</div>
+                        <div className="font-display text-[18px] font-extrabold text-brand-600">{client.deal_count}</div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-300">Revenue</div>
+                        <div className="font-display text-[18px] font-extrabold text-emerald-600">${(client.total_revenue ?? 0).toLocaleString()}</div>
+                      </div>
+                    </div>
+                    {client.tags?.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {client.tags.slice(0, 3).map(t => (
+                          <Tag key={t} className="!m-0 !rounded-full">{t}</Tag>
+                        ))}
+                        {client.tags.length > 3 && <Tag className="!m-0 !rounded-full">+{client.tags.length - 3}</Tag>}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 border-t border-line px-4 py-3">
+                    <Link href={`/clients/${client.id}`} className="flex-1">
+                      <Button block size="small">View profile</Button>
                     </Link>
-                    <Tooltip title="New Proposal">
+                    <Tooltip title="New proposal">
                       <a href={`/generate?client=${encodeURIComponent(client.name)}&company=${encodeURIComponent(client.company ?? "")}`}>
-                        <Button size="small" icon={<FileTextOutlined />} style={{ borderRadius: 8 }} />
+                        <Button size="small" icon={<FileTextOutlined />} aria-label="New proposal" />
                       </a>
                     </Tooltip>
                   </div>
@@ -371,7 +321,7 @@ export default function ClientsPage() {
       <Modal
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
-        title={<Space><TeamOutlined style={{ color: "#0ea5e9" }} />{editing ? "Edit Client" : "Add New Client"}</Space>}
+        title={<span className="inline-flex items-center gap-2"><TeamOutlined className="text-brand-600" />{editing ? "Edit client" : "Add a client"}</span>}
         width={640}
         footer={[
           <Button key="cancel" onClick={() => setModalOpen(false)}>Cancel</Button>,
@@ -438,6 +388,6 @@ export default function ClientsPage() {
           </Row>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

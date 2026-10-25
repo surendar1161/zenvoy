@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Tooltip, Typography } from "antd";
+import { Tooltip } from "antd";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-
-const { Text } = Typography;
 
 function formatElapsed(ms: number): string {
   const totalSec = Math.floor(ms / 1000);
@@ -50,18 +48,13 @@ export default function RunningTimerIndicator() {
 
   return (
     <Tooltip title={description || "Timer running"}>
-      <Link href="/time-tracking" style={{ textDecoration: "none" }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 6,
-          background: "#f0fdf4", border: "1px solid #bbf7d0",
-          borderRadius: 8, padding: "4px 10px", cursor: "pointer",
-        }}>
-          <Badge status="processing" color="#10b981" />
-          <ClockCircleOutlined style={{ color: "#10b981", fontSize: 13 }} />
-          <Text strong style={{ fontSize: 12, color: "#10b981", fontVariantNumeric: "tabular-nums" }}>
-            {formatElapsed(elapsed)}
-          </Text>
-        </div>
+      <Link href="/time-tracking" className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700 transition hover:bg-emerald-100" aria-label="Timer running">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping2 rounded-full bg-emerald-400" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+        </span>
+        <ClockCircleOutlined className="text-[12px]" />
+        <span className="text-[12.5px] font-bold tabular-nums">{formatElapsed(elapsed)}</span>
       </Link>
     </Tooltip>
   );

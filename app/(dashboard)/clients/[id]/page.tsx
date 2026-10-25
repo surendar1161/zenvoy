@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Avatar, Badge, Button, Card, Col, Divider, Form, Input, List, Modal,
-  Row, Select, Space, Statistic, Tag, Timeline, Typography, message, Spin, Empty,
+  Row, Select, Space, Tag, Timeline, Typography, message, Spin, Empty,
 } from "antd";
 import {
   ArrowLeftOutlined, MailOutlined, PhoneOutlined, GlobalOutlined, EditOutlined,
@@ -14,8 +14,10 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Page, PageHeader, Stat, StatusPill } from "@/components/app/ui";
+import { Button as BrandButton, ButtonLink } from "@/components/site/ui";
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 const STATUS_OPTIONS = [
@@ -121,91 +123,60 @@ export default function ClientDetailPage() {
     msgApi.success("Status updated");
   }
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
+  if (loading) return <Page><div className="flex justify-center py-24"><Spin size="large" /></div></Page>;
   if (!client) return null;
 
-  const statusCfg = STATUS_OPTIONS.find(s => s.value === client.status) ?? STATUS_OPTIONS[0];
   const initials = client.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   const totalRevenue = proposals.filter(p => p.status === "accepted" || p.status === "signed")
     .reduce((s, p) => s + (p.total_budget ?? 0), 0);
-
-  const PROPOSAL_STATUS_COLORS: Record<string, string> = {
-    draft: "default", sent: "blue", viewed: "cyan", accepted: "green", signed: "green", declined: "red",
-  };
+  const headerSub = [client.company, client.source ? `via ${client.source}` : null].filter(Boolean).join(" · ");
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
 
-      {/* Back */}
-      <Link href="/clients">
-        <Button type="text" icon={<ArrowLeftOutlined />} style={{ padding: "4px 0", color: "#64748b", marginBottom: 20 }}>All Clients</Button>
+      <Link href="/clients" className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-600">
+        <ArrowLeftOutlined /> All Clients
       </Link>
 
-      {/* Header card */}
-      <Card style={{ borderRadius: 20, border: `2px solid ${client.avatar_color}30`, marginBottom: 24, background: `${client.avatar_color}05` }} styles={{ body: { padding: 32 } }}>
-        <Row align="middle" justify="space-between" gutter={[24, 16]} wrap>
-          <Col>
-            <Space size={20} align="center">
-              <Avatar size={72} style={{ background: client.avatar_color, fontWeight: 800, fontSize: 26, flexShrink: 0 }}>
-                {initials}
-              </Avatar>
-              <div>
-                <Space align="center" size={12} wrap>
-                  <Title level={2} style={{ margin: 0, fontWeight: 900 }}>{client.name}</Title>
-                  <Select value={client.status} size="small" onChange={updateStatus}
-                    style={{ width: 120 }}
-                    options={STATUS_OPTIONS.map(s => ({
-                      value: s.value,
-                      label: <Space size={6}><span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, display: "inline-block" }} />{s.label}</Space>,
-                    }))} />
-                </Space>
-                <Space style={{ marginTop: 6 }} wrap>
-                  {client.company && <Text type="secondary" style={{ fontSize: 15 }}>{client.company}</Text>}
-                  {client.source && <Tag style={{ borderRadius: 20, fontSize: 12 }}>via {client.source}</Tag>}
-                  {client.tags?.map(t => <Tag key={t} style={{ borderRadius: 20, fontSize: 11 }}>{t}</Tag>)}
-                </Space>
-              </div>
-            </Space>
-          </Col>
-          <Col>
-            <Space wrap>
-              <Link href={`/generate?client=${encodeURIComponent(client.name)}&company=${encodeURIComponent(client.company ?? "")}`}>
-                <Button icon={<FileTextOutlined />} style={{ borderRadius: 10, fontWeight: 600 }}>New Proposal</Button>
-              </Link>
-              <Button type="primary" icon={<EditOutlined />} onClick={() => {
-                editForm.setFieldsValue({ name: client.name, company: client.company, email: client.email, phone: client.phone, website: client.website, city: client.city, status: client.status, source: client.source, tags: client.tags, notes: client.notes });
-                setEditOpen(true);
-              }} style={{ borderRadius: 10, fontWeight: 600 }}>
-                Edit
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-      </Card>
+      <PageHeader
+        title={client.name}
+        sub={headerSub || undefined}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={client.status} size="small" onChange={updateStatus}
+              style={{ width: 130 }}
+              options={STATUS_OPTIONS.map(s => ({
+                value: s.value,
+                label: <Space size={6}><span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, display: "inline-block" }} />{s.label}</Space>,
+              }))} />
+            <ButtonLink variant="secondary" href={`/generate?client=${encodeURIComponent(client.name)}&company=${encodeURIComponent(client.company ?? "")}`}>
+              <FileTextOutlined /> New Proposal
+            </ButtonLink>
+            <BrandButton onClick={() => {
+              editForm.setFieldsValue({ name: client.name, company: client.company, email: client.email, phone: client.phone, website: client.website, city: client.city, status: client.status, source: client.source, tags: client.tags, notes: client.notes });
+              setEditOpen(true);
+            }}>
+              <EditOutlined /> Edit
+            </BrandButton>
+          </div>
+        }
+      />
+
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <Avatar size={44} style={{ background: client.avatar_color, fontWeight: 800, fontSize: 16 }}>{initials}</Avatar>
+        {client.tags?.map(t => <Tag key={t} style={{ borderRadius: 20, fontSize: 11 }}>{t}</Tag>)}
+      </div>
 
       <Row gutter={[24, 24]}>
         {/* LEFT: Stats + Contact + Notes */}
         <Col xs={24} lg={10}>
-          {/* Stats */}
-          <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 20 }} styles={{ body: { padding: 24 } }}>
-            <Row gutter={[16, 16]}>
-              {[
-                { title: "Proposals",  value: proposals.length,    color: "#0ea5e9", icon: <FileTextOutlined /> },
-                { title: "Contracts",  value: contracts.length,    color: "#7c3aed", icon: <SafetyCertificateOutlined /> },
-                { title: "Won",        value: proposals.filter(p => p.status === "accepted" || p.status === "signed").length, color: "#10b981", icon: <CheckCircleOutlined /> },
-                { title: "Revenue",    value: `$${totalRevenue.toLocaleString()}`, color: "#f59e0b", icon: <DollarOutlined /> },
-              ].map(s => (
-                <Col span={12} key={s.title}>
-                  <Statistic
-                    title={<Space size={4}><Avatar size={20} style={{ background: `${s.color}15`, color: s.color }} icon={s.icon} /><Text type="secondary" style={{ fontSize: 11 }}>{s.title}</Text></Space>}
-                    value={s.value}
-                    valueStyle={{ color: s.color, fontWeight: 800, fontSize: 22 }}
-                  />
-                </Col>
-              ))}
-            </Row>
-          </Card>
+          <div className="mb-5 grid grid-cols-2 gap-4">
+            <Stat icon={<FileTextOutlined />} tone="brand" label="Proposals" value={proposals.length} />
+            <Stat icon={<SafetyCertificateOutlined />} tone="violet" label="Contracts" value={contracts.length} />
+            <Stat icon={<CheckCircleOutlined />} tone="emerald" label="Won" value={proposals.filter(p => p.status === "accepted" || p.status === "signed").length} />
+            <Stat icon={<DollarOutlined />} tone="amber" label="Revenue" value={`$${totalRevenue.toLocaleString()}`} />
+          </div>
 
           {/* Contact info */}
           <Card title={<Space><UserOutlined style={{ color: "#0ea5e9" }} />Contact</Space>}
@@ -276,7 +247,7 @@ export default function ClientDetailPage() {
                 <List.Item style={{ padding: "12px 20px" }}>
                   <List.Item.Meta
                     avatar={<Avatar style={{ background: "#eff6ff", color: "#0ea5e9" }} icon={<FileTextOutlined />} />}
-                    title={<Space size={8}><Text strong style={{ fontSize: 13 }}>{p.project_type ?? "Proposal"}</Text><Tag color={PROPOSAL_STATUS_COLORS[p.status] ?? "default"} style={{ borderRadius: 20, fontSize: 11 }}>{p.status}</Tag></Space>}
+                    title={<Space size={8}><Text strong style={{ fontSize: 13 }}>{p.project_type ?? "Proposal"}</Text><StatusPill status={p.status} /></Space>}
                     description={<Text type="secondary" style={{ fontSize: 12 }}>{new Date(p.created_at).toLocaleDateString()}</Text>}
                   />
                   {p.total_budget && <Text strong style={{ color: "#10b981", fontSize: 14 }}>{p.currency ?? "USD"} {p.total_budget.toLocaleString()}</Text>}
@@ -299,7 +270,7 @@ export default function ClientDetailPage() {
                 <List.Item style={{ padding: "12px 20px" }}>
                   <List.Item.Meta
                     avatar={<Avatar style={{ background: "#f5f3ff", color: "#7c3aed" }} icon={<SafetyCertificateOutlined />} />}
-                    title={<Space size={8}><Text strong style={{ fontSize: 13 }}>{c.contract_type_name ?? "Contract"}</Text><Tag style={{ borderRadius: 20, fontSize: 11 }}>{c.status}</Tag></Space>}
+                    title={<Space size={8}><Text strong style={{ fontSize: 13 }}>{c.contract_type_name ?? "Contract"}</Text><StatusPill status={c.status} /></Space>}
                     description={<Text type="secondary" style={{ fontSize: 12 }}>{c.governing_law ?? "—"} · {new Date(c.created_at).toLocaleDateString()}</Text>}
                   />
                 </List.Item>
@@ -360,6 +331,6 @@ export default function ClientDetailPage() {
           </Row>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

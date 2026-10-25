@@ -2,32 +2,26 @@
 
 import { useEffect, useState } from "react";
 import {
-  Badge, Button, Card, Col, DatePicker, Empty, Form, Input,
-  InputNumber, Modal, Row, Select, Space, Spin, Switch, Table,
+  Button, Card, Col, DatePicker, Form, Input,
+  InputNumber, Modal, Row, Select, Space, Switch, Table,
   Tag, Tooltip, Typography, message,
 } from "antd";
 import type { TableColumnsType } from "antd";
 import {
   PlusOutlined, DeleteOutlined, EyeOutlined, CopyOutlined,
   DollarOutlined, CheckCircleOutlined, ClockCircleOutlined,
-  SendOutlined, FileTextOutlined, SyncOutlined,
+  FileTextOutlined, SyncOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
 import dayjs from "dayjs";
+import { Page, PageHeader, Stat, EmptyState, StatusPill } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-const STATUS_COLOR: Record<string, string> = {
-  draft: "default", sent: "blue", viewed: "cyan",
-  paid: "green", overdue: "red", cancelled: "default",
-};
-const STATUS_ICON: Record<string, React.ReactNode> = {
-  draft: <FileTextOutlined />, sent: <SendOutlined />, viewed: <EyeOutlined />,
-  paid: <CheckCircleOutlined />, overdue: <ClockCircleOutlined />, cancelled: <DeleteOutlined />,
-};
 const CURRENCIES = ["USD","GBP","EUR","AUD","CAD","INR","SGD","AED"];
 
 interface LineItem { description: string; quantity: number; unit_price: number; amount: number; }
@@ -178,11 +172,7 @@ export default function InvoicesPage() {
     },
     {
       title: "Status", key: "status", width: 130,
-      render: (_, i) => (
-        <Tag color={STATUS_COLOR[i.status]} icon={STATUS_ICON[i.status]} style={{ borderRadius: 20, fontSize: 12, textTransform: "capitalize" }}>
-          {i.status}
-        </Tag>
-      ),
+      render: (_, i) => <StatusPill status={i.status} />,
     },
     {
       title: "Due Date", key: "due_date", width: 120,
@@ -217,68 +207,45 @@ export default function InvoicesPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <DollarOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Invoices</Title>
-            <Tag style={{ borderRadius: 20 }}>{invoices.length} total</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Standalone invoices — create, send, and track payments for any client.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large" onClick={() => setOpen(true)} style={{ borderRadius: 10, fontWeight: 600 }}>
-          New Invoice
-        </Button>
+      <PageHeader
+        title="Invoices"
+        sub="Create, send, and track payments for any client."
+        count={invoices.length ? `${invoices.length} total` : undefined}
+        action={<BrandButton onClick={() => setOpen(true)}><PlusOutlined /> New invoice</BrandButton>}
+      />
+
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<ClockCircleOutlined />} tone="amber" label="Outstanding" value={`${cur} ${total_outstanding.toLocaleString()}`} />
+        <Stat icon={<CheckCircleOutlined />} tone="emerald" label="Collected" value={`${cur} ${total_paid.toLocaleString()}`} />
+        <Stat icon={<ClockCircleOutlined />} tone="rose" label="Overdue" value={overdue_count} />
+        <Stat icon={<FileTextOutlined />} tone="brand" label="Invoices" value={invoices.length} />
       </div>
 
-      {/* Stats */}
-      <Row gutter={[14, 14]} style={{ marginBottom: 24 }}>
-        {[
-          { label: "Outstanding",    value: `${cur} ${total_outstanding.toLocaleString()}`, color: "#f59e0b", bg: "#fffbeb", icon: <ClockCircleOutlined /> },
-          { label: "Collected",      value: `${cur} ${total_paid.toLocaleString()}`,        color: "#10b981", bg: "#f0fdf4", icon: <CheckCircleOutlined /> },
-          { label: "Overdue",        value: String(overdue_count),                           color: "#ef4444", bg: "#fff1f2", icon: <ClockCircleOutlined /> },
-          { label: "Total Invoices", value: String(invoices.length),                         color: "#0ea5e9", bg: "#eff6ff", icon: <FileTextOutlined /> },
-        ].map(s => (
-          <Col key={s.label} xs={12} sm={6}>
-            <Card style={{ borderRadius: 14, border: `1.5px solid ${s.color}25`, background: s.bg }} styles={{ body: { padding: 18 } }}>
-              <Space>
-                <span style={{ color: s.color, fontSize: 18 }}>{s.icon}</span>
-                <div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: s.color }}>{s.value}</div>
-                  <Text type="secondary" style={{ fontSize: 11 }}>{s.label}</Text>
-                </div>
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      {/* Filter */}
-      <Space style={{ marginBottom: 16 }} wrap>
+      <div className="mb-4 flex flex-wrap gap-2">
         {["all", "draft", "sent", "viewed", "paid", "overdue", "recurring"].map(s => (
-          <Tag.CheckableTag key={s} checked={statusFilter === s} onChange={() => setStatusFilter(s)}
-            style={{ borderRadius: 20, padding: "4px 14px", fontSize: 13, fontWeight: 600 }}>
+          <button
+            key={s}
+            type="button"
+            onClick={() => setStatusFilter(s)}
+            className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${statusFilter === s ? "bg-ink text-white" : "border border-line bg-white text-ink-500 hover:text-ink"}`}
+          >
             {s === "all" ? "All" : s === "recurring" ? "Recurring" : s.charAt(0).toUpperCase() + s.slice(1)}
-          </Tag.CheckableTag>
+          </button>
         ))}
-      </Space>
+      </div>
 
       {/* Table */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 80 }}><Spin size="large" /></div>
+        <div className="dp-skel h-72 rounded-3xl" />
       ) : invoices.length === 0 ? (
-        <Card style={{ borderRadius: 16, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-          <DollarOutlined style={{ fontSize: 64, color: "#cbd5e1", marginBottom: 16 }} />
-          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No invoices yet</Title>
-          <Text type="secondary" style={{ display: "block", marginBottom: 24 }}>Create your first invoice and send it directly to your client.</Text>
-          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setOpen(true)} style={{ borderRadius: 12 }}>Create First Invoice</Button>
-        </Card>
+        <EmptyState icon={<DollarOutlined />} title="No invoices yet" body="Create your first invoice and send it directly to your client.">
+          <BrandButton onClick={() => setOpen(true)}><PlusOutlined /> Create first invoice</BrandButton>
+        </EmptyState>
       ) : (
-        <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
+        <Card styles={{ body: { padding: 0 } }} className="overflow-hidden">
           <Table dataSource={invoices.filter(i =>
             statusFilter === "all" ? true :
             statusFilter === "recurring" ? i.is_recurring :
@@ -388,6 +355,6 @@ export default function InvoicesPage() {
           </Card>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

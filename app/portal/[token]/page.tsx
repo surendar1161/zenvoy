@@ -18,6 +18,7 @@ import type { BrandKit } from "@/lib/brand";
 import { DEFAULT_BRAND } from "@/lib/brand";
 import SchedulingEmbed from "@/components/SchedulingEmbed";
 import SignatureBlock from "@/components/SignatureBlock";
+import { StatusPill } from "@/components/app/ui";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -29,7 +30,6 @@ interface PContract { id: string; title: string | null; contract_type: string | 
 interface PProposal { id: string; client_name: string | null; project_type: string | null; proposal_text: string | null; tiers: unknown; total_budget: number | null; currency: string | null; status: string; signed_at: string | null; signer_name: string | null; accepted_at: string | null; created_at: string; freelancer_name: string | null; }
 
 const FILE_ICONS: Record<string, string> = { contract: "📄", invoice: "💰", design: "🎨", image: "🖼️", document: "📝", general: "📎" };
-const INV_COLOR: Record<string, string> = { draft: "#94a3b8", sent: "#0ea5e9", viewed: "#06b6d4", paid: "#10b981", overdue: "#ef4444" };
 
 const BASE_SECTIONS = [
   { key: "overview",   label: "Overview",   icon: <HomeOutlined /> },
@@ -159,16 +159,16 @@ export default function ClientPortalPage() {
     return false;
   }
 
-  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Spin size="large" /></div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-canvas"><Spin size="large" /></div>;
 
   if (!portal) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
       <Result status="404" title="Portal not found" subTitle="This link may have expired or been deactivated. Contact the sender for a new link." />
     </div>
   );
 
   if (!portal.is_active) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc" }}>
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
       <Result status="warning" title="Portal unavailable" subTitle="This portal has been temporarily deactivated. Please contact the sender." />
     </div>
   );
@@ -178,15 +178,15 @@ export default function ClientPortalPage() {
   const fontFamily = `'${brand.fontFamily ?? "Inter"}', sans-serif`;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", fontFamily }}>
+    <div className="min-h-screen bg-canvas" style={{ fontFamily }}>
       {ctx}
 
       {/* Load Google Font */}
       <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(brand.fontFamily ?? "Inter")}:wght@400;600;700;800&display=swap`} />
 
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ${primary}dd, ${primary})`, padding: "0 24px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 0 0" }}>
+      <div className="mx-auto max-w-[900px] px-6 pt-8">
+        <div className="rounded-3xl bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-7 pt-7 text-white">
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
             {brand.logoUrl
               // eslint-disable-next-line @next/next/no-img-element
@@ -194,7 +194,7 @@ export default function ClientPortalPage() {
               : <Text strong style={{ color: "rgba(255,255,255,0.9)", fontSize: 18 }}>{brand.companyName}</Text>
             }
           </div>
-          <Title level={2} style={{ color: "#fff", margin: "0 0 6px", fontWeight: 900, fontSize: 28 }}>
+          <Title level={2} className="font-display" style={{ color: "#fff", margin: "0 0 6px", fontWeight: 900, fontSize: 28 }}>
             {portal.title ?? `Project Hub — ${portal.client_name}`}
           </Title>
           {portal.welcome_message && (
@@ -214,7 +214,7 @@ export default function ClientPortalPage() {
               <button key={s.key} onClick={() => setSection(s.key)}
                 style={{
                   padding: "10px 20px", border: "none", cursor: "pointer", fontFamily, fontWeight: 600,
-                  fontSize: 14, borderRadius: "10px 10px 0 0", marginRight: 4,
+                  fontSize: 14, borderRadius: 12, marginRight: 4, marginBottom: 16,
                   background: section === s.key ? "#fff" : "rgba(255,255,255,0.15)",
                   color: section === s.key ? primary : "rgba(255,255,255,0.85)",
                   transition: "all 0.15s",
@@ -358,7 +358,7 @@ export default function ClientPortalPage() {
                   <div>
                     <Text strong style={{ fontSize: 16 }}>{c.title || "Contract"}</Text>
                     {c.contract_type && <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 8, textTransform: "capitalize" }}>{c.contract_type}</Tag>}
-                    <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 4, color: c.status === "signed" ? "#10b981" : "#0ea5e9", borderColor: c.status === "signed" ? "#10b98140" : "#0ea5e940", background: c.status === "signed" ? "#10b98112" : "#0ea5e912", textTransform: "capitalize" }}>{c.status}</Tag>
+                    <span className="ml-1"><StatusPill status={c.status} /></span>
                   </div>
                   <Text type="secondary" style={{ fontSize: 12 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
                 </div>
@@ -396,13 +396,12 @@ export default function ClientPortalPage() {
                 <Text type="secondary" style={{ display: "block" }}>No proposals available.</Text>
               </Card>
             ) : proposals.map(p => {
-              const statusColor: Record<string, string> = { sent: "#0ea5e9", viewed: "#06b6d4", accepted: "#10b981" };
               return (
                 <Card key={p.id} style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
                     <div>
                       <Text strong style={{ fontSize: 16 }}>{p.project_type || "Proposal"}</Text>
-                      <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 8, color: statusColor[p.status] ?? "#94a3b8", borderColor: `${statusColor[p.status] ?? "#94a3b8"}40`, background: `${statusColor[p.status] ?? "#94a3b8"}12`, textTransform: "capitalize" }}>{p.status}</Tag>
+                      <span className="ml-2"><StatusPill status={p.status} /></span>
                     </div>
                     <Text type="secondary" style={{ fontSize: 12 }}>{new Date(p.created_at).toLocaleDateString()}</Text>
                   </div>
@@ -458,7 +457,7 @@ export default function ClientPortalPage() {
                   <div>
                     <Space align="center" size={10}>
                       <Text strong style={{ fontSize: 16 }}>{inv.invoice_number} — {inv.title}</Text>
-                      <Tag style={{ borderRadius: 20, fontSize: 11, color: INV_COLOR[inv.status], borderColor: `${INV_COLOR[inv.status]}40`, background: `${INV_COLOR[inv.status]}12`, textTransform: "capitalize" }}>{inv.status}</Tag>
+                      <StatusPill status={inv.status} />
                     </Space>
                     {inv.due_date && <Text type="secondary" style={{ display: "block", fontSize: 13, marginTop: 2 }}>Due {new Date(inv.due_date).toLocaleDateString()}</Text>}
                   </div>

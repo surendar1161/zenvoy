@@ -263,7 +263,7 @@ export default function RichEditor({
           </NextLink>
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "#0B1220", fontFamily: "var(--font-display), system-ui, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
           <div style={{ fontSize: 11, color: "#94a3b8" }}>
             {saveState === "saving" && "⏳ Saving…"}
             {saveState === "saved" && "✅ Saved"}
@@ -494,12 +494,12 @@ export default function RichEditor({
       {/* Bubble menu disabled - use toolbar instead */}
 
       {/* ── Editor canvas ── */}
-      <div style={{ flex: 1, overflowY: "auto", background: "#f1f5f9", padding: "32px 24px" }}
+      <div style={{ flex: 1, overflowY: "auto", background: "#f5f8fc", padding: "32px 24px" }}
         onClick={() => { setShowColorPicker(false); setShowHighlightPicker(false); setShowTableMenu(false); }}>
         <div style={{
           maxWidth: 860, margin: "0 auto",
-          background: "#fff", borderRadius: 4,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.06)",
+          background: "#fff", borderRadius: 16, border: "1px solid #e4e9f1",
+          boxShadow: "0 1px 2px rgba(11,18,32,.04), 0 12px 32px rgba(11,18,32,.08)",
           padding: "72px 88px", minHeight: 1050,
         }}>
           <style>{`

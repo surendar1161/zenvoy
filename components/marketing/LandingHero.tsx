@@ -1,8 +1,7 @@
 "use client";
 
-import { Button, Space, Tag } from "antd";
-import { ThunderboltFilled } from "@ant-design/icons";
-import Link from "next/link";
+import { ArrowRightOutlined } from "@ant-design/icons";
+import { ButtonLink } from "@/components/site/ui";
 
 interface CTA {
   text: string;
@@ -21,44 +20,35 @@ interface LandingHeroProps {
 
 export default function LandingHero({ tag, title, subtitle, primaryCTA, secondaryCTA, footnote }: LandingHeroProps) {
   return (
-    <section
-      aria-label="Hero"
-      style={{ background: "linear-gradient(160deg, #0c4a6e 0%, #0369a1 55%, #0ea5e9 100%)", padding: "90px 24px 100px", textAlign: "center", position: "relative", overflow: "hidden" }}
-    >
-      <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} aria-hidden />
-      <div style={{ position: "relative", maxWidth: 800, margin: "0 auto" }}>
+    <section aria-label="Hero" className="relative overflow-hidden px-5 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20">
+      <div className="dp-grid pointer-events-none absolute inset-0 opacity-70" aria-hidden />
+      <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-brand-400/20 blur-[90px]" aria-hidden />
+      <div className="pointer-events-none absolute -right-16 top-10 h-72 w-72 rounded-full bg-violet-400/15 blur-[90px]" aria-hidden />
+      <div className="relative mx-auto max-w-3xl text-center">
         {tag && (
-          <Tag style={{ marginBottom: 18, borderRadius: 20, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", color: "#fff", fontSize: 13, fontWeight: 700, padding: "5px 16px" }}>
+          <span className="inline-flex rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-[12.5px] font-bold text-brand-700">
             {tag}
-          </Tag>
+          </span>
         )}
-        <h1 style={{ fontSize: "clamp(32px, 5.5vw, 56px)", fontWeight: 900, color: "#fff", lineHeight: 1.12, margin: "0 0 18px", letterSpacing: "-1.5px" }}>
+        <h1 className="mt-5 text-[clamp(34px,5.5vw,58px)] font-extrabold leading-[1.08] tracking-tight text-ink">
           {title}
         </h1>
-        <p style={{ fontSize: "clamp(15px, 2vw, 19px)", color: "rgba(255,255,255,0.88)", maxWidth: 640, margin: "0 auto 36px", lineHeight: 1.65 }}>
+        <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-ink-500 sm:text-[18px]">
           {subtitle}
         </p>
-        <Space size={12} wrap style={{ justifyContent: "center" }}>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           {primaryCTA && (
-            <Link href={primaryCTA.href}>
-              <Button type="primary" size="large" icon={<ThunderboltFilled />}
-                style={{ height: 54, paddingInline: 36, fontSize: 17, fontWeight: 800, background: "#fff", color: "#0369a1", border: "none", borderRadius: 14, boxShadow: "0 4px 24px rgba(0,0,0,0.22)" }}>
-                {primaryCTA.text}
-              </Button>
-            </Link>
+            <ButtonLink href={primaryCTA.href} size="lg">
+              {primaryCTA.text} <ArrowRightOutlined className="text-[13px]" />
+            </ButtonLink>
           )}
           {secondaryCTA && (
-            <Link href={secondaryCTA.href}>
-              <Button size="large"
-                style={{ height: 54, paddingInline: 28, fontSize: 15, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.35)", color: "#fff", borderRadius: 14 }}>
-                {secondaryCTA.text}
-              </Button>
-            </Link>
+            <ButtonLink href={secondaryCTA.href} variant="secondary" size="lg">
+              {secondaryCTA.text}
+            </ButtonLink>
           )}
-        </Space>
-        {footnote && (
-          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 18 }}>{footnote}</p>
-        )}
+        </div>
+        {footnote && <p className="mt-5 text-[13px] text-ink-400">{footnote}</p>}
       </div>
     </section>
   );

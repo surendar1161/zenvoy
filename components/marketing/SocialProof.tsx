@@ -1,9 +1,6 @@
 "use client";
 
-import { Row, Col, Card, Space, Divider, Typography } from "antd";
 import { StarFilled } from "@ant-design/icons";
-
-const { Text } = Typography;
 
 interface Testimonial {
   quote: string;
@@ -19,25 +16,27 @@ interface SocialProofProps {
 
 export default function SocialProof({ title = "What freelancers say", subtitle, testimonials }: SocialProofProps) {
   return (
-    <section aria-label="Testimonials" style={{ background: "#f8fafc", padding: "80px 24px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <h2 style={{ fontSize: 32, fontWeight: 800, textAlign: "center", margin: "0 0 12px" }}>{title}</h2>
-        {subtitle && <p style={{ color: "#64748b", fontSize: 16, textAlign: "center", marginBottom: 48 }}>{subtitle}</p>}
-        <Row gutter={[24, 24]}>
+    <section aria-label="Testimonials" className="px-5 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-600">Stories</span>
+          <h2 className="mt-3 text-[32px] font-extrabold leading-tight text-ink sm:text-[40px]">{title}</h2>
+          {subtitle && <p className="mt-3 text-[16px] text-ink-500">{subtitle}</p>}
+        </div>
+        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
           {testimonials.map(t => (
-            <Col key={t.name} xs={24} md={8}>
-              <Card style={{ borderRadius: 18, border: "1px solid #e2e8f0", height: "100%" }} styles={{ body: { padding: 28 } }}>
-                <Space style={{ marginBottom: 16 }}>
-                  {[1, 2, 3, 4, 5].map(n => <StarFilled key={n} style={{ color: "#f59e0b", fontSize: 14 }} />)}
-                </Space>
-                <p style={{ fontSize: 15, color: "#334155", lineHeight: 1.7, margin: "0 0 20px", fontStyle: "italic" }}>"{t.quote}"</p>
-                <Divider style={{ margin: "0 0 16px" }} />
-                <Text strong style={{ display: "block" }}>{t.name}</Text>
-                <Text type="secondary" style={{ fontSize: 13 }}>{t.role}</Text>
-              </Card>
-            </Col>
+            <figure key={t.name} className="flex h-full flex-col rounded-3xl border border-line bg-white p-7 shadow-soft">
+              <div className="flex gap-1 text-[13px] text-amber-400" aria-label="5 stars">
+                {[1, 2, 3, 4, 5].map(n => <StarFilled key={n} />)}
+              </div>
+              <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">&ldquo;{t.quote}&rdquo;</blockquote>
+              <figcaption className="mt-6 border-t border-line pt-4">
+                <div className="text-[14px] font-bold text-ink">{t.name}</div>
+                <div className="text-[13px] text-ink-400">{t.role}</div>
+              </figcaption>
+            </figure>
           ))}
-        </Row>
+        </div>
       </div>
     </section>
   );

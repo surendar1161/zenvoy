@@ -1,9 +1,6 @@
 "use client";
 
-import { Row, Col, Space, Typography } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
-
-const { Text } = Typography;
 
 interface Feature {
   icon: React.ReactNode;
@@ -22,38 +19,36 @@ interface FeatureShowcaseProps {
 
 export default function FeatureShowcase({ features, sectionTitle, sectionSubtitle }: FeatureShowcaseProps) {
   return (
-    <section style={{ padding: "90px 24px", background: "#fff" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+    <section className="px-5 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl">
         {sectionTitle && (
-          <div style={{ textAlign: "center", marginBottom: 70 }}>
-            <h2 style={{ fontSize: 38, fontWeight: 900, margin: "0 0 12px", letterSpacing: "-0.5px" }}>{sectionTitle}</h2>
-            {sectionSubtitle && <p style={{ color: "#64748b", fontSize: 17, maxWidth: 540, margin: "0 auto" }}>{sectionSubtitle}</p>}
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <h2 className="text-[32px] font-extrabold leading-tight text-ink sm:text-[40px]">{sectionTitle}</h2>
+            {sectionSubtitle && <p className="mt-3 text-[16px] text-ink-500">{sectionSubtitle}</p>}
           </div>
         )}
-        <div style={{ display: "flex", flexDirection: "column", gap: 80 }}>
+        <div className="space-y-16">
           {features.map((f, i) => (
-            <Row key={f.title} gutter={[60, 40]} align="middle" style={{ flexDirection: i % 2 !== 0 ? "row-reverse" : "row" }}>
-              <Col xs={24} md={12}>
-                <div style={{ background: f.bg, border: `1.5px solid ${f.border}`, borderRadius: 24, padding: 40, height: 280, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ marginBottom: 16 }}>{f.icon}</div>
-                    <div style={{ fontSize: 40, fontWeight: 900, color: "#0f172a" }}>{f.title}</div>
-                  </div>
+            <div key={f.title} className={`grid items-center gap-8 md:grid-cols-2 md:gap-14 ${i % 2 !== 0 ? "md:[&>*:first-child]:order-2" : ""}`}>
+              <div className="flex min-h-[240px] items-center justify-center rounded-[28px] border p-10 text-center" style={{ background: f.bg, borderColor: f.border }}>
+                <div>
+                  <div className="mb-3 flex justify-center">{f.icon}</div>
+                  <div className="font-display text-[32px] font-extrabold text-ink">{f.title}</div>
                 </div>
-              </Col>
-              <Col xs={24} md={12}>
-                <h3 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 12px", letterSpacing: "-0.3px" }}>{f.title}</h3>
-                <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.7, margin: "0 0 20px" }}>{f.desc}</p>
-                <Space direction="vertical" size={10} style={{ width: "100%" }}>
+              </div>
+              <div>
+                <h3 className="text-[26px] font-extrabold tracking-tight text-ink">{f.title}</h3>
+                <p className="mt-3 text-[16px] leading-relaxed text-ink-500">{f.desc}</p>
+                <ul className="mt-5 space-y-2.5">
                   {f.points.map(pt => (
-                    <Space key={pt} align="start" size={8}>
-                      <CheckCircleFilled style={{ color: "#10b981", fontSize: 15, marginTop: 2, flexShrink: 0 }} />
-                      <Text style={{ fontSize: 15 }}>{pt}</Text>
-                    </Space>
+                    <li key={pt} className="flex items-start gap-2.5 text-[15px] text-ink">
+                      <CheckCircleFilled className="mt-1 shrink-0 text-[15px] text-emerald-500" />
+                      {pt}
+                    </li>
                   ))}
-                </Space>
-              </Col>
-            </Row>
+                </ul>
+              </div>
+            </div>
           ))}
         </div>
       </div>

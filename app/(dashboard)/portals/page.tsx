@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import {
-  Avatar, Badge, Button, Card, Col, Empty, Modal, Row, Space,
-  Tag, Typography, message, Form, Input, Switch, Tooltip, Spin,
+  Avatar, Button, Card, Col, Modal, Row, Space,
+  Typography, message, Form, Input, Switch, Tooltip,
 } from "antd";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
@@ -15,8 +15,10 @@ import {
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { loadBrand } from "@/lib/brand";
+import { Page, PageHeader, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface Portal {
   id: string;
@@ -111,41 +113,26 @@ export default function PortalsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <GlobalOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Client Portals</Title>
-            <Tag style={{ borderRadius: 20 }}>{portals.length} total</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>
-            One branded link per client — files, invoices, contracts, and chat. All in one place.
-          </Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large"
-          onClick={() => setCreateOpen(true)}
-          style={{ borderRadius: 10, fontWeight: 600 }}>
-          Create Portal
-        </Button>
-      </div>
+      <PageHeader
+        title="Client Portals"
+        sub="One branded link per client — files, invoices, contracts, and chat. All in one place."
+        count={portals.length ? `${portals.length} total` : undefined}
+        action={<BrandButton onClick={() => setCreateOpen(true)}><PlusOutlined /> Create Portal</BrandButton>}
+      />
 
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 80 }}><Spin size="large" /></div>
+        <div className="dp-skel h-72 rounded-3xl" />
       ) : portals.length === 0 ? (
-        <Card style={{ borderRadius: 20, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-          <GlobalOutlined style={{ fontSize: 64, color: "#cbd5e1", marginBottom: 20 }} />
-          <Title level={3} style={{ margin: "0 0 10px" }}>Create your first client portal</Title>
-          <Text type="secondary" style={{ fontSize: 15, display: "block", marginBottom: 28 }}>
-            Send one link to your client — they can access files, invoices, contracts, and message you directly. Fully branded.
-          </Text>
-          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}
-            style={{ borderRadius: 12, height: 48, fontWeight: 700 }}>
-            Create First Portal
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<GlobalOutlined />}
+          title="Create your first client portal"
+          body="Send one link to your client — they can access files, invoices, contracts, and message you directly. Fully branded."
+        >
+          <BrandButton onClick={() => setCreateOpen(true)}><PlusOutlined /> Create First Portal</BrandButton>
+        </EmptyState>
       ) : (
         <Row gutter={[18, 18]}>
           {portals.map(portal => (
@@ -283,6 +270,6 @@ export default function PortalsPage() {
           </Text>
         </div>
       </Modal>
-    </div>
+    </Page>
   );
 }

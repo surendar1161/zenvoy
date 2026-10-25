@@ -13,8 +13,10 @@ import type { TableColumnsType } from "antd";
 import AutomationBuilder from "@/components/AutomationBuilder";
 import type { AutomationData } from "@/components/AutomationBuilder";
 import { AUTOMATION_TEMPLATES } from "@/lib/automations/templates";
+import { Page, PageHeader, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const TRIGGER_LABELS: Record<string, string> = {
   proposal_accepted: "Proposal Accepted", proposal_viewed: "Proposal Viewed",
@@ -181,42 +183,28 @@ export default function AutomationsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
+    <Page>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <ThunderboltOutlined style={{ fontSize: 24, color: "#8b5cf6" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Automations</Title>
-            <Tag style={{ borderRadius: 20 }}>{automations.length} active</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Automate repetitive tasks with trigger-based workflows.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large"
-          onClick={() => { setEditTarget(null); setBuilderOpen(true); }}
-          style={{ borderRadius: 10, fontWeight: 600, background: "#8b5cf6", borderColor: "#8b5cf6" }}>
-          New Automation
-        </Button>
-      </div>
+      <PageHeader
+        title="Automations"
+        sub="Automate repetitive tasks with trigger-based workflows."
+        count={`${automations.length} active`}
+        action={
+          <BrandButton onClick={() => { setEditTarget(null); setBuilderOpen(true); }}>
+            <PlusOutlined /> New Automation
+          </BrandButton>
+        }
+      />
 
       <Tabs defaultActiveKey="automations" items={[
         {
           key: "automations",
           label: "My Automations",
           children: automations.length === 0 ? (
-            <Card style={{ borderRadius: 16, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
-              <ThunderboltOutlined style={{ fontSize: 64, color: "#cbd5e1", marginBottom: 16 }} />
-              <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>No automations yet</Title>
-              <Text type="secondary" style={{ display: "block", marginBottom: 24 }}>
-                Start from a template below or create a custom automation.
-              </Text>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setBuilderOpen(true)}
-                style={{ borderRadius: 12, background: "#8b5cf6", borderColor: "#8b5cf6" }}>
-                Create First Automation
-              </Button>
-            </Card>
+            <EmptyState icon={<ThunderboltOutlined />} title="No automations yet" body="Start from a template below or create a custom automation.">
+              <BrandButton onClick={() => setBuilderOpen(true)}><PlusOutlined /> Create First Automation</BrandButton>
+            </EmptyState>
           ) : (
             <Row gutter={[16, 16]}>
               {automations.map(a => (
@@ -327,6 +315,6 @@ export default function AutomationsPage() {
         initial={editTarget as AutomationData | null}
         saving={saving}
       />
-    </div>
+    </Page>
   );
 }

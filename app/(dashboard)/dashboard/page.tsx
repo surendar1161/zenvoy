@@ -1,39 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Avatar, Badge, Button, Card, Col, Empty, List, Modal, Progress,
-  Row, Space, Statistic, Tag, Typography, Spin, message, FloatButton, Tooltip,
-} from "antd";
+import { Modal, message } from "antd";
 import {
   ThunderboltOutlined, FileTextOutlined, SafetyCertificateOutlined,
   TeamOutlined, DollarOutlined, EyeOutlined, CheckCircleOutlined,
-  ArrowRightOutlined, ClockCircleOutlined, BellOutlined, WarningOutlined,
-  RiseOutlined, DeleteOutlined, ExperimentOutlined, PlusOutlined,
+  ArrowRightOutlined, ClockCircleOutlined, BellOutlined,
+  DeleteOutlined, ExperimentOutlined, PlusOutlined,
   TrophyOutlined, FireOutlined, LineChartOutlined, RocketOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getTrialInfo, trialBadgeText, trialUrgency } from "@/lib/trial";
-import { DESIGN_TOKENS } from "@/lib/design-tokens";
-
-const { Title, Text } = Typography;
-
-const PROPOSAL_STATUS_COLOR: Record<string, string> = {
-  draft: "#94a3b8", sent: "#0ea5e9", viewed: "#06b6d4",
-  accepted: "#10b981", signed: "#10b981", declined: "#ef4444", expired: "#f59e0b",
-};
+import { Page, Card, SectionTitle, Banner, StatusPill, Trend, EmptyState } from "@/components/app/ui";
+import { ButtonLink } from "@/components/site/ui";
 
 interface DashboardData {
   userName: string;
   proposals: {
     total: number; draft: number; sent: number;
     viewed: number; accepted: number; declined: number;
+    week: number; prevWeek: number;
   };
   contracts: { total: number; signed: number; draft: number };
   clients: { total: number; active: number; leads: number };
   revenue: number;
+  revenueWeek: number;
+  revenuePrevWeek: number;
   viewCount: number;
   recentProposals: {
     id: string; client_name: string; project_type: string | null;
@@ -49,19 +43,20 @@ interface DashboardData {
   }[];
 }
 
+function pctChange(now: number, prev: number): number {
+  if (prev === 0) return now === 0 ? 0 : 100;
+  return ((now - prev) / prev) * 100;
+}
+
 export default function DashboardPage() {
-  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasDemoData, setHasDemoData] = useState(false);
   const [deletingDemo, setDeletingDemo] = useState(false);
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
-  const [fabOpen, setFabOpen] = useState(false);
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   async function handleDeleteDemo() {
     Modal.confirm({
@@ -86,7 +81,6 @@ export default function DashboardPage() {
 
   async function load() {
     const supabase = createClient();
-
     const [
       userResult,
       { data: props },
@@ -108,27 +102,19 @@ export default function DashboardPage() {
     const allProps = props ?? [];
     const allContracts = contracts ?? [];
     const allClients = clients ?? [];
-
-    // Proposal stats
-    const pStats = {
-      total: allProps.length,
-      draft:    allProps.filter(p => p.status === "draft").length,
-      sent:     allProps.filter(p => p.status === "sent").length,
-      viewed:   allProps.filter(p => p.status === "viewed").length,
-      accepted: allProps.filter(p => p.status === "accepted" || p.status === "signed").length,
-      declined: allProps.filter(p => p.status === "declined").length,
-    };
-
-    // Revenue from accepted/signed
-    const revenue = allProps
-      .filter(p => p.status === "accepted" || p.status === "signed")
-      .reduce((s, p) => s + (p.total_budget ?? 0), 0);
-
-    // Total views
-    const viewCount = allProps.reduce((s, p) => s + (p.view_count ?? 0), 0);
-
-    // Needs attention: sent >3 days ago and not viewed; or viewed >2 days ago and not accepted
     const now = Date.now();
+    const d7 = now - 7 * 86400000;
+    const d14 = now - 14 * 86400000;
+    const inRange = (iso: string, from: number, to: number) => {
+      const t = new Date(iso).getTime();
+      return t >= from && t < to;
+    };
+    const won = (s: string) => s === "accepted" || s === "signed";
+    const weekProps = allProps.filter(p => inRange(p.created_at, d7, now));
+    const prevProps = allProps.filter(p => inRange(p.created_at, d14, d7));
+    const weekRev = allProps.filter(p => won(p.status) && inRange(p.created_at, d7, now)).reduce((s, p) => s + (p.total_budget ?? 0), 0);
+    const prevRev = allProps.filter(p => won(p.status) && inRange(p.created_at, d14, d7)).reduce((s, p) => s + (p.total_budget ?? 0), 0);
+
     const needsAttention = allProps
       .filter(p => {
         const age = (now - new Date(p.created_at).getTime()) / 86400000;
@@ -149,19 +135,30 @@ export default function DashboardPage() {
 
     setData({
       userName: (userResult.data?.user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ?? "there",
-      proposals: pStats,
+      proposals: {
+        total: allProps.length,
+        draft: allProps.filter(p => p.status === "draft").length,
+        sent: allProps.filter(p => p.status === "sent").length,
+        viewed: allProps.filter(p => p.status === "viewed").length,
+        accepted: allProps.filter(p => won(p.status)).length,
+        declined: allProps.filter(p => p.status === "declined").length,
+        week: weekProps.length,
+        prevWeek: prevProps.length,
+      },
       contracts: {
-        total:  allContracts.length,
+        total: allContracts.length,
         signed: allContracts.filter(c => c.status === "signed").length,
-        draft:  allContracts.filter(c => c.status === "draft").length,
+        draft: allContracts.filter(c => c.status === "draft").length,
       },
       clients: {
-        total:  allClients.length,
+        total: allClients.length,
         active: allClients.filter(c => c.status === "active").length,
-        leads:  allClients.filter(c => c.status === "lead").length,
+        leads: allClients.filter(c => c.status === "lead").length,
       },
-      revenue,
-      viewCount,
+      revenue: allProps.filter(p => won(p.status)).reduce((s, p) => s + (p.total_budget ?? 0), 0),
+      revenueWeek: weekRev,
+      revenuePrevWeek: prevRev,
+      viewCount: allProps.reduce((s, p) => s + (p.view_count ?? 0), 0),
       recentProposals: allProps.slice(0, 6) as DashboardData["recentProposals"],
       recentNotifications: (notifs ?? []) as DashboardData["recentNotifications"],
       needsAttention,
@@ -171,9 +168,18 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-        <Spin size="large" />
-      </div>
+      <Page>
+        <div className="mb-8 space-y-3">
+          <div className="dp-skel h-8 w-64" />
+          <div className="dp-skel h-4 w-80" />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[0, 1, 2].map(i => <div key={i} className="dp-skel h-16 rounded-2xl" />)}
+        </div>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map(i => <div key={i} className="dp-skel h-32 rounded-3xl" />)}
+        </div>
+      </Page>
     );
   }
 
@@ -182,726 +188,345 @@ export default function DashboardPage() {
   const convRate = data.proposals.total > 0
     ? Math.round((data.proposals.accepted / Math.max(data.proposals.total - data.proposals.draft, 1)) * 100)
     : 0;
-
   const hasAnyData = data.proposals.total > 0 || data.clients.total > 0;
+  const pipelineValue = (data.proposals.sent + data.proposals.viewed) * (data.revenue / Math.max(data.proposals.accepted, 1));
+  const potentialRevenue = Math.round(pipelineValue * (convRate / 100));
+  const trial = getTrialInfo(trialEndsAt);
+  const urgency = trialUrgency(trial);
+  const trialTone = trial.isExpired ? "slate" : urgency === "critical" ? "rose" : urgency === "warning" ? "amber" : "brand";
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
 
-      {/* Trial banner */}
-      {(() => {
-        const trial = getTrialInfo(trialEndsAt);
-        if (!trial.isOnTrial && !trial.isExpired) return null;
-        const urgency = trialUrgency(trial);
-        const colors = {
-          normal:   { bg: "linear-gradient(135deg,#eff6ff,#dbeafe)", border: "#bfdbfe", text: "#1e40af", badge: "#0ea5e9" },
-          warning:  { bg: "linear-gradient(135deg,#fffbeb,#fef3c7)", border: "#fcd34d", text: "#92400e", badge: "#f59e0b" },
-          critical: { bg: "linear-gradient(135deg,#fff1f2,#fecaca)", border: "#fca5a5", text: "#991b1b", badge: "#ef4444" },
-          expired:  { bg: "linear-gradient(135deg,#f8fafc,#f1f5f9)", border: "#e2e8f0", text: "#475569", badge: "#94a3b8" },
-        };
-        const c = trial.isExpired ? colors.expired : colors[urgency];
-        return (
-          <div style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: 14, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-            <Space size={10}>
-              <span style={{ fontSize: 20 }}>{trial.isExpired ? "⏰" : urgency === "critical" ? "🔴" : urgency === "warning" ? "🟡" : "🎉"}</span>
-              <div>
-                {trial.isOnTrial ? (
-                  <>
-                    <Text strong style={{ color: c.text, display: "block", fontSize: 14 }}>
-                      Free trial — full Pro access · {trialBadgeText(trial)}
-                    </Text>
-                    <Text style={{ color: c.text, fontSize: 13, opacity: 0.85 }}>
-                      You have access to all features. Upgrade before your trial ends to keep access.
-                    </Text>
-                  </>
-                ) : (
-                  <>
-                    <Text strong style={{ color: c.text, display: "block", fontSize: 14 }}>Your 30-day trial has ended</Text>
-                    <Text style={{ color: c.text, fontSize: 13, opacity: 0.85 }}>Upgrade to Pro to continue using all features.</Text>
-                  </>
-                )}
-              </div>
-            </Space>
-            <Link href="/subscription">
-              <Button type="primary" style={{ borderRadius: 8, fontWeight: 700, background: c.badge, borderColor: c.badge, flexShrink: 0 }}>
-                {trial.isExpired ? "Upgrade Now" : "View Plans"}
-              </Button>
+      { (trial.isOnTrial || trial.isExpired) && (
+        <Banner
+          tone={trialTone as "brand" | "amber" | "rose" | "slate"}
+          icon={<ClockCircleOutlined />}
+          title={trial.isOnTrial ? `Free trial — full Pro access · ${trialBadgeText(trial)}` : "Your 30-day trial has ended"}
+          body={trial.isOnTrial
+            ? "You have access to all features. Upgrade before your trial ends to keep access."
+            : "Upgrade to Pro to continue using all features."}
+          action={
+            <Link href="/subscription" className="inline-flex h-9 items-center rounded-xl bg-ink px-4 text-[13px] font-bold text-white">
+              {trial.isExpired ? "Upgrade now" : "View plans"}
             </Link>
-          </div>
-        );
-      })()}
-
-      {/* Demo data banner */}
-      {hasDemoData && (
-        <div style={{
-          background: "linear-gradient(135deg, #fef9c3, #fefce8)",
-          border: "1px solid #fde047",
-          borderRadius: 14, padding: "14px 20px",
-          display: "flex", alignItems: "center",
-          justifyContent: "space-between", gap: 12,
-          marginBottom: 24, flexWrap: "wrap",
-        }}>
-          <Space size={10}>
-            <ExperimentOutlined style={{ color: "#a16207", fontSize: 18 }} />
-            <div>
-              <Text strong style={{ color: "#713f12", display: "block", fontSize: 14 }}>
-                You're viewing demo data
-              </Text>
-              <Text style={{ color: "#92400e", fontSize: 13 }}>
-                Sample clients, proposals, contracts, projects and invoices have been pre-loaded so you can explore the product. Delete them whenever you're ready to start fresh.
-              </Text>
-            </div>
-          </Space>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            loading={deletingDemo}
-            onClick={handleDeleteDemo}
-            style={{ borderRadius: 8, fontWeight: 600, flexShrink: 0 }}
-          >
-            Delete Demo Data
-          </Button>
-        </div>
+          }
+        />
       )}
 
-      {/* Welcome */}
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: "0 0 4px", fontWeight: 800 }}>
-          Good {getTimeOfDay()}, {data.userName} 👋
-        </Title>
-        <Text type="secondary" style={{ fontSize: 15 }}>
-          {hasAnyData
-            ? `Here's what's happening with your business today.`
-            : `Welcome! Create your first proposal to get started.`}
-        </Text>
+      {hasDemoData && (
+        <Banner
+          tone="amber"
+          icon={<ExperimentOutlined />}
+          title="You're viewing demo data"
+          body="Sample clients, proposals, contracts, projects and invoices are pre-loaded so you can explore. Delete them when you're ready to start fresh."
+          action={
+            <button
+              onClick={handleDeleteDemo}
+              disabled={deletingDemo}
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-rose-200 bg-white px-3.5 text-[13px] font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-60"
+            >
+              <DeleteOutlined /> {deletingDemo ? "Deleting…" : "Delete demo data"}
+            </button>
+          }
+        />
+      )}
+
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-[30px] font-extrabold tracking-tight text-ink sm:text-[34px]">
+            Good {getTimeOfDay()}, {data.userName}
+          </h1>
+          <p className="mt-1 text-[15px] text-ink-500">
+            {hasAnyData ? "Here's what's happening with your deals today." : "Welcome. Create your first proposal to get started."}
+          </p>
+        </div>
       </div>
 
-      {/* Empty state for new users */}
+      {/* Quick actions — always first, per UX audit */}
+      <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Link href="/generate" className="dp-btn-primary group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-white">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-[18px]"><ThunderboltOutlined /></span>
+          <span className="text-left">
+            <span className="block text-[14.5px] font-bold">Generate proposal</span>
+            <span className="block text-[12px] text-white/75">AI-written in 60 seconds</span>
+          </span>
+          <ArrowRightOutlined className="ml-auto text-[12px] opacity-70 transition group-hover:translate-x-0.5" />
+        </Link>
+        <Link href="/contracts" className="group flex items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3.5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-[18px] text-emerald-600"><SafetyCertificateOutlined /></span>
+          <span className="text-left">
+            <span className="block text-[14.5px] font-bold text-ink">Create contract</span>
+            <span className="block text-[12px] text-ink-400">{data.contracts.total} contract{data.contracts.total !== 1 ? "s" : ""} so far</span>
+          </span>
+        </Link>
+        <Link href="/clients" className="group flex items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3.5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-50 text-[18px] text-violet-600"><TeamOutlined /></span>
+          <span className="text-left">
+            <span className="block text-[14.5px] font-bold text-ink">Add a client</span>
+            <span className="block text-[12px] text-ink-400">{data.clients.total} client{data.clients.total !== 1 ? "s" : ""} in your CRM</span>
+          </span>
+        </Link>
+      </div>
+
       {!hasAnyData ? (
-        <Card style={{ borderRadius: 20, border: "2px dashed #e2e8f0", marginBottom: 24, textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
-          <ThunderboltOutlined style={{ fontSize: 56, color: "#0ea5e9", marginBottom: 20 }} />
-          <Title level={3} style={{ margin: "0 0 10px" }}>Create your first proposal</Title>
-          <Text type="secondary" style={{ fontSize: 15, display: "block", marginBottom: 28 }}>
-            Generate a professional AI proposal in under 60 seconds — with your brand, pricing tiers, and a Stripe payment link.
-          </Text>
-          <Space size={12}>
-            <Link href="/generate">
-              <Button type="primary" size="large" icon={<ThunderboltOutlined />}
-                style={{ borderRadius: 12, height: 48, fontWeight: 700, paddingInline: 28 }}>
-                Generate My First Proposal
-              </Button>
-            </Link>
-            <Link href="/clients">
-              <Button size="large" style={{ borderRadius: 12, height: 48 }}>Add a Client</Button>
-            </Link>
-          </Space>
-        </Card>
+        <EmptyState
+          icon={<ThunderboltOutlined />}
+          title="Create your first proposal"
+          body="Answer a few questions and Claude writes a branded proposal with pricing tiers and a Stripe payment link."
+        >
+          <ButtonLink href="/generate" size="lg">Generate my first proposal <ThunderboltOutlined /></ButtonLink>
+          <ButtonLink href="/clients" variant="secondary" size="lg">Add a client</ButtonLink>
+        </EmptyState>
       ) : (
         <>
-          {/* ── Key metrics ── */}
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-            {[
-              {
-                title: "Total Revenue",
-                value: `$${data.revenue.toLocaleString()}`,
-                sub: `from ${data.proposals.accepted} won proposal${data.proposals.accepted !== 1 ? "s" : ""}`,
-                icon: <DollarOutlined />,
-                color: "#10b981",
-                trend: data.revenue > 0 ? <Space size={4}><RiseOutlined style={{ color: "#10b981" }} /><Text style={{ color: "#10b981", fontSize: 12 }}>Active</Text></Space> : null,
-              },
-              {
-                title: "Conversion Rate",
-                value: `${convRate}%`,
-                sub: `${data.proposals.accepted} accepted of ${data.proposals.total - data.proposals.draft} sent`,
-                icon: <CheckCircleOutlined />,
-                color: convRate >= 50 ? "#10b981" : convRate >= 25 ? "#f59e0b" : "#ef4444",
-              },
-              {
-                title: "Proposal Views",
-                value: data.viewCount.toLocaleString(),
-                sub: `across ${data.proposals.total} proposals`,
-                icon: <EyeOutlined />,
-                color: "#0ea5e9",
-              },
-              {
-                title: "Active Clients",
-                value: data.clients.active.toLocaleString(),
-                sub: `${data.clients.leads} lead${data.clients.leads !== 1 ? "s" : ""} in pipeline`,
-                icon: <TeamOutlined />,
-                color: "#7c3aed",
-              },
-            ].map(m => (
-              <Col key={m.title} xs={24} sm={12} lg={6}>
-                <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 22 } }}>
-                  <Space align="start" style={{ width: "100%", justifyContent: "space-between" }}>
-                    <div>
-                      <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>{m.title}</Text>
-                      <div style={{ fontSize: 28, fontWeight: 900, color: m.color, lineHeight: 1 }}>{m.value}</div>
-                      <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: "block" }}>{m.sub}</Text>
-                    </div>
-                    <Avatar size={40} style={{ background: `${m.color}15`, color: m.color, flexShrink: 0 }} icon={m.icon} />
-                  </Space>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          {/* Grouped metrics */}
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Metric
+              icon={<DollarOutlined />}
+              tone="emerald"
+              label="Revenue"
+              value={`$${data.revenue.toLocaleString()}`}
+              sub={`from ${data.proposals.accepted} won proposal${data.proposals.accepted !== 1 ? "s" : ""}`}
+              trend={pctChange(data.revenueWeek, data.revenuePrevWeek)}
+              trendLabel="vs last week"
+            />
+            <Metric
+              icon={<CheckCircleOutlined />}
+              tone={convRate >= 50 ? "emerald" : convRate >= 25 ? "amber" : "rose"}
+              label="Conversion"
+              value={`${convRate}%`}
+              sub={`${data.proposals.accepted} accepted of ${Math.max(data.proposals.total - data.proposals.draft, 0)} sent`}
+            />
+            <Metric
+              icon={<RocketOutlined />}
+              tone="brand"
+              label="Deal flow"
+              value={String(data.proposals.sent + data.proposals.viewed)}
+              sub={`${data.proposals.sent} sent · ${data.proposals.viewed} viewed`}
+              trend={pctChange(data.proposals.week, data.proposals.prevWeek)}
+              trendLabel="new this week"
+            />
+            <Metric
+              icon={<TeamOutlined />}
+              tone="violet"
+              label="Clients"
+              value={String(data.clients.active)}
+              sub={`${data.clients.leads} lead${data.clients.leads !== 1 ? "s" : ""} · ${data.viewCount} proposal views`}
+            />
+          </div>
 
-          {/* ── Revenue Forecast & Today's Focus ── */}
-          <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
-            {/* Revenue Forecast */}
-            <Col xs={24} lg={12}>
-              <Card
-                style={{
-                  borderRadius: 16,
-                  border: "1px solid #e2e8f0",
-                  background: "linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)",
-                  height: "100%",
-                }}
-                styles={{ body: { padding: 24 } }}
-              >
-                <Space direction="vertical" size={16} style={{ width: "100%" }}>
-                  <Space align="center" style={{ justifyContent: "space-between", width: "100%" }}>
-                    <Space>
-                      <Avatar
-                        size={40}
-                        style={{ background: "#10b98115", color: "#059669" }}
-                        icon={<LineChartOutlined />}
-                      />
-                      <div>
-                        <Text strong style={{ fontSize: 15, display: "block" }}>
-                          Revenue Forecast
-                        </Text>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          Based on your pipeline
-                        </Text>
-                      </div>
-                    </Space>
-                  </Space>
-
-                  {(() => {
-                    const pipelineValue = (data.proposals.sent + data.proposals.viewed) * 
-                      (data.revenue / Math.max(data.proposals.accepted, 1));
-                    const potentialRevenue = Math.round(pipelineValue * (convRate / 100));
-                    const onTrackAmount = data.revenue + potentialRevenue;
-
-                    return (
-                      <>
-                        <div>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
-                            <Text
-                              style={{
-                                fontSize: 32,
-                                fontWeight: 900,
-                                color: "#059669",
-                                lineHeight: 1,
-                              }}
-                            >
-                              ${onTrackAmount.toLocaleString()}
-                            </Text>
-                            <Space size={4}>
-                              <RiseOutlined style={{ color: "#10b981", fontSize: 14 }} />
-                              <Text style={{ color: "#10b981", fontSize: 13, fontWeight: 600 }}>
-                                Potential
-                              </Text>
-                            </Space>
-                          </div>
-                          <Text type="secondary" style={{ fontSize: 13 }}>
-                            ${data.revenue.toLocaleString()} won + ${potentialRevenue.toLocaleString()} in pipeline
-                          </Text>
-                        </div>
-
-                        <div
-                          style={{
-                            background: "#f8fafc",
-                            borderRadius: DESIGN_TOKENS.borderRadius.md,
-                            padding: "12px 16px",
-                          }}
-                        >
-                          <Space direction="vertical" size={8} style={{ width: "100%" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                              <Text style={{ fontSize: 12, color: "#64748b" }}>Pipeline Value</Text>
-                              <Text strong style={{ fontSize: 13 }}>
-                                ${Math.round(pipelineValue).toLocaleString()}
-                              </Text>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                              <Text style={{ fontSize: 12, color: "#64748b" }}>
-                                Expected Close ({convRate}%)
-                              </Text>
-                              <Text strong style={{ fontSize: 13, color: "#10b981" }}>
-                                ${potentialRevenue.toLocaleString()}
-                              </Text>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                              <Text style={{ fontSize: 12, color: "#64748b" }}>
-                                Active Proposals
-                              </Text>
-                              <Text strong style={{ fontSize: 13 }}>
-                                {data.proposals.sent + data.proposals.viewed}
-                              </Text>
-                            </div>
-                          </Space>
-                        </div>
-
-                        {convRate < 25 && data.proposals.total > 3 && (
-                          <div
-                            style={{
-                              background: "#fffbeb",
-                              border: "1px solid #fef3c7",
-                              borderRadius: DESIGN_TOKENS.borderRadius.sm,
-                              padding: "10px 14px",
-                            }}
-                          >
-                            <Space size={8}>
-                              <FireOutlined style={{ color: "#f59e0b", fontSize: 14 }} />
-                              <Text style={{ fontSize: 12, color: "#92400e" }}>
-                                <strong>Tip:</strong> Your conversion rate is low. Consider following up on
-                                viewed proposals or adjusting your pricing.
-                              </Text>
-                            </Space>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-                </Space>
-              </Card>
-            </Col>
-
-            {/* Today's Focus */}
-            <Col xs={24} lg={12}>
-              <Card
-                style={{
-                  borderRadius: 16,
-                  border: "1px solid #e2e8f0",
-                  background: "linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)",
-                  height: "100%",
-                }}
-                styles={{ body: { padding: 24 } }}
-              >
-                <Space direction="vertical" size={16} style={{ width: "100%" }}>
-                  <Space align="center" style={{ justifyContent: "space-between", width: "100%" }}>
-                    <Space>
-                      <Avatar
-                        size={40}
-                        style={{ background: "#0ea5e915", color: "#0369a1" }}
-                        icon={<TrophyOutlined />}
-                      />
-                      <div>
-                        <Text strong style={{ fontSize: 15, display: "block" }}>
-                          Today's Focus
-                        </Text>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {data.needsAttention.length === 0
-                            ? "All caught up! 🎉"
-                            : `${data.needsAttention.length} item${data.needsAttention.length !== 1 ? "s" : ""} need attention`}
-                        </Text>
-                      </div>
-                    </Space>
-                    {data.needsAttention.length > 0 && (
-                      <Badge
-                        count={data.needsAttention.length}
-                        style={{ background: "#f59e0b" }}
-                      />
-                    )}
-                  </Space>
-
-                  {data.needsAttention.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "20px 0" }}>
-                      <CheckCircleOutlined
-                        style={{ fontSize: 48, color: "#10b981", marginBottom: 12 }}
-                      />
-                      <Text
-                        style={{ display: "block", color: "#64748b", fontSize: 13 }}
-                      >
-                        No follow-ups needed. Great work!
-                      </Text>
-                    </div>
-                  ) : (
-                    <List
-                      size="small"
-                      dataSource={data.needsAttention.slice(0, 3)}
-                      renderItem={(item, index) => (
-                        <List.Item
-                          style={{
-                            padding: "12px 14px",
-                            background: "#ffffff",
-                            borderRadius: DESIGN_TOKENS.borderRadius.sm,
-                            border: "1px solid #f1f5f9",
-                            marginBottom: index < 2 ? 8 : 0,
-                          }}
-                          actions={[
-                            <Button
-                              key="action"
-                              type="primary"
-                              size="small"
-                              style={{
-                                borderRadius: DESIGN_TOKENS.borderRadius.sm,
-                                fontSize: 12,
-                                height: 28,
-                              }}
-                              onClick={() => router.push(`/proposals`)}
-                            >
-                              Follow Up
-                            </Button>,
-                          ]}
-                        >
-                          <List.Item.Meta
-                            avatar={
-                              <div
-                                style={{
-                                  width: 6,
-                                  height: 6,
-                                  borderRadius: "50%",
-                                  background:
-                                    item.status === "sent" ? "#f59e0b" : "#0ea5e9",
-                                  marginTop: 6,
-                                }}
-                              />
-                            }
-                            title={
-                              <Text strong style={{ fontSize: 13 }}>
-                                {item.client_name}
-                              </Text>
-                            }
-                            description={
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {item.reason}
-                              </Text>
-                            }
-                          />
-                        </List.Item>
-                      )}
-                    />
-                  )}
-
-                  {data.needsAttention.length > 3 && (
-                    <Button
-                      type="link"
-                      size="small"
-                      onClick={() => router.push("/proposals")}
-                      style={{ padding: 0, fontSize: 12 }}
-                    >
-                      View {data.needsAttention.length - 3} more{" "}
-                      <ArrowRightOutlined />
-                    </Button>
-                  )}
-                </Space>
-              </Card>
-            </Col>
-          </Row>
-
-          {/* ── Enhanced Proposal Pipeline ── */}
-          <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginBottom: 24 }} styles={{ body: { padding: 24 } }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-              <Space>
-                <RocketOutlined style={{ color: "#0ea5e9", fontSize: 18 }} />
-                <Title level={5} style={{ margin: 0 }}>Proposal Pipeline</Title>
-              </Space>
-              <Link href="/proposals">
-                <Button type="link" icon={<ArrowRightOutlined />} style={{ padding: 0 }}>View all</Button>
-              </Link>
-            </div>
-            {/* Visual Funnel */}
-            <div style={{ position: "relative", marginBottom: 20 }}>
-              <Row gutter={[12, 16]} align="middle">
-                {[
-                  { label: "Draft", count: data.proposals.draft, color: "#94a3b8", icon: "📝" },
-                  { label: "Sent", count: data.proposals.sent, color: "#0ea5e9", icon: "📤" },
-                  { label: "Viewed", count: data.proposals.viewed, color: "#06b6d4", icon: "👁️" },
-                  { label: "Won", count: data.proposals.accepted, color: "#10b981", icon: "✅" },
-                  { label: "Declined", count: data.proposals.declined, color: "#ef4444", icon: "❌" },
-                ].map((stage, idx) => (
-                  <Col key={stage.label} xs={24} sm={24 / 5} style={{ textAlign: "center" }}>
-                    <div style={{ position: "relative" }}>
-                      {/* Arrow connector (except for last item) */}
-                      {idx < 4 && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "25px",
-                            left: "calc(50% + 30px)",
-                            width: "calc(100% - 60px)",
-                            height: "2px",
-                            background: "#e2e8f0",
-                            zIndex: 0,
-                            display: window.innerWidth < 576 ? "none" : "block",
-                          }}
-                        >
-                          <div
-                            style={{
-                              position: "absolute",
-                              right: -4,
-                              top: -3,
-                              width: 0,
-                              height: 0,
-                              borderLeft: "4px solid #e2e8f0",
-                              borderTop: "4px solid transparent",
-                              borderBottom: "4px solid transparent",
-                            }}
-                          />
-                        </div>
-                      )}
-                      
-                      {/* Stage circle */}
-                      <div
-                        style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: "50%",
-                          background: `${stage.color}15`,
-                          border: `3px solid ${stage.color}`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "0 auto 8px",
-                          position: "relative",
-                          zIndex: 1,
-                          boxShadow: `0 2px 8px ${stage.color}25`,
-                        }}
-                      >
-                        <Text style={{ fontSize: 20 }}>{stage.icon}</Text>
-                      </div>
-                      
-                      {/* Count */}
-                      <Text
-                        strong
-                        style={{
-                          display: "block",
-                          fontSize: 18,
-                          fontWeight: 900,
-                          color: stage.color,
-                          marginBottom: 2,
-                        }}
-                      >
-                        {stage.count}
-                      </Text>
-                      
-                      {/* Label */}
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {stage.label}
-                      </Text>
-                      
-                      {/* Percentage (for non-draft stages) */}
-                      {idx > 0 && data.proposals.total > 0 && (
-                        <div style={{ marginTop: 4 }}>
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: stage.color,
-                              background: `${stage.color}10`,
-                              padding: "2px 6px",
-                              borderRadius: 10,
-                              fontWeight: 600,
-                            }}
-                          >
-                            {Math.round((stage.count / data.proposals.total) * 100)}%
-                          </Text>
-                        </div>
-                      )}
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-            </div>
-            {/* Progress bar */}
-            <div style={{ marginTop: 20 }}>
-              <div style={{ display: "flex", gap: 2, borderRadius: 8, overflow: "hidden", height: 8 }}>
-                {[
-                  { count: data.proposals.draft, color: "#e2e8f0" },
-                  { count: data.proposals.sent, color: "#0ea5e9" },
-                  { count: data.proposals.viewed, color: "#06b6d4" },
-                  { count: data.proposals.accepted, color: "#10b981" },
-                  { count: data.proposals.declined, color: "#fca5a5" },
-                ].map((s, i) => {
-                  const pct = data.proposals.total > 0 ? (s.count / data.proposals.total) * 100 : 0;
-                  return pct > 0 ? <div key={i} style={{ flex: pct, background: s.color, minWidth: 4 }} /> : null;
-                })}
+          <div className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            {/* Forecast */}
+            <Card>
+              <SectionTitle icon={<LineChartOutlined />} title="Revenue forecast" />
+              <div className="font-display text-[36px] font-extrabold tabular-nums text-emerald-600">
+                ${(data.revenue + potentialRevenue).toLocaleString()}
               </div>
+              <p className="mt-1 text-[13.5px] text-ink-500">
+                ${data.revenue.toLocaleString()} won + ${potentialRevenue.toLocaleString()} expected from the pipeline
+              </p>
+              <div className="mt-5 space-y-2.5 rounded-2xl bg-canvas px-4 py-3.5 text-[13px]">
+                <Row label="Pipeline value" value={`$${Math.round(pipelineValue).toLocaleString()}`} />
+                <Row label={`Expected close (${convRate}%)`} value={`$${potentialRevenue.toLocaleString()}`} accent />
+                <Row label="Active proposals" value={String(data.proposals.sent + data.proposals.viewed)} />
+              </div>
+              {convRate < 25 && data.proposals.total > 3 && (
+                <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-amber-50 px-3.5 py-3 text-[12.5px] text-amber-900">
+                  <FireOutlined className="mt-0.5 text-amber-500" />
+                  <span><b>Tip:</b> Conversion is low. Follow up on viewed proposals or revisit your pricing.</span>
+                </div>
+              )}
+            </Card>
+
+            {/* Today's focus */}
+            <Card>
+              <SectionTitle
+                icon={<TrophyOutlined />}
+                title="Today's focus"
+                href={data.needsAttention.length > 3 ? "/proposals" : undefined}
+                hrefLabel={data.needsAttention.length > 3 ? `View ${data.needsAttention.length - 3} more` : undefined}
+              />
+              {data.needsAttention.length === 0 ? (
+                <div className="flex flex-col items-center py-8 text-center">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-[22px] text-emerald-500"><CheckCircleOutlined /></span>
+                  <p className="mt-3 text-[14px] font-semibold text-ink">All caught up</p>
+                  <p className="text-[13px] text-ink-400">No follow-ups needed. Great work.</p>
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {data.needsAttention.slice(0, 3).map(item => (
+                    <li key={item.id} className="flex items-center gap-3 rounded-2xl border border-line px-3.5 py-3">
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${item.status === "sent" ? "bg-amber-400" : "bg-brand-500"}`} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[13.5px] font-semibold text-ink">{item.client_name}</div>
+                        <div className="truncate text-[12px] text-ink-400">{item.reason}</div>
+                      </div>
+                      <Link href="/proposals" className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-[12px] font-bold text-white">
+                        Follow up
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </div>
+
+          {/* Pipeline */}
+          <Card className="mb-6">
+            <SectionTitle icon={<RocketOutlined />} title="Proposal pipeline" href="/proposals" />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {[
+                { label: "Draft", count: data.proposals.draft, color: "text-ink-400 bg-slate-100" },
+                { label: "Sent", count: data.proposals.sent, color: "text-brand-700 bg-brand-50" },
+                { label: "Viewed", count: data.proposals.viewed, color: "text-cyan-700 bg-cyan-50" },
+                { label: "Won", count: data.proposals.accepted, color: "text-emerald-700 bg-emerald-50" },
+                { label: "Declined", count: data.proposals.declined, color: "text-rose-700 bg-rose-50" },
+              ].map(s => (
+                <div key={s.label} className={`rounded-2xl px-3 py-4 text-center ${s.color.split(" ")[1]}`}>
+                  <div className={`font-display text-[28px] font-extrabold tabular-nums ${s.color.split(" ")[0]}`}>{s.count}</div>
+                  <div className="mt-0.5 text-[12px] font-semibold text-ink-500">{s.label}</div>
+                  {data.proposals.total > 0 && (
+                    <div className="mt-1 text-[11px] text-ink-300">{Math.round((s.count / data.proposals.total) * 100)}%</div>
+                  )}
+                </div>
+              ))}
             </div>
+            {data.proposals.total > 0 && (
+              <div className="mt-5 flex h-2 overflow-hidden rounded-full bg-slate-100">
+                {[
+                  { count: data.proposals.draft, color: "bg-slate-300" },
+                  { count: data.proposals.sent, color: "bg-brand-500" },
+                  { count: data.proposals.viewed, color: "bg-cyan-400" },
+                  { count: data.proposals.accepted, color: "bg-emerald-500" },
+                  { count: data.proposals.declined, color: "bg-rose-300" },
+                ].map((s, i) => s.count > 0 ? (
+                  <div key={i} className={s.color} style={{ width: `${(s.count / data.proposals.total) * 100}%` }} />
+                ) : null)}
+              </div>
+            )}
           </Card>
 
-          <Row gutter={[24, 24]}>
-            {/* ── Recent activity ── */}
-            <Col xs={24} lg={12}>
-              <Card
-                title={<Space><BellOutlined style={{ color: "#0ea5e9" }} />Activity</Space>}
-                extra={<Link href="/analytics"><Button type="link" style={{ padding: 0, fontSize: 13 }}>All activity</Button></Link>}
-                style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%" }}
-                styles={{ body: { padding: 0 } }}
-              >
-                {data.recentNotifications.length === 0 ? (
-                  <Empty description={<Text type="secondary">Activity will appear here when clients open your proposals.</Text>}
-                    style={{ padding: "32px 20px" }} imageStyle={{ height: 60 }} />
-                ) : (
-                  <List
-                    dataSource={data.recentNotifications}
-                    renderItem={notif => {
-                      const isPositive = notif.type.includes("signed") || notif.type.includes("accepted");
-                      const color = isPositive ? "#10b981" : "#0ea5e9";
-                      return (
-                        <List.Item style={{ padding: "12px 20px" }}>
-                          <List.Item.Meta
-                            avatar={
-                              <Avatar size={36} style={{ background: `${color}15`, color, fontSize: 14 }}>
-                                {isPositive ? "✅" : "👁"}
-                              </Avatar>
-                            }
-                            title={<Text style={{ fontSize: 13, fontWeight: 600 }}>{notif.title}</Text>}
-                            description={
-                              <Space direction="vertical" size={0}>
-                                {notif.message && <Text type="secondary" style={{ fontSize: 12 }}>{notif.message}</Text>}
-                                <Text type="secondary" style={{ fontSize: 11 }}>{timeAgo(notif.created_at)}</Text>
-                              </Space>
-                            }
-                          />
-                        </List.Item>
-                      );
-                    }}
-                  />
-                )}
-              </Card>
-            </Col>
-          </Row>
-
-          {/* ── Recent proposals ── */}
-          {data.recentProposals.length > 0 && (
-            <Card
-              title={<Space><FileTextOutlined style={{ color: "#0ea5e9" }} />Recent Proposals</Space>}
-              extra={<Link href="/proposals"><Button type="link" style={{ padding: 0, fontSize: 13 }}>View all <ArrowRightOutlined /></Button></Link>}
-              style={{ borderRadius: 16, border: "1px solid #e2e8f0", marginTop: 24 }}
-              styles={{ body: { padding: 0 } }}
-            >
-              <List
-                dataSource={data.recentProposals}
-                renderItem={p => {
-                  const statusColor = PROPOSAL_STATUS_COLOR[p.status] ?? "#94a3b8";
-                  return (
-                    <List.Item style={{ padding: "14px 24px" }}>
-                      <List.Item.Meta
-                        avatar={
-                          <Avatar style={{ background: `${statusColor}15`, color: statusColor, fontWeight: 700 }}>
-                            {p.client_name.charAt(0).toUpperCase()}
-                          </Avatar>
-                        }
-                        title={
-                          <Space size={8}>
-                            <Text strong style={{ fontSize: 14 }}>{p.client_name}</Text>
-                            <Tag style={{ borderRadius: 20, fontSize: 11, color: statusColor, borderColor: `${statusColor}40`, background: `${statusColor}12`, margin: 0 }}>
-                              {p.status}
-                            </Tag>
-                          </Space>
-                        }
-                        description={
-                          <Space size={16}>
-                            <Text type="secondary" style={{ fontSize: 12 }}>{p.project_type ?? "—"}</Text>
-                            {p.view_count > 0 && (
-                              <Space size={4}>
-                                <EyeOutlined style={{ color: "#94a3b8", fontSize: 11 }} />
-                                <Text type="secondary" style={{ fontSize: 12 }}>{p.view_count} view{p.view_count !== 1 ? "s" : ""}</Text>
-                              </Space>
-                            )}
-                            <Text type="secondary" style={{ fontSize: 12 }}>{timeAgo(p.created_at)}</Text>
-                          </Space>
-                        }
-                      />
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+            {/* Recent proposals */}
+            <Card padded={false} className="lg:col-span-3">
+              <div className="px-6 pt-6">
+                <SectionTitle icon={<FileTextOutlined />} title="Recent proposals" href="/proposals" />
+              </div>
+              {data.recentProposals.length === 0 ? (
+                <p className="px-6 pb-6 text-[14px] text-ink-400">No proposals yet.</p>
+              ) : (
+                <ul>
+                  {data.recentProposals.map(p => (
+                    <li key={p.id} className="dp-row flex items-center gap-3 border-t border-line px-6 py-3.5">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-violet-500 text-[12px] font-bold text-white">
+                        {p.client_name.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="truncate text-[14px] font-semibold text-ink">{p.client_name}</span>
+                          <StatusPill status={p.status} />
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-[12px] text-ink-400">
+                          <span>{p.project_type ?? "Proposal"}</span>
+                          {p.view_count > 0 && <span className="inline-flex items-center gap-1"><EyeOutlined /> {p.view_count}</span>}
+                          <span>{timeAgo(p.created_at)}</span>
+                        </div>
+                      </div>
                       {p.total_budget && p.total_budget > 0 && (
-                        <Text strong style={{ color: "#10b981", fontSize: 15 }}>
+                        <span className="hidden text-[14px] font-bold tabular-nums text-emerald-600 sm:block">
                           {p.currency ?? "USD"} {p.total_budget.toLocaleString()}
-                        </Text>
+                        </span>
                       )}
-                    </List.Item>
-                  );
-                }}
-              />
+                      <div className="dp-row-actions flex shrink-0 gap-1">
+                        <Link href={`/proposal/${p.id}`} className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 hover:bg-canvas hover:text-brand-600" aria-label="View">
+                          <EyeOutlined />
+                        </Link>
+                        <Link href={`/editor/proposal/${p.id}`} className="grid h-8 w-8 place-items-center rounded-lg text-ink-400 hover:bg-canvas hover:text-brand-600" aria-label="Edit">
+                          <EditOutlined />
+                        </Link>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Card>
-          )}
 
-          {/* ── Quick actions (minimal) ── */}
-          <Row gutter={[12, 12]} style={{ marginTop: 24 }}>
-            <Col xs={24} sm={8}>
-              <Link href="/generate">
-                <Card hoverable style={{ borderRadius: 14, border: "1px solid #e2e8f0", cursor: "pointer" }} styles={{ body: { padding: 18 } }}>
-                  <Space>
-                    <Avatar style={{ background: "#eff6ff", color: "#0ea5e9" }} icon={<ThunderboltOutlined />} />
-                    <div>
-                      <Text strong style={{ display: "block", fontSize: 14 }}>New Proposal</Text>
-                      <Text type="secondary" style={{ fontSize: 12 }}>AI-generated in 60s</Text>
-                    </div>
-                  </Space>
-                </Card>
-              </Link>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Link href="/clients">
-                <Card hoverable style={{ borderRadius: 14, border: "1px solid #e2e8f0", cursor: "pointer" }} styles={{ body: { padding: 18 } }}>
-                  <Space>
-                    <Avatar style={{ background: "#f5f3ff", color: "#7c3aed" }} icon={<TeamOutlined />} />
-                    <div>
-                      <Text strong style={{ display: "block", fontSize: 14 }}>Add Client</Text>
-                      <Text type="secondary" style={{ fontSize: 12 }}>{data.clients.total} client{data.clients.total !== 1 ? "s" : ""} total</Text>
-                    </div>
-                  </Space>
-                </Card>
-              </Link>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Link href="/contracts">
-                <Card hoverable style={{ borderRadius: 14, border: "1px solid #e2e8f0", cursor: "pointer" }} styles={{ body: { padding: 18 } }}>
-                  <Space>
-                    <Avatar style={{ background: "#f0fdf4", color: "#10b981" }} icon={<SafetyCertificateOutlined />} />
-                    <div>
-                      <Text strong style={{ display: "block", fontSize: 14 }}>New Contract</Text>
-                      <Text type="secondary" style={{ fontSize: 12 }}>{data.contracts.total} contract{data.contracts.total !== 1 ? "s" : ""} total</Text>
-                    </div>
-                  </Space>
-                </Card>
-              </Link>
-            </Col>
-          </Row>
+            {/* Activity */}
+            <Card padded={false} className="lg:col-span-2">
+              <div className="px-6 pt-6">
+                <SectionTitle icon={<BellOutlined />} title="Activity" href="/analytics" hrefLabel="All activity" />
+              </div>
+              {data.recentNotifications.length === 0 ? (
+                <p className="px-6 pb-8 text-[14px] leading-relaxed text-ink-400">Activity appears here when clients open your proposals.</p>
+              ) : (
+                <ul>
+                  {data.recentNotifications.map(n => {
+                    const good = n.type.includes("signed") || n.type.includes("accepted");
+                    return (
+                      <li key={n.id} className="flex items-start gap-3 border-t border-line px-6 py-3.5">
+                        <span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[13px] ${good ? "bg-emerald-50 text-emerald-600" : "bg-brand-50 text-brand-600"}`}>
+                          {good ? <CheckCircleOutlined /> : <EyeOutlined />}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-[13.5px] font-semibold text-ink">{n.title}</div>
+                          {n.message && <div className="truncate text-[12px] text-ink-400">{n.message}</div>}
+                          <div className="mt-0.5 text-[11.5px] text-ink-300">{timeAgo(n.created_at)}</div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Card>
+          </div>
         </>
       )}
 
-      {/* ── Floating Action Button ── */}
-      <FloatButton.Group
-        open={fabOpen}
-        trigger="click"
-        onClick={() => setFabOpen(!fabOpen)}
-        style={{ right: 24, bottom: 24 }}
-        icon={<PlusOutlined />}
-        tooltip="Quick Actions"
-        type="primary"
+      {/* Mobile quick compose */}
+      <Link
+        href="/generate"
+        className="dp-btn-primary fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full text-[22px] text-white shadow-glow sm:hidden"
+        aria-label="New proposal"
       >
-        <Tooltip title="Create Proposal" placement="left">
-          <FloatButton
-            icon={<ThunderboltOutlined />}
-            onClick={() => router.push("/generate")}
-            style={{ background: "#0ea5e9" }}
-          />
-        </Tooltip>
-        <Tooltip title="New Contract" placement="left">
-          <FloatButton
-            icon={<SafetyCertificateOutlined />}
-            onClick={() => router.push("/contracts")}
-            style={{ background: "#10b981" }}
-          />
-        </Tooltip>
-        <Tooltip title="Add Client" placement="left">
-          <FloatButton
-            icon={<TeamOutlined />}
-            onClick={() => router.push("/clients")}
-            style={{ background: "#7c3aed" }}
-          />
-        </Tooltip>
-        <Tooltip title="Website Analyzer" placement="left">
-          <FloatButton
-            icon={<RocketOutlined />}
-            onClick={() => router.push("/website-analyzer")}
-            style={{ background: "#f59e0b" }}
-          />
-        </Tooltip>
-      </FloatButton.Group>
+        <PlusOutlined />
+      </Link>
+    </Page>
+  );
+}
+
+function Metric({
+  icon, tone, label, value, sub, trend, trendLabel,
+}: {
+  icon: React.ReactNode; tone: "brand" | "emerald" | "violet" | "amber" | "rose";
+  label: string; value: string; sub: string; trend?: number; trendLabel?: string;
+}) {
+  const tones = {
+    brand: "bg-brand-50 text-brand-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    violet: "bg-violet-50 text-violet-600",
+    amber: "bg-amber-50 text-amber-600",
+    rose: "bg-rose-50 text-rose-600",
+  };
+  return (
+    <Card>
+      <div className="flex items-start justify-between">
+        <span className={`grid h-10 w-10 place-items-center rounded-xl text-[16px] ${tones[tone]}`}>{icon}</span>
+        {trend !== undefined && <Trend value={trend} label={trendLabel} />}
+      </div>
+      <div className="mt-4 text-[12.5px] font-semibold uppercase tracking-wider text-ink-400">{label}</div>
+      <div className="mt-1 font-display text-[28px] font-extrabold leading-none tabular-nums text-ink">{value}</div>
+      <div className="mt-2 text-[12.5px] text-ink-400">{sub}</div>
+    </Card>
+  );
+}
+
+function Row({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-ink-400">{label}</span>
+      <span className={`font-semibold tabular-nums ${accent ? "text-emerald-600" : "text-ink"}`}>{value}</span>
     </div>
   );
 }
@@ -915,7 +540,7 @@ function getTimeOfDay() {
 
 function timeAgo(dateStr: string): string {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
-  if (diff < 60)   return "just now";
+  if (diff < 60) return "just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;

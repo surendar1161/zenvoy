@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button, Card, Space, Typography, Segmented, Empty, List, Avatar, Tag, Spin } from "antd";
+import { Button, Card, Space, Typography, Segmented, List, Avatar, Spin } from "antd";
 import {
   ThunderboltOutlined, SafetyCertificateOutlined, RocketOutlined,
   ArrowLeftOutlined, UserOutlined,
@@ -12,9 +12,10 @@ import { getContractType } from "@/lib/contract-types";
 import type { ContractType } from "@/lib/contract-types";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
+import { Page, PageHeader, EmptyState } from "@/components/app/ui";
 
 const ContractFormSimple = dynamic(() => import("@/components/ContractFormSimple"), { ssr: false });
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const CATEGORY_COLORS: Record<string, string> = {
   Employment: "#0ea5e9",
@@ -38,7 +39,8 @@ interface Client {
 function ContractGenerateQuickClient() {
   const { type } = useParams<{ type: string }>();
   const router = useRouter();
-  const contract = getContractType(type);
+  // Guarded below (`if (!contract)`); asserted here so hoisted handlers keep the narrowed type.
+  const contract = getContractType(type) as ContractType;
 
   const [mode, setMode] = useState<"quick" | "custom">("quick");
   const [clients, setClients] = useState<Client[]>([]);
@@ -70,16 +72,17 @@ function ContractGenerateQuickClient() {
 
   if (!contract) {
     return (
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "80px 28px", textAlign: "center" }}>
-        <Empty
-          description="Contract type not found"
-          image={<SafetyCertificateOutlined style={{ fontSize: 64, color: "#cbd5e1" }} />}
+      <Page>
+        <EmptyState
+          icon={<SafetyCertificateOutlined />}
+          title="Contract type not found"
+          body="This contract type is not in the library. Browse the other types to continue."
         >
           <Link href="/contracts">
             <Button type="primary">Browse Contract Types</Button>
           </Link>
-        </Empty>
-      </div>
+        </EmptyState>
+      </Page>
     );
   }
 
@@ -214,13 +217,9 @@ function ContractGenerateQuickClient() {
   // If contract generated, show result
   if (generatedContract) {
     return (
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 28px" }}>
-        <Card style={{ borderRadius: 16 }}>
-          <div style={{ marginBottom: 24 }}>
-            <Title level={3}>✅ Contract Generated!</Title>
-            <Text type="secondary">Review, edit, or send to your client</Text>
-          </div>
-
+      <Page>
+        <PageHeader title="Contract generated" sub="Review, edit, or send to your client" />
+        <Card style={{ borderRadius: 24, border: "1px solid #E4E9F1" }}>
           <Space size={12}>
             <Button
               onClick={() => {
@@ -241,64 +240,35 @@ function ContractGenerateQuickClient() {
             </Link>
           </Space>
         </Card>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "32px 28px" }}>
-      {/* Back Button */}
+    <Page>
       <Link href="/contracts">
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
-          style={{ marginBottom: 16, padding: "4px 0", color: "#64748b" }}
+          style={{ marginBottom: 8, padding: "4px 0", color: "#64748b" }}
         >
           All Contracts
         </Button>
       </Link>
-
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 16 }}>
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 14,
-              background: `${color}18`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 24,
-              flexShrink: 0,
-            }}
-          >
-            {contract.icon}
-          </div>
-          <div>
-            <Space align="center">
-              <Title level={3} style={{ margin: 0, fontWeight: 800 }}>
-                {contract.name}
-              </Title>
-              <Tag style={{ borderRadius: 20, color, border: "none", background: `${color}15` }}>
-                {contract.category}
-              </Tag>
-            </Space>
-            <Text type="secondary" style={{ fontSize: 13 }}>
-              {contract.description}
-            </Text>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={contract.name}
+        sub={contract.description}
+        count={contract.category}
+      />
 
       {/* Mode Selector */}
       <Card
         style={{
-          borderRadius: 16,
-          border: "2px solid #e2e8f0",
+          borderRadius: 24,
+          border: "1px solid #E4E9F1",
           marginBottom: 28,
-          background: "linear-gradient(135deg, #fef3c7 0%, #fff 100%)",
+          background: "#fff",
+          boxShadow: "0 1px 2px rgba(11,18,32,.04), 0 4px 16px rgba(11,18,32,.05)",
         }}
         styles={{ body: { padding: 24 } }}
       >
@@ -350,7 +320,26 @@ function ContractGenerateQuickClient() {
       </Card>
 
       {/* Quick Contract Mode */}
-      {mode === "quick" && (
+      {mode === "quick" && (loadingClients ? (
+        <Card style={{ borderRadius: 24, border: "1px solid #E4E9F1" }} styles={{ body: { padding: 24 } }}>
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <Spin size="large" />
+          </div>
+        </Card>
+      ) : clients.length === 0 ? (
+        <EmptyState
+          icon={<UserOutlined />}
+          title="No active clients yet"
+          body="You need at least one active client to use Quick Contract."
+        >
+          <Link href="/clients">
+            <Button type="primary">Add Client</Button>
+          </Link>
+          <Button onClick={() => setMode("custom")}>
+            Use Custom Mode
+          </Button>
+        </EmptyState>
+      ) : (
         <Card
           title={
             <Space>
@@ -358,31 +347,9 @@ function ContractGenerateQuickClient() {
               <span>Quick Contract — Select Client</span>
             </Space>
           }
-          style={{ borderRadius: 16 }}
+          style={{ borderRadius: 24, border: "1px solid #E4E9F1" }}
           styles={{ body: { padding: 24 } }}
         >
-          {loadingClients ? (
-            <div style={{ textAlign: "center", padding: 40 }}>
-              <Spin size="large" />
-            </div>
-          ) : clients.length === 0 ? (
-            <Empty
-              description="No active clients yet"
-              image={<UserOutlined style={{ fontSize: 48, color: "#cbd5e1" }} />}
-            >
-              <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
-                You need at least one active client to use Quick Contract
-              </Text>
-              <Space>
-                <Link href="/clients">
-                  <Button type="primary">Add Client</Button>
-                </Link>
-                <Button onClick={() => setMode("custom")}>
-                  Use Custom Mode
-                </Button>
-              </Space>
-            </Empty>
-          ) : (
             <>
               <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
                 Select a client to generate a {contract.name} with smart defaults:
@@ -429,9 +396,8 @@ function ContractGenerateQuickClient() {
                 )}
               />
             </>
-          )}
         </Card>
-      )}
+      ))}
 
       {/* Custom Mode */}
       {mode === "custom" && (
@@ -441,7 +407,7 @@ function ContractGenerateQuickClient() {
           loading={generating}
         />
       )}
-    </div>
+    </Page>
   );
 }
 

@@ -3,19 +3,21 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  Badge, Button, Card, Col, Empty, Input, Modal, Row, Select, Space,
-  Spin, Tag, Tabs, Typography, Tooltip, message, Form, Divider,
+  Button, Card, Col, Input, Modal, Row, Select, Space,
+  Tag, Tabs, Typography, Tooltip, message, Form, Divider,
 } from "antd";
 import {
   SearchOutlined, ArrowRightOutlined, SafetyCertificateOutlined,
   DeleteOutlined, EyeOutlined, FileTextOutlined, EditOutlined,
-  CheckCircleOutlined, PlusOutlined, ClockCircleOutlined, FormOutlined, DownloadOutlined,
+  CheckCircleOutlined, PlusOutlined, FormOutlined, DownloadOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { CONTRACT_TYPES, CONTRACT_CATEGORIES } from "@/lib/contract-types";
 import { listContracts, deleteContract, signContract, updateContractStatus } from "@/lib/db";
+import { Page, PageHeader, EmptyState, StatusPill, Banner } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const CATEGORY_COLORS: Record<string, string> = {
   Employment:      "#0ea5e9",
@@ -26,21 +28,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   Property:        "#ef4444",
   Finance:         "#6366f1",
   "Legal Waiver":  "#64748b",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  draft:      "default",
-  reviewed:   "blue",
-  signed:     "green",
-  expired:    "orange",
-  terminated: "red",
-};
-const STATUS_ICONS: Record<string, React.ReactNode> = {
-  draft:      <FileTextOutlined />,
-  reviewed:   <EyeOutlined />,
-  signed:     <CheckCircleOutlined />,
-  expired:    <ClockCircleOutlined />,
-  terminated: <DeleteOutlined />,
 };
 
 type Contract = {
@@ -149,22 +136,14 @@ function ContractsPage() {
   });
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "36px 28px" }}>
+    <Page wide>
       {ctx}
 
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <SafetyCertificateOutlined style={{ fontSize: 26, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Contracts</Title>
-            <Tag color="blue" style={{ borderRadius: 20, fontWeight: 700 }}>15 types</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>
-            AI-generated contracts with jurisdiction-aware clauses and e-signature.
-          </Text>
-        </div>
-      </div>
+      <PageHeader
+        title="Contracts"
+        sub="AI-generated contracts with jurisdiction-aware clauses and e-signature."
+        count="15 types"
+      />
 
       <Tabs
         activeKey={activeTab}
@@ -187,31 +166,20 @@ function ContractsPage() {
             label: `My Contracts${contracts.length ? ` (${contracts.length})` : ""}`,
             icon: <FileTextOutlined />,
             children: loading ? (
-              <div style={{ textAlign: "center", padding: 80 }}><Spin size="large" /></div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[0, 1, 2].map(i => <div key={i} className="dp-skel h-52 rounded-3xl" />)}
+              </div>
             ) : contracts.length === 0 ? (
-              <Card style={{ borderRadius: 16, textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-                <Empty
-                  image={<SafetyCertificateOutlined style={{ fontSize: 64, color: "#cbd5e1" }} />}
-                  imageStyle={{ height: 80 }}
-                  description={
-                    <div>
-                      <Title level={4} style={{ color: "#64748b", marginBottom: 8 }}>No contracts yet</Title>
-                      <Text type="secondary">Generate your first AI contract to see it here.</Text>
-                    </div>
-                  }
-                >
-                  <Button type="primary" icon={<PlusOutlined />} onClick={() => setActiveTab("templates")}>
-                    Browse Contract Types
-                  </Button>
-                </Empty>
-              </Card>
+              <EmptyState icon={<SafetyCertificateOutlined />} title="No contracts yet" body="Generate your first AI contract and it will show up here.">
+                <BrandButton onClick={() => setActiveTab("templates")}><PlusOutlined /> Browse contract types</BrandButton>
+              </EmptyState>
             ) : (
               <Row gutter={[16, 16]}>
                 {contracts.map(c => (
                   <Col key={c.id} xs={24} sm={12} lg={8}>
                     <Card
                       hoverable
-                      style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%" }}
+                      className="h-full"
                       styles={{ body: { padding: 22 } }}
                       actions={[
                         <Tooltip key="view" title="View contract">
@@ -252,13 +220,7 @@ function ContractsPage() {
                               {c.category}
                             </Tag>
                           </div>
-                          <Tag
-                            color={STATUS_COLORS[c.status]}
-                            icon={STATUS_ICONS[c.status]}
-                            style={{ borderRadius: 20, fontSize: 11, textTransform: "capitalize", flexShrink: 0 }}
-                          >
-                            {c.status}
-                          </Tag>
+                          <StatusPill status={c.status} />
                         </div>
 
                         <div style={{ background: "#f8fafc", borderRadius: 8, padding: "8px 12px" }}>
@@ -359,7 +321,7 @@ function ContractsPage() {
           Timestamp: {new Date().toLocaleString()} · Your IP address will be recorded with this signature.
         </Text>
       </Modal>
-    </div>
+    </Page>
   );
 }
 
@@ -375,44 +337,43 @@ function TemplatesBrowser({
   return (
     <div>
       {/* Disclaimer */}
-      <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 12, padding: "12px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "flex-start" }}>
-        <span style={{ fontSize: 18 }}>⚠️</span>
-        <Text style={{ fontSize: 13, color: "#92400e" }}>
-          <strong>Legal Disclaimer:</strong> AI-generated contracts are for informational purposes only. Always have contracts reviewed by a licensed attorney before signing or relying on them.
-        </Text>
-      </div>
+      <Banner
+        tone="amber"
+        title="Legal disclaimer"
+        body="AI-generated contracts are for informational purposes only. Have a licensed attorney review them before you sign or rely on them."
+      />
 
-      {/* Search + filter */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
         <Input
-          prefix={<SearchOutlined style={{ color: "#94a3b8" }} />}
+          prefix={<SearchOutlined className="text-ink-300" />}
           placeholder="Search contract types…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ maxWidth: 320, borderRadius: 10, height: 40 }}
+          className="!h-10 !max-w-xs"
           allowClear
         />
-        <Space wrap>
-          <Tag
-            style={{ cursor: "pointer", borderRadius: 20, padding: "4px 14px", fontWeight: !activeCategory ? 700 : 400, background: !activeCategory ? "#0ea5e9" : "#fff", color: !activeCategory ? "#fff" : "#374151", border: `1.5px solid ${!activeCategory ? "#0ea5e9" : "#e2e8f0"}` }}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
             onClick={() => setActiveCategory(null)}
+            className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${!activeCategory ? "bg-ink text-white" : "border border-line bg-white text-ink-500 hover:text-ink"}`}
           >
             All
-          </Tag>
+          </button>
           {CONTRACT_CATEGORIES.map(cat => {
             const active = activeCategory === cat.id;
-            const color = CATEGORY_COLORS[cat.id];
             return (
-              <Tag
+              <button
                 key={cat.id}
-                style={{ cursor: "pointer", borderRadius: 20, padding: "4px 14px", fontWeight: active ? 700 : 400, background: active ? color : "#fff", color: active ? "#fff" : "#374151", border: `1.5px solid ${active ? color : "#e2e8f0"}` }}
+                type="button"
                 onClick={() => setActiveCategory(active ? null : cat.id)}
+                className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${active ? "bg-ink text-white" : "border border-line bg-white text-ink-500 hover:text-ink"}`}
               >
                 {cat.icon} {cat.id}
-              </Tag>
+              </button>
             );
           })}
-        </Space>
+        </div>
       </div>
 
       {/* Grid */}
@@ -422,16 +383,16 @@ function TemplatesBrowser({
           if (!items.length) return null;
           const color = CATEGORY_COLORS[cat.id];
           return (
-            <div key={cat.id} style={{ marginBottom: 40 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+            <div key={cat.id} className="mb-10">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl text-[18px]" style={{ background: `${color}18` }}>
                   {cat.icon}
                 </div>
-                <div>
-                  <Title level={5} style={{ margin: 0 }}>{cat.label}</Title>
-                  <Text type="secondary" style={{ fontSize: 12 }}>{cat.description}</Text>
+                <div className="min-w-0">
+                  <div className="font-display text-[16px] font-bold text-ink">{cat.label}</div>
+                  <div className="text-[12.5px] text-ink-400">{cat.description}</div>
                 </div>
-                <Tag style={{ marginLeft: "auto", borderRadius: 20 }}>{items.length}</Tag>
+                <span className="ml-auto rounded-full bg-canvas px-2.5 py-1 text-[12px] font-bold text-ink-500">{items.length}</span>
               </div>
               <Row gutter={[14, 14]}>
                 {items.map(c => <ContractCard key={c.id} contract={c} color={color} />)}
@@ -449,9 +410,7 @@ function TemplatesBrowser({
       )}
 
       {filtered.length === 0 && (
-        <div style={{ textAlign: "center", padding: "80px 0" }}>
-          <Text type="secondary" style={{ fontSize: 16 }}>No contracts match &ldquo;{search}&rdquo;</Text>
-        </div>
+        <EmptyState icon={<SearchOutlined />} title="No matching types" body={search ? `Nothing matches “${search}”.` : "No contract types in this category."} />
       )}
     </div>
   );
@@ -461,52 +420,40 @@ function ContractCard({ contract, color }: { contract: (typeof CONTRACT_TYPES)[0
   return (
     <Col xs={24} sm={12} lg={8}>
       <Link href={`/contracts/generate-quick/${contract.id}`}>
-        <Card
-          hoverable
-          size="small"
-          style={{ borderRadius: 14, border: "1px solid #e2e8f0", cursor: "pointer", height: "100%" }}
-          styles={{ body: { padding: 20 } }}
-        >
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+        <Card hoverable className="h-full" styles={{ body: { padding: 20 } }}>
+          <div className="mb-3 flex items-start gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[20px]" style={{ background: `${color}18` }}>
               {contract.icon}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <Text strong style={{ fontSize: 14 }}>{contract.name}</Text>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[14px] font-semibold text-ink">{contract.name}</span>
                 {contract.badge && (
-                  <Badge
-                    count={contract.badge}
-                    style={{ background: contract.badge === "Hot" ? "#ef4444" : "#10b981", fontSize: 10, height: 18, lineHeight: "18px", borderRadius: 9 }}
-                  />
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold text-white ${contract.badge === "Hot" ? "bg-rose-500" : "bg-emerald-500"}`}>
+                    {contract.badge}
+                  </span>
                 )}
               </div>
-              <Tag color={color} style={{ marginTop: 4, borderRadius: 20, fontSize: 11, border: "none", background: `${color}15`, color }}>
-                {contract.category}
-              </Tag>
+              <div className="mt-1 text-[12px] font-semibold" style={{ color }}>{contract.category}</div>
             </div>
           </div>
 
-          <Text type="secondary" style={{ fontSize: 12, lineHeight: 1.5, display: "block", marginBottom: 12 }}>
+          <p className="mb-3 text-[12.5px] leading-relaxed text-ink-400">
             {contract.description.slice(0, 110)}…
-          </Text>
+          </p>
 
-          <Space wrap style={{ marginBottom: 12 }}>
+          <div className="mb-3 flex flex-wrap gap-1.5">
             {contract.features.slice(0, 3).map(f => (
-              <Tag key={f} style={{ borderRadius: 20, fontSize: 10, padding: "1px 8px", background: "#f8fafc", border: "1px solid #e2e8f0" }}>{f}</Tag>
+              <span key={f} className="rounded-full border border-line bg-canvas px-2 py-0.5 text-[10.5px] font-medium text-ink-500">{f}</span>
             ))}
             {contract.features.length > 3 && (
-              <Tag style={{ borderRadius: 20, fontSize: 10, padding: "1px 8px" }}>+{contract.features.length - 3} more</Tag>
+              <span className="rounded-full border border-line px-2 py-0.5 text-[10.5px] font-medium text-ink-400">+{contract.features.length - 3} more</span>
             )}
-          </Space>
+          </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Text style={{ fontSize: 12, color, fontWeight: 600 }}>
-              Generate <ArrowRightOutlined />
-            </Text>
-            <Button type="primary" size="small" style={{ background: color, borderColor: color, borderRadius: 8, fontSize: 12 }}>
-              Use →
-            </Button>
+          <div className="flex items-center justify-between text-[12.5px] font-semibold" style={{ color }}>
+            <span className="inline-flex items-center gap-1">Generate <ArrowRightOutlined /></span>
+            <span>Use →</span>
           </div>
         </Card>
       </Link>

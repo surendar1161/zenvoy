@@ -54,15 +54,15 @@ export default function ProposalEditorPage() {
     }
   }
 
-  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Spin size="large" /></div>;
-  if (!proposal) return <Result status="404" title="Proposal not found" extra={<Button href="/proposals">Back</Button>} />;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-canvas"><Spin size="large" /></div>;
+  if (!proposal) return <div className="flex min-h-screen items-center justify-center bg-canvas"><Result status="404" title="Proposal not found" extra={<Button href="/proposals">Back</Button>} /></div>;
 
   // Show warning if proposal is accepted (but still allow editing with caution)
   const isAccepted = proposal.status === "accepted" || proposal.accepted_at;
   const isLateEdit = ["sent", "viewed", "accepted"].includes(proposal.status);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex min-h-screen flex-col bg-canvas">
       {isAccepted && (
         <Alert
           type="error"

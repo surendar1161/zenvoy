@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import {
-  Button, Card, Col, Empty, Input, Modal, Row, Select, Space, Tag, Typography, message, Tooltip,
+  Button, Card, Col, Input, Modal, Row, Select, Space, Tag, Typography, message, Tooltip,
 } from "antd";
 import {
   PlusOutlined, DeleteOutlined, CopyOutlined, EditOutlined, BookOutlined,
 } from "@ant-design/icons";
 import { createClient } from "@/lib/supabase/client";
+import { Page, PageHeader, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { TextArea } = Input;
 
 const CATEGORIES = ["General", "About Me", "Case Study", "Scope of Work", "Terms & Conditions", "Why Choose Me", "Pricing", "Timeline", "Testimonials"];
@@ -95,22 +97,17 @@ export default function ContentLibraryPage() {
   });
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
+    <Page>
       {ctx}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <BookOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Content Library</Title>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Save reusable sections — case studies, T&Cs, about pages — and insert them into any proposal with one click.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large"
-          onClick={() => setEditItem({ title: "", content: "", category: "General", tags: [] })}
-          style={{ borderRadius: 10, fontWeight: 600 }}>
-          Add Section
-        </Button>
-      </div>
+      <PageHeader
+        title="Content Library"
+        sub="Save reusable sections — case studies, T&Cs, about pages — and insert them into any proposal with one click."
+        action={
+          <BrandButton onClick={() => setEditItem({ title: "", content: "", category: "General", tags: [] })}>
+            <PlusOutlined /> Add Section
+          </BrandButton>
+        }
+      />
 
       {/* Filters */}
       <Space style={{ marginBottom: 24 }} wrap>
@@ -122,16 +119,15 @@ export default function ContentLibraryPage() {
       </Space>
 
       {loading ? null : filtered.length === 0 ? (
-        <Card style={{ borderRadius: 16, textAlign: "center" }} styles={{ body: { padding: "80px 40px" } }}>
-          <Empty image={<BookOutlined style={{ fontSize: 64, color: "#cbd5e1" }} />}
-            imageStyle={{ height: 80 }}
-            description={<><Title level={4} style={{ color: "#64748b" }}>No saved sections yet</Title><Text type="secondary">Create reusable content blocks — About Me, Case Studies, T&Cs — and insert them anywhere.</Text></>}
-          >
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditItem({ title: "", content: "", category: "General", tags: [] })}>
-              Create First Section
-            </Button>
-          </Empty>
-        </Card>
+        <EmptyState
+          icon={<BookOutlined />}
+          title="No saved sections yet"
+          body="Create reusable content blocks — About Me, Case Studies, T&Cs — and insert them anywhere."
+        >
+          <BrandButton onClick={() => setEditItem({ title: "", content: "", category: "General", tags: [] })}>
+            <PlusOutlined /> Create First Section
+          </BrandButton>
+        </EmptyState>
       ) : (
         <Row gutter={[16, 16]}>
           {filtered.map(item => (
@@ -205,6 +201,6 @@ export default function ContentLibraryPage() {
           </div>
         </Space>
       </Modal>
-    </div>
+    </Page>
   );
 }

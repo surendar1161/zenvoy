@@ -23,10 +23,12 @@ import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { Page, PageHeader, Stat } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -536,58 +538,48 @@ export default function ProjectDetailPage() {
     },
   ];
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
+  if (loading) return <Page><div className="flex justify-center py-24"><Spin size="large" /></div></Page>;
   if (!project) return null;
 
   const ps = STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG];
   const client = project.clients;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 28px" }}>
+    <Page>
       {ctx}
 
-      <Link href="/projects">
-        <Button type="text" icon={<ArrowLeftOutlined />} style={{ padding: "4px 0", color: "#64748b", marginBottom: 16 }}>All Projects</Button>
+      <Link href="/projects" className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-600">
+        <ArrowLeftOutlined /> All Projects
       </Link>
 
-      {/* Project header */}
+      <PageHeader
+        title={project.name}
+        sub={project.description || undefined}
+        action={<BrandButton onClick={openCreateTask}><PlusOutlined /> Add Task</BrandButton>}
+      />
+
       <Card style={{ borderRadius: 20, border: `2px solid ${project.color}30`, marginBottom: 24, background: `${project.color}05` }} styles={{ body: { padding: 28 } }}>
-        <Row justify="space-between" gutter={[16, 16]} wrap>
-          <Col>
-            <Space align="center" size={14}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: project.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <FolderOpenOutlined style={{ color: "#fff", fontSize: 22 }} />
-              </div>
-              <div>
-                <Space align="center" size={10} wrap>
-                  <Title level={2} style={{ margin: 0, fontWeight: 900 }}>{project.name}</Title>
-                  <Tag style={{ borderRadius: 20, color: ps?.color, background: ps?.bg, borderColor: `${ps?.color}30`, fontSize: 12 }}>{ps?.label}</Tag>
-                </Space>
-                <Space size={16} wrap style={{ marginTop: 6 }}>
-                  {client && (
-                    <Space size={6}>
-                      <Avatar size={18} style={{ background: client.avatar_color, fontSize: 10, fontWeight: 700 }}>{client.name[0].toUpperCase()}</Avatar>
-                      <Text type="secondary" style={{ fontSize: 13 }}>{client.name}{client.company ? ` · ${client.company}` : ""}</Text>
-                    </Space>
-                  )}
-                  {project.due_date && (
-                    <Space size={4}><CalendarOutlined style={{ color: "#94a3b8", fontSize: 12 }} />
-                      <Text type="secondary" style={{ fontSize: 13 }}>Due {dayjs(project.due_date).format("MMM D, YYYY")}</Text>
-                    </Space>
-                  )}
-                  {project.budget && (
-                    <Text style={{ color: "#10b981", fontWeight: 600, fontSize: 13 }}>{project.currency} {project.budget.toLocaleString()}</Text>
-                  )}
-                  {project.tags?.map(t => <Tag key={t} style={{ borderRadius: 20, fontSize: 11 }}>{t}</Tag>)}
-                </Space>
-              </div>
+        <Space size={16} wrap>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: project.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <FolderOpenOutlined style={{ color: "#fff", fontSize: 18 }} />
+          </div>
+          <Tag style={{ borderRadius: 20, color: ps?.color, background: ps?.bg, borderColor: `${ps?.color}30`, fontSize: 12 }}>{ps?.label}</Tag>
+          {client && (
+            <Space size={6}>
+              <Avatar size={18} style={{ background: client.avatar_color, fontSize: 10, fontWeight: 700 }}>{client.name[0].toUpperCase()}</Avatar>
+              <Text type="secondary" style={{ fontSize: 13 }}>{client.name}{client.company ? ` · ${client.company}` : ""}</Text>
             </Space>
-          </Col>
-          <Col>
-            <Button type="primary" icon={<PlusOutlined />} onClick={openCreateTask}
-              style={{ borderRadius: 10, fontWeight: 600 }}>Add Task</Button>
-          </Col>
-        </Row>
+          )}
+          {project.due_date && (
+            <Space size={4}><CalendarOutlined style={{ color: "#94a3b8", fontSize: 12 }} />
+              <Text type="secondary" style={{ fontSize: 13 }}>Due {dayjs(project.due_date).format("MMM D, YYYY")}</Text>
+            </Space>
+          )}
+          {project.budget && (
+            <Text style={{ color: "#10b981", fontWeight: 600, fontSize: 13 }}>{project.currency} {project.budget.toLocaleString()}</Text>
+          )}
+          {project.tags?.map(t => <Tag key={t} style={{ borderRadius: 20, fontSize: 11 }}>{t}</Tag>)}
+        </Space>
 
         {tasks.length > 0 && (
           <div style={{ marginTop: 20 }}>
@@ -600,23 +592,13 @@ export default function ProjectDetailPage() {
         )}
       </Card>
 
-      {/* Stats row */}
-      <Row gutter={[14, 14]} style={{ marginBottom: 20 }}>
-        {[
-          { label: "Total Tasks",  value: tasks.length,                                         color: "#0ea5e9" },
-          { label: "To Do",        value: tasks.filter(t => t.status === "todo").length,        color: "#94a3b8" },
-          { label: "In Progress",  value: tasks.filter(t => t.status === "in_progress").length, color: "#f59e0b" },
-          { label: "Done",         value: done,                                                  color: "#10b981" },
-          { label: "Overdue",      value: overdue,                                               color: "#ef4444" },
-        ].map(s => (
-          <Col key={s.label} xs={12} sm={6} md={4}>
-            <Card style={{ borderRadius: 12, border: "1px solid #e2e8f0", textAlign: "center" }} styles={{ body: { padding: 14 } }}>
-              <div style={{ fontSize: 24, fontWeight: 900, color: s.color }}>{s.value}</div>
-              <Text type="secondary" style={{ fontSize: 11 }}>{s.label}</Text>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <Stat tone="brand" label="Total Tasks" value={tasks.length} />
+        <Stat tone="slate" label="To Do" value={tasks.filter(t => t.status === "todo").length} />
+        <Stat tone="amber" label="In Progress" value={tasks.filter(t => t.status === "in_progress").length} />
+        <Stat tone="emerald" label="Done" value={done} />
+        <Stat tone="rose" label="Overdue" value={overdue} />
+      </div>
 
       {/* Tabs */}
       <Tabs
@@ -1088,6 +1070,6 @@ export default function ProjectDetailPage() {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

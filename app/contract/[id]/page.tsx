@@ -118,13 +118,13 @@ export default function ContractViewPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
       <Spin size="large" />
     </div>
   );
 
   if (notFound || !contract) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
       <Result status="404" title="Contract not found"
         subTitle="This contract may have been deleted or the link is invalid."
         extra={<Button href="/">Go to DealPilot</Button>} />
@@ -134,7 +134,7 @@ export default function ContractViewPage() {
   const rendered = renderContractMd(contract.contract_text);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+    <div className="min-h-screen bg-canvas" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
 
       {/* Styles */}
       <style>{`
@@ -163,19 +163,14 @@ export default function ContractViewPage() {
       `}</style>
 
       {/* Toolbar */}
-      <div className="cv-no-print" style={{
-        position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #e2e8f0", padding: "12px 24px",
-        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
-      }}>
+      <div className="cv-no-print sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white px-6 py-3">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "#fff", fontSize: 16 }}>📄</span>
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-ink text-base text-white">
+            <span>📄</span>
           </div>
           <div>
-            <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: 15, color: "#0f172a" }}>{contract.contract_type_name}</div>
-            <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#94a3b8" }}>{contract.governing_law}</div>
+            <div className="font-display text-[15px] font-bold text-ink">{contract.contract_type_name}</div>
+            <div className="text-xs text-ink-300">{contract.governing_law}</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -186,7 +181,7 @@ export default function ContractViewPage() {
           )}
           <Button icon={<DownloadOutlined />} onClick={handleDownload} style={{ fontFamily: "Inter, sans-serif" }}>Download</Button>
           <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}
-            style={{ background: "#0ea5e9", borderColor: "#0ea5e9", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+            style={{ background: "#0369a1", borderColor: "#0369a1", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
             Print / PDF
           </Button>
         </div>
@@ -194,21 +189,15 @@ export default function ContractViewPage() {
 
       {/* Contract document */}
       <div style={{ maxWidth: 860, margin: "40px auto", padding: "0 24px 60px" }}>
-        <div className="cv-page" style={{
-          background: "#fff",
-          borderRadius: 16,
-          border: "1px solid #e2e8f0",
-          boxShadow: "0 4px 32px rgba(0,0,0,0.07)",
-          overflow: "hidden",
-        }}>
+        <div className="cv-page overflow-hidden rounded-3xl border border-line bg-white shadow-float">
           {/* Document header band */}
-          <div style={{ background: "linear-gradient(135deg, #0c4a6e 0%, #0369a1 60%, #0ea5e9 100%)", padding: "36px 48px 32px" }}>
+          <div className="bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-12 pb-8 pt-9 text-white">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
               <div>
                 <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
                   Legal Document
                 </div>
-                <div style={{ color: "#fff", fontSize: 26, fontWeight: 900, letterSpacing: "-0.5px", fontFamily: "Inter, sans-serif", lineHeight: 1.2 }}>
+                <div className="font-display text-[26px] font-extrabold leading-tight tracking-tight text-white">
                   {contract.contract_type_name}
                 </div>
                 <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontFamily: "Inter, sans-serif", marginTop: 6 }}>

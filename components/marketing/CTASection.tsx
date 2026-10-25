@@ -1,10 +1,7 @@
 "use client";
 
-import { Button, Card, Typography } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import Link from "next/link";
-
-const { Text } = Typography;
+import { ButtonLink } from "@/components/site/ui";
 
 interface CTASectionProps {
   emoji?: string;
@@ -26,32 +23,23 @@ export default function CTASection({
   footnote = "Free forever plan · No credit card · Instant access",
 }: CTASectionProps) {
   return (
-    <section aria-label="Call to action" style={{ padding: "90px 24px", background: "#fff" }}>
-      <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
-        <Card
-          style={{ borderRadius: 28, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", border: "none", boxShadow: "0 24px 80px rgba(14,165,233,0.3)" }}
-          styles={{ body: { padding: "60px 48px" } }}
-        >
-          <div style={{ fontSize: 48, marginBottom: 16 }}>{emoji}</div>
-          <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", display: "block", marginBottom: 10 }}>
-            {tagline}
-          </Text>
-          <h2 style={{ color: "#fff", fontSize: 34, fontWeight: 900, margin: "0 0 14px", letterSpacing: "-0.5px" }}>
-            {title}
-          </h2>
-          <p style={{ color: "rgba(255,255,255,0.82)", fontSize: 17, lineHeight: 1.65, margin: "0 0 36px" }}>
-            {subtitle}
-          </p>
-          <Link href={buttonHref}>
-            <Button size="large" icon={<ArrowRightOutlined />}
-              style={{ height: 56, paddingInline: 42, fontSize: 17, fontWeight: 800, background: "#fff", color: "#0369a1", border: "none", borderRadius: 14, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
-              {buttonText}
-            </Button>
-          </Link>
-          {footnote && (
-            <div style={{ marginTop: 20, color: "rgba(255,255,255,0.6)", fontSize: 13 }}>{footnote}</div>
-          )}
-        </Card>
+    <section aria-label="Call to action" className="px-5 py-16 sm:px-6 sm:py-24">
+      <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[36px] bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-6 py-14 text-center text-white shadow-float sm:px-12 sm:py-20">
+        <div className="dp-grid absolute inset-0 opacity-30" aria-hidden />
+        <div className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-brand-500/40 blur-[80px]" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-violet-500/40 blur-[80px]" aria-hidden />
+        <div className="relative">
+          <div className="text-[40px]" aria-hidden>{emoji}</div>
+          <p className="mt-4 text-[12px] font-bold uppercase tracking-[0.16em] text-brand-200">{tagline}</p>
+          <h2 className="mx-auto mt-3 max-w-xl text-[32px] font-extrabold leading-tight sm:text-[42px]">{title}</h2>
+          <p className="mx-auto mt-4 max-w-lg text-[16px] leading-relaxed text-ink-300">{subtitle}</p>
+          <div className="mt-8">
+            <ButtonLink href={buttonHref} variant="light" size="lg" className="font-bold">
+              {buttonText} <ArrowRightOutlined className="text-[13px]" />
+            </ButtonLink>
+          </div>
+          {footnote && <p className="mt-5 text-[13px] text-ink-400">{footnote}</p>}
+        </div>
       </div>
     </section>
   );

@@ -16,6 +16,7 @@ import { Upload, Divider } from "antd";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import SignatureBlock from "@/components/SignatureBlock";
+import { StatusPill } from "@/components/app/ui";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -41,7 +42,6 @@ interface Activity { id: string; actor: string; actor_name: string | null; event
 interface PContract { id: string; title: string | null; contract_type: string | null; party_a_name: string | null; party_b_name: string | null; governing_law: string | null; contract_text: string | null; status: string; signed_at: string | null; signer_name: string | null; created_at: string; }
 interface PProposal { id: string; client_name: string | null; project_type: string | null; proposal_text: string | null; tiers: unknown; total_budget: number | null; currency: string | null; status: string; signed_at: string | null; signer_name: string | null; accepted_at: string | null; created_at: string; freelancer_name: string | null; }
 
-const INV_COLOR: Record<string, string> = { draft: "#94a3b8", sent: "#0ea5e9", viewed: "#06b6d4", paid: "#10b981", overdue: "#ef4444" };
 const FILE_ICONS: Record<string, string> = { contract: "📄", invoice: "💰", design: "🎨", image: "🖼️", document: "📝", general: "📎" };
 const APPROVAL_CONFIG = {
   pending:        { color: "#f59e0b", bg: "#fffbeb", label: "Awaiting Review",  icon: <ClockCircleOutlined /> },
@@ -234,7 +234,7 @@ export default function MyPortalPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
       <Spin size="large" />
     </div>
   );
@@ -503,7 +503,7 @@ export default function MyPortalPage() {
                 <div>
                   <Text strong style={{ fontSize: 16 }}>{c.title || "Contract"}</Text>
                   {c.contract_type && <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 8, textTransform: "capitalize" }}>{c.contract_type}</Tag>}
-                  <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 4, color: c.status === "signed" ? "#10b981" : "#0ea5e9", borderColor: c.status === "signed" ? "#10b98140" : "#0ea5e940", background: c.status === "signed" ? "#10b98112" : "#0ea5e912", textTransform: "capitalize" }}>{c.status}</Tag>
+                  <span className="ml-1"><StatusPill status={c.status} /></span>
                 </div>
                 <Text type="secondary" style={{ fontSize: 12 }}>{new Date(c.created_at).toLocaleDateString()}</Text>
               </div>
@@ -542,13 +542,12 @@ export default function MyPortalPage() {
               <Empty description="No proposals available" />
             </Card>
           ) : proposals.map(p => {
-            const statusColor: Record<string, string> = { sent: "#0ea5e9", viewed: "#06b6d4", accepted: "#10b981" };
             return (
               <Card key={p.id} style={{ borderRadius: 14, border: "1px solid #e2e8f0", marginBottom: 16 }} styles={{ body: { padding: 24 } }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
                   <div>
                     <Text strong style={{ fontSize: 16 }}>{p.project_type || "Proposal"}</Text>
-                    <Tag style={{ borderRadius: 20, fontSize: 11, marginLeft: 8, color: statusColor[p.status] ?? "#94a3b8", borderColor: `${statusColor[p.status] ?? "#94a3b8"}40`, background: `${statusColor[p.status] ?? "#94a3b8"}12`, textTransform: "capitalize" }}>{p.status}</Tag>
+                    <span className="ml-2"><StatusPill status={p.status} /></span>
                   </div>
                   <Text type="secondary" style={{ fontSize: 12 }}>{new Date(p.created_at).toLocaleDateString()}</Text>
                 </div>
@@ -634,7 +633,7 @@ export default function MyPortalPage() {
                   <div>
                     <Space size={8}>
                       <Text strong style={{ fontSize: 16 }}>{inv.invoice_number} — {inv.title}</Text>
-                      <Tag color={INV_COLOR[inv.status]} style={{ borderRadius: 20, fontSize: 11, textTransform: "capitalize" }}>{inv.status}</Tag>
+                      <StatusPill status={inv.status} />
                     </Space>
                     {inv.due_date && <Text type="secondary" style={{ display: "block", fontSize: 13, marginTop: 2 }}>Due {new Date(inv.due_date).toLocaleDateString()}</Text>}
                   </div>
@@ -746,12 +745,12 @@ export default function MyPortalPage() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
+    <div className="min-h-screen bg-canvas">
       {ctx}
 
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ${primary}dd, ${primary})`, padding: "0 24px" }}>
-        <div style={{ maxWidth: 920, margin: "0 auto", padding: "20px 0 0" }}>
+      <div className="mx-auto max-w-[920px] px-6 pt-8">
+        <div className="rounded-3xl bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-7 pt-6 text-white">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               {brand.logoUrl
@@ -778,7 +777,7 @@ export default function MyPortalPage() {
           </div>
 
           {activePortal && (
-            <Title level={3} style={{ color: "#fff", margin: "0 0 4px", fontWeight: 800 }}>
+            <Title level={3} className="font-display" style={{ color: "#fff", margin: "0 0 4px", fontWeight: 800 }}>
               {activePortal.title ?? `${activePortal.client_name}'s Portal`}
             </Title>
           )}
@@ -789,7 +788,7 @@ export default function MyPortalPage() {
               <button key={t.key} onClick={() => setTab(t.key)}
                 style={{
                   padding: "9px 18px", border: "none", cursor: "pointer",
-                  fontWeight: 600, fontSize: 13, borderRadius: "8px 8px 0 0",
+                  fontWeight: 600, fontSize: 13, borderRadius: 12, marginBottom: 16,
                   background: tab === t.key ? "#fff" : "rgba(255,255,255,0.15)",
                   color: tab === t.key ? primary : "rgba(255,255,255,0.85)",
                   display: "flex", alignItems: "center", gap: 6,

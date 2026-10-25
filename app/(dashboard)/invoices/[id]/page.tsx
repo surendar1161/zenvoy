@@ -13,6 +13,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import dayjs from "dayjs";
+import { Page, PageHeader } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
 const { Title, Text } = Typography;
 
@@ -89,7 +91,7 @@ export default function InvoiceDetailPage() {
     msgApi.success("Recurring stopped");
   }
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}><Spin size="large" /></div>;
+  if (loading) return <Page><div className="flex justify-center py-24"><Spin size="large" /></div></Page>;
   if (!invoice) return null;
 
   const cur = invoice.currency;
@@ -97,39 +99,40 @@ export default function InvoiceDetailPage() {
   const isOverdue = invoice.due_date && new Date(invoice.due_date) < new Date() && invoice.status !== "paid";
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 28px" }}>
+    <Page>
       {ctx}
 
-      {/* Toolbar — hidden on print */}
-      <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-        <Link href="/invoices">
-          <Button type="text" icon={<ArrowLeftOutlined />} style={{ color: "#64748b", padding: "4px 0" }}>All Invoices</Button>
+      <div className="no-print">
+        <Link href="/invoices" className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-600">
+          <ArrowLeftOutlined /> All Invoices
         </Link>
-        <Space wrap>
-          <Select
-            value={invoice.status}
-            style={{ width: 130 }}
-            onChange={updateStatus}
-            options={["draft","sent","viewed","paid","overdue","cancelled"].map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
-          />
-          {invoice.is_recurring && (
-            <Button danger icon={<StopOutlined />} onClick={stopRecurring}>Stop Recurring</Button>
-          )}
-          {invoice.payment_link && (
-            <Button icon={<CopyOutlined />} onClick={handleCopyLink}>Copy Payment Link</Button>
-          )}
-          <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/pdf/invoice/${id}`, "_blank")}>Download PDF</Button>
-          <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}>Print</Button>
-        </Space>
+        <PageHeader
+          title={invoice.invoice_number ?? "Invoice"}
+          sub={invoice.title}
+          action={
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={invoice.status}
+                style={{ width: 130 }}
+                onChange={updateStatus}
+                options={["draft","sent","viewed","paid","overdue","cancelled"].map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
+              />
+              {invoice.is_recurring && (
+                <Button danger icon={<StopOutlined />} onClick={stopRecurring}>Stop Recurring</Button>
+              )}
+              {invoice.payment_link && (
+                <Button icon={<CopyOutlined />} onClick={handleCopyLink}>Copy Payment Link</Button>
+              )}
+              <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/pdf/invoice/${id}`, "_blank")}>Download PDF</Button>
+              <BrandButton onClick={handlePrint}><PrinterOutlined /> Print</BrandButton>
+            </div>
+          }
+        />
       </div>
 
       {/* Invoice document */}
-      <div ref={printRef} style={{
-        background: "#fff", borderRadius: 20, border: "1px solid #e2e8f0",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.06)", overflow: "hidden",
-      }}>
-        {/* Header band */}
-        <div style={{ background: "linear-gradient(135deg, #0c4a6e, #0ea5e9)", padding: "36px 44px" }}>
+      <div ref={printRef} className="overflow-hidden rounded-3xl border border-line bg-white shadow-soft">
+        <div className="bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-8 py-9 text-white sm:px-11">
           <Row justify="space-between" align="middle">
             <Col>
               <Title level={1} style={{ color: "#fff", margin: 0, fontWeight: 900, fontSize: 42, letterSpacing: "-1px" }}>
@@ -305,6 +308,6 @@ export default function InvoiceDetailPage() {
           body { background: white !important; }
         }
       `}</style>
-    </div>
+    </Page>
   );
 }

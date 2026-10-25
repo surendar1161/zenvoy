@@ -1,10 +1,8 @@
 "use client";
 
-import { Button, Card, Divider, Space, Tag, Typography } from "antd";
-import { ThunderboltFilled, ArrowRightOutlined, CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
-
-const { Text } = Typography;
+import { ButtonLink } from "@/components/site/ui";
 
 interface BlogArticleProps {
   tag: string;
@@ -15,97 +13,70 @@ interface BlogArticleProps {
   children: React.ReactNode;
 }
 
+const RELATED = [
+  { title: "How to Write a Freelance Proposal That Wins", href: "/blog/how-to-write-a-freelance-proposal", tag: "Guide" },
+  { title: "How to Price Freelance Projects (Without Undercharging)", href: "/blog/how-to-price-freelance-projects", tag: "Pricing" },
+  { title: "How to Follow Up on a Proposal Without Being Annoying", href: "/blog/how-to-follow-up-on-a-proposal", tag: "Sales" },
+  { title: "7 Freelance Proposal Examples That Actually Won Clients", href: "/blog/freelance-proposal-examples", tag: "Examples" },
+];
+
 export default function BlogArticle({ tag, title, subtitle, date, readTime, children }: BlogArticleProps) {
   return (
     <main>
-      {/* Article Header */}
-      <section style={{ background: "linear-gradient(160deg, #0c4a6e 0%, #0369a1 55%, #0ea5e9 100%)", padding: "80px 24px 70px", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} aria-hidden />
-        <div style={{ position: "relative", maxWidth: 740, margin: "0 auto" }}>
-          <div style={{ marginBottom: 16 }}>
-            <Link href="/blog" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none" }}>
-              ← Back to Blog
-            </Link>
+      <section className="relative overflow-hidden px-5 pb-14 pt-12 sm:px-6 sm:pt-16">
+        <div className="dp-grid pointer-events-none absolute inset-0 opacity-70" aria-hidden />
+        <div className="relative mx-auto max-w-3xl">
+          <Link href="/blog" className="text-[14px] font-semibold text-brand-600 hover:text-brand-700">← Back to blog</Link>
+          <div className="mt-5">
+            <span className="inline-flex rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-[12.5px] font-bold text-brand-700">{tag}</span>
           </div>
-          <Tag style={{ marginBottom: 16, borderRadius: 20, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", color: "#fff", fontSize: 13, fontWeight: 700, padding: "5px 16px" }}>
-            {tag}
-          </Tag>
-          <h1 style={{ fontSize: "clamp(28px, 5vw, 46px)", fontWeight: 900, color: "#fff", lineHeight: 1.15, margin: "0 0 16px", letterSpacing: "-1px" }}>
-            {title}
-          </h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,0.82)", lineHeight: 1.6, margin: "0 0 24px" }}>
-            {subtitle}
-          </p>
-          <Space size={16}>
-            <Space size={6}>
-              <CalendarOutlined style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }} />
-              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{date}</Text>
-            </Space>
-            <Space size={6}>
-              <ClockCircleOutlined style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }} />
-              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{readTime}</Text>
-            </Space>
-          </Space>
+          <h1 className="mt-4 text-[clamp(32px,5vw,48px)] font-extrabold leading-[1.12] tracking-tight text-ink">{title}</h1>
+          <p className="mt-4 text-[18px] leading-relaxed text-ink-500">{subtitle}</p>
+          <div className="mt-6 flex flex-wrap gap-4 text-[13px] text-ink-400">
+            <span className="inline-flex items-center gap-1.5"><CalendarOutlined /> {date}</span>
+            <span className="inline-flex items-center gap-1.5"><ClockCircleOutlined /> {readTime}</span>
+          </div>
         </div>
       </section>
 
-      {/* Article Body */}
-      <section style={{ padding: "60px 24px 40px", background: "#fff" }}>
-        <div style={{ maxWidth: 740, margin: "0 auto" }}>
+      <section className="px-5 pb-8 sm:px-6">
+        <div className="dp-article mx-auto max-w-3xl rounded-[28px] border border-line bg-white px-6 py-8 shadow-soft sm:px-10 sm:py-12">
           {children}
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section style={{ padding: "0 24px 80px", background: "#fff" }}>
-        <div style={{ maxWidth: 740, margin: "0 auto" }}>
-          <Divider style={{ margin: "0 0 48px" }} />
-          <Card
-            style={{ borderRadius: 24, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", border: "none", boxShadow: "0 24px 80px rgba(14,165,233,0.25)" }}
-            styles={{ body: { padding: "48px 40px", textAlign: "center" } }}
-          >
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📨</div>
-            <h2 style={{ color: "#fff", fontSize: 28, fontWeight: 900, margin: "0 0 12px", letterSpacing: "-0.5px" }}>
-              Skip the writing. Generate with AI.
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, lineHeight: 1.65, margin: "0 0 28px", maxWidth: 480, marginInline: "auto" }}>
-              DealPilot uses Claude AI to generate a fully personalised, professional proposal in 60 seconds. Try it free — no credit card required.
+      <section className="px-5 py-10 sm:px-6">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[32px] bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-6 py-12 text-center text-white shadow-float sm:px-12">
+          <div className="dp-grid absolute inset-0 opacity-30" aria-hidden />
+          <div className="relative">
+            <h2 className="text-[28px] font-extrabold leading-tight sm:text-[34px]">Skip the writing. Generate with AI.</h2>
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink-300">
+              DealPilot writes a personalised proposal in 60 seconds. Try it free — no credit card required.
             </p>
-            <Link href="/sign-up">
-              <Button size="large" icon={<ArrowRightOutlined />}
-                style={{ height: 52, paddingInline: 36, fontSize: 16, fontWeight: 800, background: "#fff", color: "#0369a1", border: "none", borderRadius: 14, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
-                Generate Your First Proposal Free
-              </Button>
-            </Link>
-            <div style={{ marginTop: 16, color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
-              Free plan: 5 proposals/month · No credit card · 60-second setup
+            <div className="mt-7">
+              <ButtonLink href="/sign-up" variant="light" size="lg" className="font-bold">
+                Generate your first proposal <ArrowRightOutlined className="text-[13px]" />
+              </ButtonLink>
             </div>
-          </Card>
+            <p className="mt-4 text-[13px] text-ink-400">Free plan: 5 proposals/month · No credit card · 60-second setup</p>
+          </div>
         </div>
       </section>
 
-      {/* Related Articles */}
-      <section style={{ padding: "60px 24px 80px", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
-        <div style={{ maxWidth: 740, margin: "0 auto" }}>
-          <h3 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 24px" }}>Keep reading</h3>
-          <Space direction="vertical" size={12} style={{ width: "100%" }}>
-            {[
-              { title: "How to Write a Freelance Proposal That Wins", href: "/blog/how-to-write-a-freelance-proposal", tag: "Guide" },
-              { title: "How to Price Freelance Projects (Without Undercharging)", href: "/blog/how-to-price-freelance-projects", tag: "Pricing" },
-              { title: "How to Follow Up on a Proposal Without Being Annoying", href: "/blog/how-to-follow-up-on-a-proposal", tag: "Sales" },
-              { title: "7 Freelance Proposal Examples That Actually Won Clients", href: "/blog/freelance-proposal-examples", tag: "Examples" },
-            ].map(a => (
-              <Link key={a.href} href={a.href} style={{ textDecoration: "none" }}>
-                <Card hoverable style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" } }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <Tag style={{ borderRadius: 20, fontSize: 11, margin: 0 }}>{a.tag}</Tag>
-                    <Text strong style={{ fontSize: 15 }}>{a.title}</Text>
-                  </div>
-                  <ArrowRightOutlined style={{ color: "#94a3b8", fontSize: 13 }} />
-                </Card>
+      <section className="border-t border-line px-5 py-14 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <h3 className="text-[22px] font-extrabold text-ink">Keep reading</h3>
+          <div className="mt-5 space-y-3">
+            {RELATED.map(a => (
+              <Link key={a.href} href={a.href} className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-white px-5 py-4 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift">
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700">{a.tag}</span>
+                  <span className="truncate text-[15px] font-semibold text-ink">{a.title}</span>
+                </span>
+                <ArrowRightOutlined className="shrink-0 text-[13px] text-ink-300" />
               </Link>
             ))}
-          </Space>
+          </div>
         </div>
       </section>
     </main>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  Button, Card, DatePicker, Empty, Form, Input, Modal, Select, Space, Spin,
+  Button, Card, DatePicker, Form, Input, Modal, Select, Space, Spin,
   Table, Tabs, Tag, Tooltip, Typography, message,
 } from "antd";
 import {
@@ -14,8 +14,10 @@ import {
 import type { TableColumnsType } from "antd";
 import dayjs from "dayjs";
 import ClientSelect, { type ClientOption } from "@/components/ClientSelect";
+import { Page, PageHeader, EmptyState } from "@/components/app/ui";
+import { Button as BrandButton } from "@/components/site/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface Booking {
   id: string;
@@ -189,23 +191,15 @@ export default function BookingsPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
+    <Page>
       {ctx}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Space align="center" style={{ marginBottom: 6 }}>
-            <CalendarOutlined style={{ fontSize: 24, color: "#0ea5e9" }} />
-            <Title level={2} style={{ margin: 0, fontWeight: 800 }}>Bookings</Title>
-            <Tag style={{ borderRadius: 20 }}>{bookings.length}</Tag>
-          </Space>
-          <Text type="secondary" style={{ fontSize: 15 }}>Manage meetings booked through proposals and portals.</Text>
-        </div>
-        <Button type="primary" icon={<PlusOutlined />} size="large" onClick={openCreate}
-          style={{ borderRadius: 10, fontWeight: 600 }}>
-          Add Booking
-        </Button>
-      </div>
+      <PageHeader
+        title="Bookings"
+        sub="Manage meetings booked through proposals and portals."
+        count={bookings.length}
+        action={<BrandButton onClick={openCreate}><PlusOutlined /> Add Booking</BrandButton>}
+      />
 
       <Tabs activeKey={tab} onChange={setTab} items={[
         { key: "upcoming", label: "Upcoming" },
@@ -215,22 +209,17 @@ export default function BookingsPage() {
       {loading ? (
         <div style={{ textAlign: "center", padding: 80 }}><Spin size="large" /></div>
       ) : bookings.length === 0 ? (
-        <Card style={{ borderRadius: 16, border: "2px dashed #e2e8f0", textAlign: "center" }} styles={{ body: { padding: "60px 40px" } }}>
-          <CalendarOutlined style={{ fontSize: 64, color: "#cbd5e1", marginBottom: 16 }} />
-          <Title level={4} style={{ color: "#64748b", margin: "0 0 8px" }}>
-            {tab === "upcoming" ? "No upcoming bookings" : "No past bookings"}
-          </Title>
-          <Text type="secondary" style={{ display: "block", marginBottom: 24 }}>
-            {tab === "upcoming"
-              ? "Set up your scheduling link in Settings to let clients book calls directly from proposals and portals."
-              : "Completed and cancelled bookings will appear here."}
-          </Text>
+        <EmptyState
+          icon={<CalendarOutlined />}
+          title={tab === "upcoming" ? "No upcoming bookings" : "No past bookings"}
+          body={tab === "upcoming"
+            ? "Set up your scheduling link in Settings to let clients book calls directly from proposals and portals."
+            : "Completed and cancelled bookings will appear here."}
+        >
           {tab === "upcoming" && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ borderRadius: 12 }}>
-              Add Your First Booking
-            </Button>
+            <BrandButton onClick={openCreate}><PlusOutlined /> Add Your First Booking</BrandButton>
           )}
-        </Card>
+        </EmptyState>
       ) : (
         <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
           <Table dataSource={bookings} columns={columns} rowKey="id" pagination={{ pageSize: 15 }} />
@@ -308,6 +297,6 @@ export default function BookingsPage() {
           )}
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

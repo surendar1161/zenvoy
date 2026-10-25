@@ -17,6 +17,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import dayjs from "dayjs";
+import { Page, PageHeader, StatusPill } from "@/components/app/ui";
+import { btnClass } from "@/components/site/ui";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -28,7 +30,6 @@ interface PInvoice { id: string; invoice_number: string | null; title: string; l
 interface LineItem { description: string; quantity: number; unit_price: number; amount: number; }
 
 const FILE_ICONS: Record<string, string> = { contract: "📄", invoice: "💰", design: "🎨", image: "🖼️", document: "📝", general: "📎" };
-const INV_STATUS_COLOR: Record<string, string> = { draft: "default", sent: "blue", viewed: "cyan", paid: "green", overdue: "red", cancelled: "default" };
 const APPROVAL_COLORS: Record<string, string> = { pending: "#f59e0b", approved: "#10b981", needs_revision: "#ef4444" };
 const APPROVAL_LABELS: Record<string, string> = { pending: "Awaiting Review", approved: "Approved ✓", needs_revision: "Needs Revision" };
 
@@ -194,30 +195,31 @@ export default function PortalManagePage() {
     return `${(b / 1024 / 1024).toFixed(1)} MB`;
   }
 
-  if (loading) return <div style={{ display: "flex", justifyContent: "center", padding: 120 }}>{ctx}<Spin size="large" /></div>;
+  if (loading) return <Page>{ctx}<div className="flex justify-center py-24"><Spin size="large" /></div></Page>;
   if (!portal) return null;
   const unreadCount = messages.filter(m => m.sender === "client" && !m.read_by_client).length;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 28px" }}>
+    <Page>
       {ctx}
-      <Link href="/portals"><Button type="text" icon={<ArrowLeftOutlined />} style={{ padding: "4px 0", color: "#64748b", marginBottom: 16 }}>All Portals</Button></Link>
+      <Link href="/portals" className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-600">
+        <ArrowLeftOutlined /> All Portals
+      </Link>
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <Title level={2} style={{ margin: "0 0 4px", fontWeight: 800 }}>{portal.client_name ?? "Client Portal"}</Title>
-          <Text type="secondary">{portal.title ?? "Portal"}</Text>
-        </div>
-        <Space>
-          <Button icon={<CopyOutlined />} onClick={() => { navigator.clipboard.writeText(`${appUrl}/portal/${portal.token}`); msgApi.success("Link copied!"); }}>
-            Copy Link
-          </Button>
-          <a href={`/portal/${portal.token}`} target="_blank" rel="noopener noreferrer">
-            <Button type="primary" icon={<EyeOutlined />}>Preview as Client</Button>
-          </a>
-        </Space>
-      </div>
+      <PageHeader
+        title={portal.client_name ?? "Client Portal"}
+        sub={portal.title ?? "Portal"}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button icon={<CopyOutlined />} onClick={() => { navigator.clipboard.writeText(`${appUrl}/portal/${portal.token}`); msgApi.success("Link copied!"); }}>
+              Copy Link
+            </Button>
+            <a href={`/portal/${portal.token}`} target="_blank" rel="noopener noreferrer" className={btnClass()}>
+              <EyeOutlined /> Preview as Client
+            </a>
+          </div>
+        }
+      />
 
       <Tabs defaultActiveKey="files" size="large" type="card">
 
@@ -352,7 +354,7 @@ export default function PortalManagePage() {
                     title={
                       <Space>
                         <Text strong>{inv.invoice_number} — {inv.title}</Text>
-                        <Tag color={INV_STATUS_COLOR[inv.status]} style={{ borderRadius: 20, fontSize: 11, textTransform: "capitalize" }}>{inv.status}</Tag>
+                        <StatusPill status={inv.status} />
                       </Space>
                     }
                     description={
@@ -404,6 +406,6 @@ export default function PortalManagePage() {
           <Form.Item name="notes" label="Notes"><Input.TextArea rows={2} placeholder="Payment terms, bank details…" style={{ borderRadius: 8 }} /></Form.Item>
         </Form>
       </Modal>
-    </div>
+    </Page>
   );
 }

@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Badge, Button, Card, Col, Row, Space, Switch, Tag, Typography } from "antd";
-import { CheckCircleFilled, CloseCircleOutlined, ThunderboltFilled } from "@ant-design/icons";
 import Link from "next/link";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { PLANS } from "@/lib/plans";
-
-const { Title, Text } = Typography;
+import { ButtonLink } from "@/components/site/ui";
 
 const FAQ = [
   { q: "Can I cancel anytime?", a: "Yes. You can cancel your subscription at any time from the billing portal. You keep Pro/Business access until the end of your billing period." },
@@ -18,161 +16,99 @@ const FAQ = [
 ];
 
 export default function PricingPage() {
-  const [yearly, setYearly] = useState(false);
+  const [yearly, setYearly] = useState(true);
 
   return (
-    <div style={{ background: "#f8fafc" }}>
-      {/* Hero */}
-      <div style={{ textAlign: "center", padding: "80px 24px 60px" }}>
-        <Tag style={{ marginBottom: 16, padding: "4px 16px", borderRadius: 20, fontSize: 13, background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1d4ed8" }}>
-          Simple, transparent pricing
-        </Tag>
-        <Title level={1} style={{ margin: "0 0 16px", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900, letterSpacing: "-1px" }}>
-          Plans that grow with you
-        </Title>
-        <Text type="secondary" style={{ fontSize: 18, display: "block", marginBottom: 32 }}>
-          Start free. Upgrade when you're ready. No hidden fees.
-        </Text>
+    <main>
+      <section className="relative overflow-hidden px-5 pb-6 pt-14 text-center sm:px-6 sm:pt-20">
+        <div className="dp-grid pointer-events-none absolute inset-0 opacity-70" aria-hidden />
+        <div className="relative mx-auto max-w-2xl">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-600">Pricing</span>
+          <h1 className="mt-3 text-[clamp(34px,5vw,52px)] font-extrabold leading-[1.1] tracking-tight text-ink">Plans that grow with you</h1>
+          <p className="mt-4 text-[17px] text-ink-500">Start free. Upgrade when you&rsquo;re ready. No hidden fees.</p>
+          <div className="mt-8 inline-flex rounded-full border border-line bg-white p-1 shadow-soft" role="group" aria-label="Billing period">
+            {[{ l: "Monthly", v: false }, { l: "Yearly", v: true }].map(o => (
+              <button key={o.l} type="button" onClick={() => setYearly(o.v)} aria-pressed={yearly === o.v}
+                className={`rounded-full px-5 py-2 text-[14px] font-semibold transition ${yearly === o.v ? "bg-ink text-white" : "text-ink-500 hover:text-ink"}`}>
+                {o.l}
+                {o.v && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10.5px] font-bold text-emerald-700">Save 25%</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        {/* Toggle */}
-        <Space align="center" size={12}>
-          <Text style={{ fontWeight: yearly ? 400 : 700, color: yearly ? "#94a3b8" : "#0f172a" }}>Monthly</Text>
-          <Switch checked={yearly} onChange={setYearly} style={{ background: yearly ? "#0ea5e9" : "#94a3b8" }} />
-          <Text style={{ fontWeight: yearly ? 700 : 400, color: yearly ? "#0f172a" : "#94a3b8" }}>
-            Yearly
-            <Tag color="green" style={{ marginLeft: 8, borderRadius: 20, fontSize: 11 }}>Save up to 21%</Tag>
-          </Text>
-        </Space>
-      </div>
-
-      {/* Plans */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px 80px" }}>
-        <Row gutter={[24, 24]} align="top">
+      <section className="px-5 py-10 sm:px-6">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
           {PLANS.map(plan => {
             const price = yearly ? plan.yearlyPrice : plan.monthlyPrice;
             const isFree = plan.id === "free";
-
+            const pop = !!plan.popular;
             return (
-              <Col key={plan.id} xs={24} md={8}>
-                <Badge.Ribbon
-                  text={plan.popular ? "⭐ Most Popular" : ""}
-                  color="#0ea5e9"
-                  style={{ display: plan.popular ? undefined : "none" }}
-                >
-                  <Card
-                    style={{
-                      borderRadius: 20,
-                      border: `2px solid ${plan.popular ? plan.color : "#e2e8f0"}`,
-                      boxShadow: plan.popular ? `0 12px 40px ${plan.color}25` : "0 2px 8px rgba(0,0,0,0.06)",
-                      height: "100%",
-                    }}
-                    styles={{ body: { padding: 32 } }}
-                  >
-                    {/* Plan header */}
-                    <div style={{ marginBottom: 24 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 10, background: `${plan.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <ThunderboltFilled style={{ color: plan.color, fontSize: 18 }} />
-                        </div>
-                        <Title level={4} style={{ margin: 0, fontWeight: 800 }}>{plan.name}</Title>
-                      </div>
-                      <Text type="secondary" style={{ fontSize: 14 }}>{plan.tagline}</Text>
-                    </div>
-
-                    {/* Price */}
-                    <div style={{ marginBottom: 8 }}>
-                      <span style={{ fontSize: 52, fontWeight: 900, color: "#0f172a", lineHeight: 1 }}>
-                        ${price}
-                      </span>
-                      <span style={{ color: "#94a3b8", fontSize: 16 }}>/mo</span>
-                    </div>
-                    {yearly && !isFree && (
-                      <Text type="secondary" style={{ fontSize: 13, display: "block", marginBottom: 4 }}>
-                        Billed as ${plan.yearlyTotal}/year
-                      </Text>
-                    )}
-                    {!yearly && !isFree && (
-                      <Text style={{ fontSize: 13, color: "#10b981", display: "block", marginBottom: 4 }}>
-                        Switch to yearly → save ${(plan.monthlyPrice - plan.yearlyPrice) * 12}/yr
-                      </Text>
-                    )}
-
-                    {/* CTA */}
-                    <Link href={isFree ? "/sign-up" : `/sign-up?plan=${plan.id}&period=${yearly ? "yearly" : "monthly"}`}>
-                      <Button
-                        type={plan.popular ? "primary" : "default"}
-                        size="large"
-                        block
-                        style={{
-                          borderRadius: 12, height: 48, fontWeight: 700, marginTop: 20, marginBottom: 28,
-                          ...(plan.popular ? { background: plan.color, borderColor: plan.color } : {}),
-                          ...(plan.id === "business" ? { background: plan.color, borderColor: plan.color, color: "#fff" } : {}),
-                        }}
-                      >
-                        {isFree ? "Start Free — No Card" : plan.popular ? "Start with Pro" : "Get Business"}
-                      </Button>
-                    </Link>
-
-                    {/* Features */}
-                    <div style={{ borderTop: "1px solid #f1f5f9", paddingTop: 24 }}>
-                      <Space direction="vertical" size={10} style={{ width: "100%" }}>
-                        {plan.features.map(f => (
-                          <Space key={f} align="start" size={8}>
-                            <CheckCircleFilled style={{ color: plan.color, fontSize: 15, marginTop: 2, flexShrink: 0 }} />
-                            <Text style={{ fontSize: 14 }}>{f}</Text>
-                          </Space>
-                        ))}
-                        {plan.notIncluded?.map(f => (
-                          <Space key={f} align="start" size={8}>
-                            <CloseCircleOutlined style={{ color: "#cbd5e1", fontSize: 15, marginTop: 2, flexShrink: 0 }} />
-                            <Text type="secondary" style={{ fontSize: 14 }}>{f}</Text>
-                          </Space>
-                        ))}
-                      </Space>
-                    </div>
-                  </Card>
-                </Badge.Ribbon>
-              </Col>
+              <div key={plan.id} className={`relative flex h-full flex-col rounded-[28px] p-7 sm:p-8 ${pop ? "bg-gradient-to-b from-ink to-ink-800 text-white shadow-float ring-1 ring-brand-400/40 lg:-my-3" : "border border-line bg-white shadow-soft"}`}>
+                {pop && <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-500 to-violet-600 px-4 py-1 text-[11.5px] font-bold uppercase tracking-wider text-white shadow-glow">Most popular</span>}
+                <div className="font-display text-[20px] font-bold">{plan.name}</div>
+                <div className={`text-[13.5px] ${pop ? "text-ink-300" : "text-ink-400"}`}>{plan.tagline}</div>
+                <div className="mt-6 flex items-end gap-1">
+                  <span className="font-display text-[52px] font-extrabold leading-none tabular-nums">${price}</span>
+                  <span className={`pb-2 text-[14px] ${pop ? "text-ink-300" : "text-ink-400"}`}>/mo</span>
+                </div>
+                <div className={`mt-1 h-5 text-[12.5px] ${pop ? "text-ink-300" : "text-ink-400"}`}>
+                  {yearly && !isFree ? `Billed $${plan.yearlyTotal}/year` : !yearly && !isFree ? `Switch to yearly and save $${(plan.monthlyPrice - plan.yearlyPrice) * 12}/yr` : "Free forever"}
+                </div>
+                <Link href={isFree ? "/sign-up" : `/sign-up?plan=${plan.id}&period=${yearly ? "yearly" : "monthly"}`}
+                  className={`mt-6 block rounded-2xl py-3.5 text-center text-[15px] font-semibold ${pop ? "dp-btn-primary text-white" : "border border-line bg-canvas text-ink hover:border-brand-300"}`}>
+                  {isFree ? "Start free — no card" : pop ? "Start with Pro" : "Get Business"}
+                </Link>
+                <ul className="mt-7 space-y-3">
+                  {plan.features.map(f => (
+                    <li key={f} className={`flex items-start gap-2.5 text-[14.5px] ${pop ? "text-ink-200" : "text-ink-600"}`}>
+                      <CheckOutlined className={`mt-1 text-[12px] ${pop ? "text-brand-300" : "text-emerald-600"}`} />
+                      {f}
+                    </li>
+                  ))}
+                  {plan.notIncluded?.map(f => (
+                    <li key={f} className="flex items-start gap-2.5 text-[14.5px] text-ink-300">
+                      <CloseOutlined className="mt-1 text-[12px]" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             );
           })}
-        </Row>
-
-        {/* Comparison note */}
-        <div style={{ textAlign: "center", marginTop: 48 }}>
-          <Text type="secondary" style={{ fontSize: 14 }}>
-            All plans include: AI generation with Claude Opus 4.6 · Stripe payment links · Web proposal URLs · Cover page · 15 contract types · 24-hour support
-          </Text>
         </div>
+        <p className="mx-auto mt-10 max-w-3xl text-center text-[13.5px] text-ink-400">
+          All plans include AI generation, Stripe payment links, web proposal URLs, a cover page, 15 contract types, and support.
+        </p>
+      </section>
 
-        {/* FAQ */}
-        <div style={{ marginTop: 80 }}>
-          <Title level={2} style={{ textAlign: "center", marginBottom: 40, fontWeight: 800 }}>Frequently Asked Questions</Title>
-          <Row gutter={[32, 24]}>
+      <section className="px-5 py-8 sm:px-6">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-center text-[32px] font-extrabold text-ink">Questions, answered.</h2>
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
             {FAQ.map(item => (
-              <Col key={item.q} xs={24} md={12}>
-                <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0", height: "100%" }} styles={{ body: { padding: 24 } }}>
-                  <Text strong style={{ display: "block", marginBottom: 8, fontSize: 15 }}>{item.q}</Text>
-                  <Text type="secondary" style={{ fontSize: 14, lineHeight: 1.6 }}>{item.a}</Text>
-                </Card>
-              </Col>
+              <div key={item.q} className="rounded-3xl border border-line bg-white p-6 shadow-soft">
+                <div className="font-display text-[16px] font-bold text-ink">{item.q}</div>
+                <p className="mt-2 text-[14.5px] leading-relaxed text-ink-500">{item.a}</p>
+              </div>
             ))}
-          </Row>
+          </div>
         </div>
+      </section>
 
-        {/* Enterprise CTA */}
-        <Card style={{ borderRadius: 24, marginTop: 60, background: "linear-gradient(135deg, #0369a1, #0ea5e9)", border: "none", boxShadow: "0 20px 60px rgba(14,165,233,0.25)" }} styles={{ body: { padding: "48px 40px", textAlign: "center" } }}>
-          <Title level={2} style={{ color: "#fff", margin: "0 0 12px", fontWeight: 900 }}>
-            Need more than 5 team members?
-          </Title>
-          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, display: "block", marginBottom: 28 }}>
-            Talk to us about an Enterprise plan — custom pricing, SLA, dedicated support, and SSO.
-          </Text>
-          <Button size="large" icon={<ThunderboltFilled />}
-            style={{ height: 52, paddingInline: 36, fontSize: 15, fontWeight: 700, background: "#fff", color: "#0369a1", border: "none", borderRadius: 12 }}>
-            Contact Sales
-          </Button>
-        </Card>
-      </div>
-    </div>
+      <section className="px-5 py-16 sm:px-6">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-gradient-to-br from-ink via-ink-800 to-brand-900 px-6 py-14 text-center text-white shadow-float sm:px-12">
+          <div className="dp-grid absolute inset-0 opacity-30" aria-hidden />
+          <div className="relative">
+            <h2 className="text-[30px] font-extrabold sm:text-[36px]">Need more than 5 team members?</h2>
+            <p className="mx-auto mt-3 max-w-lg text-[16px] leading-relaxed text-ink-300">Talk to us about an Enterprise plan — custom pricing, SLA, dedicated support, and SSO.</p>
+            <div className="mt-8">
+              <ButtonLink href="/sign-up?plan=business" variant="light" size="lg" className="font-bold">Contact sales</ButtonLink>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

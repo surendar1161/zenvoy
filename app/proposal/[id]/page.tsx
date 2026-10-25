@@ -96,7 +96,7 @@ export default function ProposalViewPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <Spin size="large" />
       </div>
     );
@@ -104,7 +104,7 @@ export default function ProposalViewPage() {
 
   if (expired) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div className="flex min-h-screen items-center justify-center bg-canvas p-6">
         <Result status="warning" title="This proposal has expired"
           subTitle="The sender set an expiry date. Contact them for a new link."
           extra={<Button href="/">DealPilot</Button>} />
@@ -114,12 +114,12 @@ export default function ProposalViewPage() {
 
   if (passwordRequired) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fafc", padding: 24 }}>
-        <div style={{ maxWidth: 360, width: "100%", background: "#fff", borderRadius: 20, padding: 40, boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
-          <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
-            <h2 style={{ margin: 0, fontWeight: 800 }}>Password Required</h2>
-            <p style={{ color: "#64748b", marginTop: 8 }}>This proposal is password protected.</p>
+      <div className="flex min-h-screen items-center justify-center bg-canvas p-6">
+        <div className="w-full max-w-[360px] rounded-3xl border border-line bg-white p-10 shadow-float">
+          <div className="mb-7 text-center">
+            <div className="mb-3 text-[40px]">🔒</div>
+            <h2 className="m-0 font-display text-2xl font-extrabold text-ink">Password Required</h2>
+            <p className="mt-2 text-ink-500">This proposal is password protected.</p>
           </div>
           <input
             type="password"
@@ -141,7 +141,7 @@ export default function ProposalViewPage() {
 
   if (error || !data) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div className="flex min-h-screen items-center justify-center bg-canvas p-6">
         <Result status="404" title="Proposal not found"
           subTitle="This link may have expired or the proposal was deleted. Contact the sender for a new link."
           extra={<Button href="/">Go to DealPilot</Button>} />

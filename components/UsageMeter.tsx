@@ -1,29 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Progress, Tooltip, Typography } from "antd";
+import { Tooltip } from "antd";
+import { FileTextOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import type { UsageSummary } from "@/lib/usage";
 import { isAtLimit, usageLabel, usagePercent } from "@/lib/usage";
-
-const { Text } = Typography;
 
 interface UsageMeterProps {
   usage: UsageSummary | null;
   collapsed?: boolean;
 }
 
-function limitColor(percent: number, atLimit: boolean): string {
-  if (atLimit) return "#ef4444";
-  if (percent >= 80) return "#f59e0b";
-  return "#0ea5e9";
+function barClass(percent: number, atLimit: boolean): string {
+  if (atLimit) return "bg-red-500";
+  if (percent >= 80) return "bg-amber-500";
+  return "bg-gradient-to-r from-brand-400 to-brand-600";
 }
 
 export default function UsageMeter({ usage, collapsed = false }: UsageMeterProps) {
   if (!usage) return null;
 
   const items = [
-    { key: "proposals", label: "Proposals", icon: "📄", data: usage.proposals },
-    { key: "contracts", label: "Contracts", icon: "📋", data: usage.contracts },
+    { key: "proposals", label: "Proposals", icon: <FileTextOutlined />, data: usage.proposals },
+    { key: "contracts", label: "Contracts", icon: <SafetyCertificateOutlined />, data: usage.contracts },
   ];
 
   const showUpgrade = !usage.hasUnlimitedUsage && items.some(i => isAtLimit(i.data));
@@ -38,24 +37,12 @@ export default function UsageMeter({ usage, collapsed = false }: UsageMeterProps
     if (usage.hasUnlimitedUsage) return null;
 
     const atLimit = isAtLimit(worst.data);
-    const color = limitColor(worst.pct, atLimit);
 
     return (
-      <Tooltip
-        title={`${worst.label}: ${usageLabel(worst.data)} this month`}
-        placement="right"
-      >
-        <Link href="/subscription" style={{ display: "block", padding: "8px 12px" }}>
-          <div style={{
-            height: 4, borderRadius: 4, background: "#e2e8f0",
-            overflow: "hidden",
-          }}>
-            <div style={{
-              width: `${worst.pct}%`,
-              height: "100%",
-              background: color,
-              borderRadius: 4,
-            }} />
+      <Tooltip title={`${worst.label}: ${usageLabel(worst.data)} this month`} placement="right">
+        <Link href="/subscription" className="block px-3 py-2" aria-label="Usage this month">
+          <div className="h-1 overflow-hidden rounded-full bg-line">
+            <div className={`h-full rounded-full ${barClass(worst.pct, atLimit)}`} style={{ width: `${worst.pct}%` }} />
           </div>
         </Link>
       </Tooltip>
@@ -63,42 +50,32 @@ export default function UsageMeter({ usage, collapsed = false }: UsageMeterProps
   }
 
   return (
-    <div style={{ margin: "8px 12px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#f8fafc", padding: "12px 14px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <Text style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-          Usage · {usage.periodLabel.split(" ")[0]}
-        </Text>
+    <div className="mx-3 my-2 rounded-2xl border border-line bg-canvas p-3.5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-ink-400">Usage · {usage.periodLabel.split(" ")[0]}</span>
         {usage.hasUnlimitedUsage && (
-          <Text style={{ fontSize: 10, fontWeight: 700, color: "#0ea5e9", background: "#eff6ff", padding: "2px 8px", borderRadius: 20 }}>
-            Pro
-          </Text>
+          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-600">Pro</span>
         )}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-3">
         {items.map(item => {
           const atLimit = isAtLimit(item.data);
           const pct = usagePercent(item.data.used, item.data.limit);
-          const color = item.data.limit === "unlimited" ? "#0ea5e9" : limitColor(pct, atLimit);
+          const unlimited = item.data.limit === "unlimited";
 
           return (
             <div key={item.key}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <Text style={{ fontSize: 12, color: "#475569" }}>
-                  {item.icon} {item.label}
-                </Text>
-                <Text style={{ fontSize: 12, fontWeight: 600, color: atLimit ? "#ef4444" : "#334155" }}>
-                  {item.data.limit === "unlimited" ? `${item.data.used} · Unlimited` : usageLabel(item.data)}
-                </Text>
+              <div className="mb-1.5 flex items-center justify-between text-[12px]">
+                <span className="flex items-center gap-1.5 text-ink-500"><span className="text-[11px] text-ink-300">{item.icon}</span>{item.label}</span>
+                <span className={`font-semibold tabular-nums ${atLimit ? "text-red-500" : "text-ink-700"}`}>
+                  {unlimited ? `${item.data.used} · Unlimited` : usageLabel(item.data)}
+                </span>
               </div>
-              {item.data.limit !== "unlimited" && (
-                <Progress
-                  percent={pct}
-                  showInfo={false}
-                  size="small"
-                  strokeColor={color}
-                  trailColor="#e2e8f0"
-                />
+              {!unlimited && (
+                <div className="h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${item.label} usage`}>
+                  <div className={`h-full rounded-full transition-all duration-700 ${barClass(pct, atLimit)}`} style={{ width: `${pct}%` }} />
+                </div>
               )}
             </div>
           );
@@ -106,10 +83,8 @@ export default function UsageMeter({ usage, collapsed = false }: UsageMeterProps
       </div>
 
       {showUpgrade && (
-        <Link href="/subscription" style={{ display: "block", marginTop: 10 }}>
-          <Text style={{ fontSize: 11, color: "#0ea5e9", fontWeight: 600 }}>
-            Upgrade for unlimited →
-          </Text>
+        <Link href="/subscription" className="mt-3 block text-[12px] font-semibold text-brand-600 hover:text-brand-700">
+          Upgrade for unlimited →
         </Link>
       )}
     </div>

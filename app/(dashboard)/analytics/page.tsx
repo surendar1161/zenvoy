@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  Card, Col, Row, Statistic, Space, Typography, Tag, List, Avatar, Badge, Spin, Empty, Tooltip,
+  Card, Col, Row, Space, Typography, List, Avatar, Badge, Spin, Empty, Tooltip,
 } from "antd";
 import {
   EyeOutlined, FileTextOutlined, CheckCircleOutlined, EditOutlined,
@@ -11,8 +11,9 @@ import {
 } from "@ant-design/icons";
 import { createClient } from "@/lib/supabase/client";
 import dayjs from "dayjs";
+import { Page, PageHeader, Stat, StatusPill } from "@/components/app/ui";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface Notification {
   id: string;
@@ -148,69 +149,32 @@ export default function AnalyticsPage() {
     .forEach(p => { clientRevMap[p.client_name] = (clientRevMap[p.client_name] ?? 0) + (p.total_budget ?? 0); });
   const topClients = Object.entries(clientRevMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
-  const STATUS_COLORS: Record<string, string> = {
-    draft: "default", sent: "blue", viewed: "cyan",
-    accepted: "green", signed: "green", declined: "red", expired: "orange",
-  };
-
   if (loading) return (
-    <div style={{ display: "flex", justifyContent: "center", padding: "120px 0" }}>
-      <Spin size="large" />
-    </div>
+    <Page>
+      <div className="flex justify-center py-24"><Spin size="large" /></div>
+    </Page>
   );
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 28px" }}>
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: "0 0 6px", fontWeight: 800 }}>Analytics</Title>
-        <Text type="secondary" style={{ fontSize: 15 }}>Real-time tracking of proposals, revenue, expenses, and profitability.</Text>
+    <Page>
+      <PageHeader
+        title="Analytics"
+        sub="Real-time tracking of proposals, revenue, expenses, and profitability."
+      />
+
+      <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<EyeOutlined />} tone="brand" label="Total Views" value={totalViews} />
+        <Stat icon={<FileTextOutlined />} tone="violet" label="Sent Proposals" value={totalSent} />
+        <Stat icon={<CheckCircleOutlined />} tone="emerald" label="Signed / Accepted" value={totalSigned} />
+        <Stat icon={<ClockCircleOutlined />} tone="amber" label="Conversion Rate" value={`${convRate}%`} />
       </div>
 
-      {/* Proposal Stats */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        {[
-          { title: "Total Views",        value: totalViews,   icon: <EyeOutlined />,           color: "#0ea5e9" },
-          { title: "Sent Proposals",     value: totalSent,    icon: <FileTextOutlined />,       color: "#7c3aed" },
-          { title: "Signed / Accepted",  value: totalSigned,  icon: <CheckCircleOutlined />,    color: "#10b981" },
-          { title: "Conversion Rate",    value: `${convRate}%`, icon: <ClockCircleOutlined />, color: "#f59e0b" },
-        ].map(s => (
-          <Col key={s.title} xs={24} sm={12} lg={6}>
-            <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 24 } }}>
-              <Space>
-                <Avatar style={{ background: `${s.color}18`, color: s.color }} icon={s.icon} />
-                <Statistic
-                  title={<Text type="secondary" style={{ fontSize: 13 }}>{s.title}</Text>}
-                  value={s.value}
-                  valueStyle={{ color: s.color, fontWeight: 800, fontSize: 26 }}
-                />
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      {/* Financial Stats */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
-        {[
-          { title: "Total Revenue",   value: `$${totalRevenue.toLocaleString()}`,  icon: <DollarOutlined />,  color: "#10b981" },
-          { title: "Total Expenses",  value: `$${totalExpenses.toLocaleString()}`, icon: <WalletOutlined />,  color: "#ef4444" },
-          { title: "Net Profit",      value: `$${netProfit.toLocaleString()}`,     icon: netProfit >= 0 ? <RiseOutlined /> : <FallOutlined />, color: netProfit >= 0 ? "#10b981" : "#ef4444" },
-          { title: "Profit Margin",   value: `${profitMargin}%`,                   icon: <RiseOutlined />,    color: profitMargin >= 0 ? "#10b981" : "#ef4444" },
-        ].map(s => (
-          <Col key={s.title} xs={24} sm={12} lg={6}>
-            <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 24 } }}>
-              <Space>
-                <Avatar style={{ background: `${s.color}18`, color: s.color }} icon={s.icon} />
-                <Statistic
-                  title={<Text type="secondary" style={{ fontSize: 13 }}>{s.title}</Text>}
-                  value={s.value}
-                  valueStyle={{ color: s.color, fontWeight: 800, fontSize: 26 }}
-                />
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat icon={<DollarOutlined />} tone="emerald" label="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} />
+        <Stat icon={<WalletOutlined />} tone="rose" label="Total Expenses" value={`$${totalExpenses.toLocaleString()}`} />
+        <Stat icon={netProfit >= 0 ? <RiseOutlined /> : <FallOutlined />} tone={netProfit >= 0 ? "emerald" : "rose"} label="Net Profit" value={`$${netProfit.toLocaleString()}`} />
+        <Stat icon={<RiseOutlined />} tone={profitMargin >= 0 ? "emerald" : "rose"} label="Profit Margin" value={`${profitMargin}%`} />
+      </div>
 
       {/* Revenue vs Expenses — 12-month bar chart */}
       <Card
@@ -350,7 +314,7 @@ export default function AnalyticsPage() {
                       avatar={<Avatar style={{ background: "#eff6ff", color: "#0ea5e9" }} icon={<FileTextOutlined />} />}
                       title={<Space size={8}>
                         <Text strong style={{ fontSize: 14 }}>{p.client_name}</Text>
-                        <Tag color={STATUS_COLORS[p.status] ?? "default"} style={{ borderRadius: 20, fontSize: 11 }}>{p.status}</Tag>
+                        <StatusPill status={p.status} />
                       </Space>}
                       description={<Space size={12} style={{ fontSize: 12 }}>
                         <span>{p.project_type ?? "—"}</span>
@@ -403,6 +367,6 @@ export default function AnalyticsPage() {
           </Card>
         </Col>
       </Row>
-    </div>
+    </Page>
   );
 }

@@ -43,13 +43,13 @@ export default function ContractEditorPage() {
     if (error) throw error;
   }
 
-  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><Spin size="large" /></div>;
-  if (!contract) return <Result status="404" title="Contract not found" extra={<Button href="/contracts">Back</Button>} />;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-canvas"><Spin size="large" /></div>;
+  if (!contract) return <div className="flex min-h-screen items-center justify-center bg-canvas"><Result status="404" title="Contract not found" extra={<Button href="/contracts">Back</Button>} /></div>;
 
   // Show warning if contract is signed
   if (contract.status === "signed" || contract.signed_at) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div className="flex min-h-screen items-center justify-center bg-canvas p-6">
         <Result
           status="warning"
           title="Contract is Signed"
@@ -64,7 +64,7 @@ export default function ContractEditorPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex min-h-screen flex-col bg-canvas">
       <RichEditor
         content={contract.contract_text ?? ""}
         documentId={id}

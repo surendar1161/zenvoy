@@ -2,10 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { Button, Card, Space, Typography, Segmented } from "antd";
-import {
-  ThunderboltOutlined, AppstoreOutlined, RocketOutlined,
-} from "@ant-design/icons";
 import GenerateClient from "@/components/GenerateClient";
+import { Page, PageHeader } from "@/components/app/ui";
 import dynamic from "next/dynamic";
 
 const ProposalFormSimple = dynamic(() => import("@/components/ProposalFormSimple"), { ssr: false });
@@ -86,13 +84,9 @@ function GeneratePageClient() {
   // If proposal generated, show result
   if (proposal || proposalId) {
     return (
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 28px" }}>
-        <Card style={{ borderRadius: 16 }}>
-          <div style={{ marginBottom: 24 }}>
-            <Title level={3}>✅ Proposal Generated!</Title>
-            <Text type="secondary">Review, edit, or send to your client</Text>
-          </div>
-          
+      <Page>
+        <PageHeader title="Proposal generated" sub="Review, edit, or send to your client" />
+        <Card style={{ borderRadius: 24, border: "1px solid #E4E9F1" }}>
           <div
             style={{
               background: "#f8fafc",
@@ -121,32 +115,25 @@ function GeneratePageClient() {
             )}
           </Space>
         </Card>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "32px 28px" }}>
-      {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <Space direction="vertical" size={8}>
-          <RocketOutlined style={{ fontSize: 42, color: "#0ea5e9" }} />
-          <Title level={2} style={{ margin: 0, fontWeight: 800 }}>
-            New Proposal
-          </Title>
-          <Text type="secondary" style={{ fontSize: 15 }}>
-            Create a professional AI-powered proposal in minutes
-          </Text>
-        </Space>
-      </div>
+    <Page>
+      <PageHeader
+        title="New Proposal"
+        sub="Create a professional AI-powered proposal in minutes"
+      />
 
       {/* Mode Selector */}
       <Card
         style={{
-          borderRadius: 16,
-          border: "2px solid #e2e8f0",
+          borderRadius: 24,
+          border: "1px solid #E4E9F1",
           marginBottom: 28,
-          background: "linear-gradient(135deg, #eff6ff 0%, #fff 100%)",
+          background: "#fff",
+          boxShadow: "0 1px 2px rgba(11,18,32,.04), 0 4px 16px rgba(11,18,32,.05)",
         }}
         styles={{ body: { padding: 24 } }}
       >
@@ -218,7 +205,7 @@ function GeneratePageClient() {
       )}
       
       {mode === "wizard" && (
-        <Card style={{ borderRadius: 16, textAlign: "center", padding: 40 }}>
+        <Card style={{ borderRadius: 24, border: "1px solid #E4E9F1", textAlign: "center", padding: 40 }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🧙</div>
           <Title level={4}>Wizard Mode Coming Soon!</Title>
           <Text type="secondary" style={{ display: "block", marginBottom: 20 }}>
@@ -244,7 +231,7 @@ function GeneratePageClient() {
           <GenerateClient />
         </Suspense>
       )}
-    </div>
+    </Page>
   );
 }
 
