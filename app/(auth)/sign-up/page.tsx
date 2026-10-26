@@ -8,6 +8,13 @@ import { createClient } from "@/lib/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import AuthShell, { AuthCard, AuthHeading } from "@/components/auth/AuthShell";
 
+function readSignupSource() {
+  if (typeof window === "undefined") return null;
+  const raw = new URLSearchParams(window.location.search).get("source") ?? "";
+  const clean = raw.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+  return clean || null;
+}
+
 const hasSupabase =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder");
@@ -28,11 +35,12 @@ export default function SignUpPage() {
     setLoading(true);
     setError(null);
     const supabase = createClient();
+    const source = readSignupSource();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, ...(source ? { signup_source: source } : {}) },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -40,7 +48,7 @@ export default function SignUpPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      trackEvent("signup_email");
+      trackEvent("signup_email", source ? { source } : undefined);
       // Seed demo data in background — don't block the UI
       fetch("/api/seed-demo", { method: "POST" }).catch(() => {});
       setSignedUpEmail(email);
@@ -51,11 +59,14 @@ export default function SignUpPage() {
   async function signInWithGoogle() {
     if (!hasSupabase) { msgApi.warning("Supabase not configured."); return; }
     setGoogleLoading(true);
-    trackEvent("signup_google");
+    const source = readSignupSource();
+    trackEvent("signup_google", source ? { source } : undefined);
     const supabase = createClient();
+    const callback = new URL("/auth/callback", window.location.origin);
+    if (source) callback.searchParams.set("source", source);
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callback.toString() },
     });
   }
 

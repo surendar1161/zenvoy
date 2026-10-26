@@ -10,6 +10,10 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const source = searchParams.get("source") ?? "";
+      if (/^[a-z0-9_-]{1,40}$/.test(source)) {
+        await supabase.auth.updateUser({ data: { signup_source: source } });
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

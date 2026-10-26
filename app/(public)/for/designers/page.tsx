@@ -83,14 +83,14 @@ export default function DesignersPage() {
         tag="Graphic Design Proposal Generator"
         title={
           <>
-            Design proposals that match
+            Paste the brief.
             <br />
-            your <span style={{ color: "#c4b5fd" }}>creative standards</span>
+            Get a brand proposal you can send tonight.
           </>
         }
         subtitle="Your work is polished. Your proposals should be too. DealPilot generates branded design proposals with deliverable scoping, revision terms, and milestone payments — in 60 seconds."
-        primaryCTA={{ text: "Create a Design Proposal", href: "/sign-up" }}
-        secondaryCTA={{ text: "Preview a Template", href: "/templates" }}
+        primaryCTA={{ text: "Paste a brief", href: "/sign-up?source=designers" }}
+        secondaryCTA={{ text: "Start free", href: "/sign-up?source=designers" }}
         footnote="Free forever plan · No credit card required"
       />
 
@@ -301,7 +301,7 @@ export default function DesignersPage() {
         title="Your proposals should look as good as your designs"
         subtitle="Generate a branded design proposal with deliverable scoping, revision terms, and milestone payments — in 60 seconds. Free forever."
         buttonText="Create Your Design Proposal"
-        buttonHref="/sign-up"
+        buttonHref="/sign-up?source=designers"
       />
     </>
   );
