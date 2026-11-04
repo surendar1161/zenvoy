@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
+import JsonLd from "@/components/seo/JsonLd";
+import { faqJsonLd } from "@/lib/json-ld";
 
 interface FAQ {
   q: string;
@@ -18,6 +20,7 @@ export default function FAQSection({ title = "Frequently Asked Questions", subti
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section aria-label="FAQ" className="border-t border-line px-5 py-16 sm:px-6 sm:py-24">
+      {faqs.length > 0 && <JsonLd data={faqJsonLd(faqs)} />}
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-brand-600">FAQ</span>

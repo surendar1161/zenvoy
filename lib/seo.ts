@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
+import { GENERATORS } from "@/lib/generators";
+import { GUIDES } from "@/lib/guides";
+import { SAME_AS } from "@/lib/directory-listings";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 const APP_NAME = "DealPilot";
+
+/** Public profiles (G2, Capterra, Product Hunt, socials). Fill after each listing is live. */
+export { SAME_AS };
 
 export type SeoPage = {
   path: string;
@@ -26,6 +32,8 @@ export const SEO_PAGES: SeoPage[] = [
   { path: "/proposal-templates", title: "Freelance Proposal Templates", description: "19+ industry proposal templates for designers, developers, consultants, and agencies. Customize with AI.", changeFrequency: "monthly", priority: 0.8 },
   { path: "/freelance-crm", title: "Freelance CRM — Clients, Proposals & Invoices", description: "Lightweight CRM for freelancers. Track clients, proposals, contracts, invoices, and project pipeline in one place.", changeFrequency: "monthly", priority: 0.8 },
   { path: "/compare/proposal-software", title: "Best Proposal Software Compared (2026)", description: "Compare DealPilot vs Proposify, PandaDoc, HoneyBook, Bonsai, Better Proposals, Qwilr, and Dubsado.", keywords: ["proposal software comparison", "best proposal software"], changeFrequency: "monthly", priority: 0.9 },
+  { path: "/ai-generators", title: "AI Proposal Generators for Freelancers", description: "Free AI proposal generators for freelance, design, web, consulting, copywriting, marketing, and video work. Paste a brief, send tonight.", keywords: ["AI proposal generator", "freelance proposal generator"], changeFrequency: "weekly", priority: 0.9 },
+  { path: "/guides", title: "DealPilot Guides — Generate, Send, Get Signed", description: "How to generate a proposal, send it, and get it signed in DealPilot. Short product guides for freelancers.", changeFrequency: "monthly", priority: 0.75 },
 
   // Competitor alternatives
   { path: "/alternative/proposify", title: "Proposify Alternative for Freelancers", description: "DealPilot vs Proposify — AI-generated proposals, unlimited sends, and $12/mo instead of $49/user/mo.", keywords: ["proposify alternative"], changeFrequency: "monthly", priority: 0.85 },
@@ -53,6 +61,21 @@ export const SEO_PAGES: SeoPage[] = [
   { path: "/blog/how-to-price-freelance-projects", title: "How to Price Freelance Projects", description: "Hourly vs project-based vs value pricing. How to present rates clients respect.", changeFrequency: "monthly", priority: 0.75 },
   { path: "/blog/how-to-follow-up-on-a-proposal", title: "How to Follow Up on a Proposal", description: "Timing, templates, and strategy for following up without being annoying.", changeFrequency: "monthly", priority: 0.75 },
   { path: "/blog/freelance-proposal-examples", title: "7 Freelance Proposal Examples", description: "Real proposal breakdowns for web dev, design, copywriting, and consulting — with annotations.", changeFrequency: "monthly", priority: 0.75 },
+  { path: "/blog/best-ai-proposal-writers", title: "9 Best AI Proposal Writers in 2026", description: "Looking for the best AI proposal writer? We compared 9 tools — DealPilot, ChatGPT, Jasper, Proposify, and more — so you can pick one and send a proposal tonight.", keywords: ["best AI proposal writer", "AI proposal generator comparison"], changeFrequency: "monthly", priority: 0.9 },
+  ...GENERATORS.map((generator) => ({
+    path: `/ai-generators/${generator.slug}`,
+    title: generator.seoTitle,
+    description: generator.seoDescription,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  })),
+  ...GUIDES.map((guide) => ({
+    path: `/guides/${guide.slug}`,
+    title: guide.seoTitle,
+    description: guide.seoDescription,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  })),
 ];
 
 const SEO_BY_PATH = Object.fromEntries(SEO_PAGES.map((p) => [p.path, p]));
@@ -71,7 +94,7 @@ export function getPageMetadata(path: string): Metadata {
     keywords: page.keywords,
     alternates: { canonical: url },
     openGraph: {
-      type: "website",
+      type: page.path.startsWith("/blog/") || page.path.startsWith("/guides/") ? "article" : "website",
       url,
       title: `${page.title} | ${APP_NAME}`,
       description: page.description,

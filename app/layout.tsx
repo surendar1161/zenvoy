@@ -3,6 +3,8 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Analytics } from "@vercel/analytics/react";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { organizationJsonLd, softwareApplicationJsonLd } from "@/lib/json-ld";
+import { SAME_AS } from "@/lib/directory-listings";
 
 // Brand type system: Plus Jakarta Sans for display, Inter for UI/body.
 const fontDisplay = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700", "800"], display: "swap" });
@@ -57,26 +59,8 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": APP_NAME,
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web",
-  "url": APP_URL,
-  "description": DESCRIPTION,
-  "offers": [
-    { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free Plan" },
-    { "@type": "Offer", "price": "19", "priceCurrency": "USD", "name": "Pro Plan", "billingIncrement": "P1M" },
-    { "@type": "Offer", "price": "49", "priceCurrency": "USD", "name": "Business Plan", "billingIncrement": "P1M" },
-  ],
-  "featureList": [
-    "AI Proposal Generation", "Digital E-Signatures", "Stripe Payment Links",
-    "Client Portal", "AI Contract Generator", "Milestone Payments",
-    "Proposal Analytics", "White-Label Branding", "19+ Templates",
-  ],
-  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "127" },
-};
+const softwareLd = softwareApplicationJsonLd();
+const organizationLd = organizationJsonLd(SAME_AS);
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -84,7 +68,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
         />
       </head>
       <body>

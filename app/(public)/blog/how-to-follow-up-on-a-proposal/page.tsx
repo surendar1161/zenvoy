@@ -10,6 +10,8 @@ export default function HowToFollowUpOnAProposal() {
       title="How to Follow Up on a Proposal Without Being Annoying"
       subtitle="The exact timing, templates, and strategy for following up on proposals — including what to do when clients go silent."
       date="May 7, 2026"
+      dateIso="2026-05-07"
+      path="/blog/how-to-follow-up-on-a-proposal"
       readTime="9 min read"
     >
       {/* ── Section 1: Why Most Freelancers Don't Follow Up ── */}

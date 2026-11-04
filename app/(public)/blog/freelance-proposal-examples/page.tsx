@@ -113,6 +113,8 @@ export default function FreelanceProposalExamples() {
       title="7 Freelance Proposal Examples That Actually Won Clients"
       subtitle="Real-world proposal breakdowns across web development, design, copywriting, consulting, and more — with annotations on what made each one work."
       date="May 7, 2026"
+      dateIso="2026-05-07"
+      path="/blog/freelance-proposal-examples"
       readTime="15 min read"
     >
       <p style={{ fontSize: 16, color: "#334155", lineHeight: 1.8, margin: "0 0 20px" }}>

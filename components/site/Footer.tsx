@@ -5,7 +5,7 @@ const COLS = [
   { h: "Product", l: [["AI proposals", "/ai-proposal-generator"], ["Contracts", "/features/contracts"], ["E-signatures", "/features/e-signatures"], ["Invoicing", "/features/invoicing"], ["Client portal", "/features/client-portal"]] },
   { h: "For", l: [["Designers", "/for/designers"], ["Web developers", "/for/web-developers"], ["Copywriters", "/for/copywriters"], ["Consultants", "/for/consultants"], ["Agencies", "/for/marketing-agencies"]] },
   { h: "Compare", l: [["vs Bonsai", "/alternative/bonsai"], ["vs HoneyBook", "/alternative/honeybook"], ["vs PandaDoc", "/alternative/pandadoc"], ["vs Proposify", "/alternative/proposify"]] },
-  { h: "Resources", l: [["Blog", "/blog"], ["Proposal templates", "/proposal-templates"], ["Free proposal maker", "/free-proposal-maker"], ["Pricing", "/pricing"]] },
+  { h: "Resources", l: [["Blog", "/blog"], ["Best AI proposal writers", "/blog/best-ai-proposal-writers"], ["AI generators", "/ai-generators"], ["Guides", "/guides"], ["Pricing", "/pricing"]] },
 ];
 
 export default function Footer() {

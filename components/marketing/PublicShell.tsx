@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { antdTheme } from "@/lib/theme";
 import Nav from "@/components/site/Nav";
 import Footer from "@/components/site/Footer";
+import Breadcrumbs from "@/components/site/Breadcrumbs";
+import { crumbsFromPath } from "@/lib/json-ld";
 
 /**
  * Shared shell for every public marketing page ("Calm Flight").
@@ -15,12 +17,20 @@ import Footer from "@/components/site/Footer";
 export default function PublicShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const crumbs = crumbsFromPath(pathname ?? "/");
 
   return (
     <ConfigProvider theme={antdTheme}>
       <div className="dp min-h-screen">
         <Nav solid={!isHome} />
-        <div className={isHome ? "" : "pt-[76px]"}>{children}</div>
+        <div className={isHome ? "" : "pt-[76px]"}>
+          {!isHome && crumbs.length > 1 && (
+            <div className="px-5 pt-5 sm:px-6">
+              <Breadcrumbs items={crumbs} />
+            </div>
+          )}
+          {children}
+        </div>
         <Footer />
       </div>
     </ConfigProvider>

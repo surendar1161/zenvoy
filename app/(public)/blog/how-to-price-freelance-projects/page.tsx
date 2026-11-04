@@ -18,6 +18,8 @@ export default function HowToPriceFreelanceProjects() {
       title="How to Price Freelance Projects (Without Undercharging)"
       subtitle="The complete pricing guide for freelancers — hourly vs project-based, value pricing, rate calculators, and how to present pricing that clients respect."
       date="May 7, 2026"
+      dateIso="2026-05-07"
+      path="/blog/how-to-price-freelance-projects"
       readTime="14 min read"
     >
       <p style={pStyle}>

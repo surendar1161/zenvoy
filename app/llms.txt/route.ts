@@ -16,8 +16,12 @@ export async function GET() {
 ## Key pages
 
 - AI Proposal Generator: ${APP_URL}/ai-proposal-generator
+- AI Generators hub: ${APP_URL}/ai-generators
+- Graphic design proposal generator: ${APP_URL}/ai-generators/graphic-design-proposal
 - Free Proposal Maker: ${APP_URL}/free-proposal-maker
 - Proposal Software Comparison: ${APP_URL}/compare/proposal-software
+- Best AI proposal writers (2026): ${APP_URL}/blog/best-ai-proposal-writers
+- Guides: ${APP_URL}/guides
 - Blog: ${APP_URL}/blog
 
 ## Alternatives

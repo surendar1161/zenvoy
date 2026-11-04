@@ -18,6 +18,8 @@ export default function HowToWriteAFreelanceProposal() {
       title="How to Write a Freelance Proposal That Wins"
       subtitle="A step-by-step guide to writing proposals that close deals — covering structure, tone, pricing, and the psychology behind why clients say yes."
       date="May 7, 2026"
+      dateIso="2026-05-07"
+      path="/blog/how-to-write-a-freelance-proposal"
       readTime="12 min read"
     >
       <p style={pStyle}>
