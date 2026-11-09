@@ -2,6 +2,7 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 
 import { useEffect, useState } from "react";
+import { BADGE_HREF } from "@/lib/proposal-badge";
 import type { BrandKit } from "@/lib/brand";
 import type { PricingTier, AddOn, Milestone } from "@/lib/types";
 import ProposalCover from "@/components/ProposalCover";
@@ -40,6 +41,8 @@ export interface ProposalData {
 
 interface Props {
   data: ProposalData;
+  /** Free-plan owners: show a small "Made with DealPilot" link. */
+  showBadge?: boolean;
 }
 
 // Parse markdown into sections
@@ -135,7 +138,7 @@ function renderMd(text: string): string {
   }).join("\n");
 }
 
-export default function BrandedProposalView({ data }: Props) {
+export default function BrandedProposalView({ data, showBadge = false }: Props) {
   const { brand } = data;
   const [selectedTier, setSelectedTier] = useState(data.tiers.find(t => t.recommended)?.id ?? data.tiers[0]?.id ?? "");
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
@@ -301,6 +304,13 @@ export default function BrandedProposalView({ data }: Props) {
         <p className="mt-1">Generated {new Date(data.createdAt).toLocaleDateString()}</p>
         {data.expiresAt && (
           <p className="mt-1">This proposal expires on <strong>{new Date(data.expiresAt).toLocaleDateString()}</strong></p>
+        )}
+        {showBadge && (
+          <p className="mt-4 text-xs">
+            <a href={BADGE_HREF} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 underline underline-offset-2">
+              Made with DealPilot — create proposals like this free
+            </a>
+          </p>
         )}
       </div>
     </div>

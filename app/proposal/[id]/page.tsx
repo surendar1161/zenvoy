@@ -17,6 +17,7 @@ export default function ProposalViewPage() {
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [showBadge, setShowBadge] = useState(false);
 
   const startTime = useRef(Date.now());
   const tracked = useRef(false);
@@ -82,6 +83,17 @@ export default function ProposalViewPage() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  // Free-plan owners get a small "Made with DealPilot" badge on the client view.
+  useEffect(() => {
+    if (!data) return;
+    let cancelled = false;
+    fetch(`/api/proposal-badge?id=${encodeURIComponent(id)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { if (!cancelled && j?.showBadge === true) setShowBadge(true); })
+      .catch(() => { /* badge is optional */ });
+    return () => { cancelled = true; };
+  }, [data, id]);
 
   async function checkPassword() {
     const supabase = createClient();
@@ -149,7 +161,7 @@ export default function ProposalViewPage() {
     );
   }
 
-  return <BrandedProposalView data={data} />;
+  return <BrandedProposalView data={data} showBadge={showBadge} />;
 }
 
 function buildFromRow(row: Record<string, unknown>): ProposalData {
