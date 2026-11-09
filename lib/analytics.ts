@@ -5,7 +5,9 @@ type AnalyticsEvent =
   | "signup_google"
   | "signup_completed"
   | "checkout_started"
-  | "subscription_upgraded";
+  | "subscription_upgraded"
+  | "preview_generated"
+  | "preview_cta_click";
 
 export function trackEvent(event: AnalyticsEvent, properties?: Record<string, string | number | boolean>) {
   try {

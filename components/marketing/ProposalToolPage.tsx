@@ -4,6 +4,7 @@ import Link from "next/link";
 import LandingHero from "@/components/marketing/LandingHero";
 import FAQSection from "@/components/marketing/FAQSection";
 import CTASection from "@/components/marketing/CTASection";
+import PreviewGenerator from "@/components/marketing/PreviewGenerator";
 import { PROPOSAL_TOOLS, type ProposalTool } from "@/lib/proposal-catalog";
 
 export default function ProposalToolPage({ tool }: { tool: ProposalTool }) {
@@ -16,10 +17,12 @@ export default function ProposalToolPage({ tool }: { tool: ProposalTool }) {
         tag="Proposal generator"
         title={tool.title}
         subtitle={tool.subtitle}
-        primaryCTA={{ text: "Paste a brief", href: `/sign-up?source=${source}` }}
+        primaryCTA={{ text: "Try it now", href: "#try-it" }}
         secondaryCTA={{ text: "All proposal generators", href: "/generate/proposal" }}
         footnote="Free plan: 5 proposals/month · Edit every line before you send"
       />
+
+      <PreviewGenerator tool={tool} />
 
       <section className="border-t border-line bg-white px-5 py-16 sm:px-6">
         <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[1.15fr_0.85fr]">
