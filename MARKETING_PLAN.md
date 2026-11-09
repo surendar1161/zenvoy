@@ -103,3 +103,14 @@ Frameworks used: campaign-plan (marketing plugin), find-first-customers (founder
 - SEO pages are thin if all 220 share templated copy. Mitigation: unique includes/FAQ per niche (already per-niche fields), add real examples, and monitor for "crawled, not indexed".
 - Unverified social proof is a trust and potentially legal risk. Mitigation: keep only verifiable numbers.
 - Free plan too generous (or inconsistent) hurts upgrades. Mitigation: align Free with `plans.ts` and test limits.
+
+## 8. Checklist (open items)
+
+- [ ] **Referral reward** (deferred by owner on 2026-11-09). Proposed defaults: both sides get 2 extra proposals on the monthly limit, granted after the new user generates their first proposal; self-referral blocked; referrer bonus capped at 20; share link shown in Settings. Needs a SQL migration applied by hand in Supabase (`update-27-referrals.sql`), `?ref=` capture on sign-up (like `signup_source`), and a safe server-side credit route. Read new columns defensively so the dashboard does not break before the migration is applied.
+- [ ] **Refund guarantee decision.** Pricing FAQ now explains the no-refund policy clearly; a 14-day money-back guarantee on annual plans is an owner decision.
+- [ ] **Confirm `SUPABASE_SERVICE_ROLE_KEY` is set in Vercel** so the "Made with DealPilot" badge can read another user's plan. Test on a Free-plan proposal link.
+- [ ] **Fix `NEXT_PUBLIC_APP_URL` in Vercel** to `https://www.dealpilot.co.in` (build guard covers it, but the variable itself is still wrong).
+- [ ] **Confirm funnel events in Vercel Analytics:** `proposal_generated`, `proposal_link_copied`, `document_viewed`, `proposal_accepted`, `document_signed`, `preview_generated`, `preview_cta_click`.
+- [ ] Record a 60-second product demo for the home page and Reddit/YouTube.
+- [ ] Create real G2 / Capterra / Product Hunt listings, then add them to `SAME_AS` in `lib/directory-listings.ts`.
+- [ ] Reddit programme: see `REDDIT_PLAN.md` (start with section 9).
