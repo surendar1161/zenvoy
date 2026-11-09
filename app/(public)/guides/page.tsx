@@ -15,13 +15,13 @@ export default function GuidesIndexPage() {
             How DealPilot works
           </h1>
           <p className="mt-4 text-[17px] leading-relaxed text-ink-500">
-            Short product guides: generate, send, and get a proposal signed. For writing craft and pricing psychology, use the blog.
+            Step-by-step help guides: generate, edit, send, and sign proposals, then set up contracts, payment links, invoices, and the client portal. For writing craft and pricing psychology, use the blog.
           </p>
         </div>
       </section>
 
       <section className="px-5 pb-16 sm:px-6">
-        <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
+        <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-2 lg:grid-cols-3">
           {GUIDES.map((guide, index) => (
             <Link
               key={guide.slug}

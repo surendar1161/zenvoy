@@ -17,6 +17,10 @@ export async function GET() {
 
 - AI Proposal Generator: ${APP_URL}/ai-proposal-generator
 - AI Generators hub: ${APP_URL}/ai-generators
+- Generate library: ${APP_URL}/generate/library
+- Proposal generators: ${APP_URL}/generate/proposal
+- Freelance proposal generator: ${APP_URL}/generate/proposal/freelance-proposal
+- 11 best AI proposal generators: ${APP_URL}/blog/best-ai-proposal-generators
 - Graphic design proposal generator: ${APP_URL}/ai-generators/graphic-design-proposal
 - Free Proposal Maker: ${APP_URL}/free-proposal-maker
 - Proposal Software Comparison: ${APP_URL}/compare/proposal-software

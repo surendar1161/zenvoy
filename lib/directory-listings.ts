@@ -115,5 +115,12 @@ export const LISTING_COPY = {
   audiences: ["Freelance designers", "Independent consultants", "Copywriters", "Small agencies"],
 };
 
-/** Public profiles to add to Organization JSON-LD after each listing is live. */
-export const SAME_AS: string[] = [];
+/**
+ * Organization.sameAs — only URLs that are this product.
+ * Do not add G2, Capterra, Product Hunt, YouTube, or Reddit until a listing
+ * for dealpilot.co.in exists. The Product Hunt "Deal Pilot" page is a
+ * different cold-email product. Launch Llama is a real listing of this site.
+ */
+export const SAME_AS: string[] = [
+  "https://tools.launchllama.co/products/deal-pilot",
+];

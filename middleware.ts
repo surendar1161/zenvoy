@@ -43,9 +43,11 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
+  const isPublicGenerator =
+    path === "/generate/library" || path.startsWith("/generate/proposal");
 
   // ── Unauthenticated ──────────────────────────────────────────
-  const isFreelancerRoute = FREELANCER_ONLY.some(r => path.startsWith(r));
+  const isFreelancerRoute = !isPublicGenerator && FREELANCER_ONLY.some(r => path.startsWith(r));
   const isClientRoute     = CLIENT_ROUTES.some(r => path.startsWith(r));
 
   if (!user && (isFreelancerRoute || isClientRoute)) {

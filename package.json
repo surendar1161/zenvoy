@@ -15,6 +15,9 @@
     "mobile": "cd mobile && npm start",
     "mobile:ios": "cd mobile && npm run ios",
     "mobile:android": "cd mobile && npm run android",
+    "native:sync": "cd native && npx cap sync",
+    "native:android": "cd native && npx cap open android",
+    "native:ios": "cd native && npx cap open ios",
     "listings": "node scripts/open-directory-listings.mjs",
     "listings:open": "node scripts/open-directory-listings.mjs --open"
   },

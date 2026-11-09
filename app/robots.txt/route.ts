@@ -4,6 +4,8 @@ export function GET() {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
   const body = `User-agent: *
 Allow: /
+Allow: /generate/library
+Allow: /generate/proposal
 Disallow: /dashboard
 Disallow: /generate
 Disallow: /portals

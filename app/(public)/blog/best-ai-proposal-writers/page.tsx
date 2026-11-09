@@ -81,14 +81,46 @@ const TOOLS = [
     best: "Freelancers who want one admin home and will write the proposal themselves",
     watch: "Templates still expect you to do the thinking.",
   },
+  {
+    n: "10",
+    name: "Qwilr",
+    href: "https://qwilr.com",
+    blurb: "Turns proposals into interactive web pages with embedded pricing. Strong presentation; aimed at sales teams more than solo freelancers.",
+    best: "Teams that want a designed, page-style proposal and already work in a sales process",
+    watch: "Not built around writing the proposal from a brief, and priced for teams.",
+  },
+  {
+    n: "11",
+    name: "Better Proposals",
+    href: "https://betterproposals.io",
+    blurb: "Template-led proposal software with e-signature and payment collection. A solid send-and-sign tool once you have the content.",
+    best: "Agencies that reuse polished templates across many similar deals",
+    watch: "You still write the substance yourself; AI drafting is not the core of the product.",
+  },
+  {
+    n: "12",
+    name: "Hubflo",
+    href: "https://hubflo.com",
+    blurb: "Client portal and CRM for service businesses, with proposals as one part of a wider onboarding flow.",
+    best: "Agencies that want one client-facing workspace after the deal closes",
+    watch: "Proposal writing is a smaller piece of a bigger platform, so expect more setup.",
+  },
+  {
+    n: "13",
+    name: "Piktochart",
+    href: "https://piktochart.com",
+    blurb: "A visual design tool with proposal templates. Good for a good-looking document; not a proposal workflow.",
+    best: "People who care most about how the document looks and will handle sending and signing elsewhere",
+    watch: "No built-in proposal drafting from a brief, e-sign, or deposit link as the core flow.",
+  },
 ];
 
 export default function BestAIProposalWritersPage() {
   return (
     <BlogArticle
       tag="Roundup"
-      title="9 Best AI Proposal Writers in 2026"
-      subtitle="Looking for the best AI proposal writer? We compared 9 tools — DealPilot, ChatGPT, Jasper, Proposify, and more — so you can pick one and send a proposal tonight."
+      title="13 Best AI Proposal Writers in 2026"
+      subtitle="Best AI proposal writers: 1. DealPilot, 2. ChatGPT, 3. Claude, 4. Jasper, 5. Copy.ai, 6. Proposify, 7. PandaDoc, 8. HoneyBook, 9. Bonsai, 10. Qwilr, 11. Better Proposals, 12. Hubflo, 13. Piktochart."
       date="November 4, 2026"
       dateIso="2026-11-04"
       readTime="11 min read"

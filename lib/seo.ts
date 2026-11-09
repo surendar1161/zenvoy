@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GENERATORS } from "@/lib/generators";
 import { GUIDES } from "@/lib/guides";
 import { SAME_AS } from "@/lib/directory-listings";
+import { PROPOSAL_TOOLS } from "@/lib/proposal-catalog";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 const APP_NAME = "DealPilot";
@@ -33,7 +34,7 @@ export const SEO_PAGES: SeoPage[] = [
   { path: "/freelance-crm", title: "Freelance CRM — Clients, Proposals & Invoices", description: "Lightweight CRM for freelancers. Track clients, proposals, contracts, invoices, and project pipeline in one place.", changeFrequency: "monthly", priority: 0.8 },
   { path: "/compare/proposal-software", title: "Best Proposal Software Compared (2026)", description: "Compare DealPilot vs Proposify, PandaDoc, HoneyBook, Bonsai, Better Proposals, Qwilr, and Dubsado.", keywords: ["proposal software comparison", "best proposal software"], changeFrequency: "monthly", priority: 0.9 },
   { path: "/ai-generators", title: "AI Proposal Generators for Freelancers", description: "Free AI proposal generators for freelance, design, web, consulting, copywriting, marketing, and video work. Paste a brief, send tonight.", keywords: ["AI proposal generator", "freelance proposal generator"], changeFrequency: "weekly", priority: 0.9 },
-  { path: "/guides", title: "DealPilot Guides — Generate, Send, Get Signed", description: "How to generate a proposal, send it, and get it signed in DealPilot. Short product guides for freelancers.", changeFrequency: "monthly", priority: 0.75 },
+  { path: "/guides", title: "DealPilot Help Guides — Proposals, Contracts, Payments", description: "Step-by-step help: generate, edit, send, and sign proposals; set up your brand kit, contracts, payment links, invoices, and client portal.", changeFrequency: "monthly", priority: 0.75 },
 
   // Competitor alternatives
   { path: "/alternative/proposify", title: "Proposify Alternative for Freelancers", description: "DealPilot vs Proposify — AI-generated proposals, unlimited sends, and $12/mo instead of $49/user/mo.", keywords: ["proposify alternative"], changeFrequency: "monthly", priority: 0.85 },
@@ -61,7 +62,10 @@ export const SEO_PAGES: SeoPage[] = [
   { path: "/blog/how-to-price-freelance-projects", title: "How to Price Freelance Projects", description: "Hourly vs project-based vs value pricing. How to present rates clients respect.", changeFrequency: "monthly", priority: 0.75 },
   { path: "/blog/how-to-follow-up-on-a-proposal", title: "How to Follow Up on a Proposal", description: "Timing, templates, and strategy for following up without being annoying.", changeFrequency: "monthly", priority: 0.75 },
   { path: "/blog/freelance-proposal-examples", title: "7 Freelance Proposal Examples", description: "Real proposal breakdowns for web dev, design, copywriting, and consulting — with annotations.", changeFrequency: "monthly", priority: 0.75 },
-  { path: "/blog/best-ai-proposal-writers", title: "9 Best AI Proposal Writers in 2026", description: "Looking for the best AI proposal writer? We compared 9 tools — DealPilot, ChatGPT, Jasper, Proposify, and more — so you can pick one and send a proposal tonight.", keywords: ["best AI proposal writer", "AI proposal generator comparison"], changeFrequency: "monthly", priority: 0.9 },
+  { path: "/blog/best-ai-proposal-writers", title: "13 Best AI Proposal Writers in 2026", description: "Best AI proposal writers: 1. DealPilot, 2. ChatGPT, 3. Claude, 4. Jasper, 5. Copy.ai, 6. Proposify, 7. PandaDoc, 8. HoneyBook, 9. Bonsai, 10. Qwilr, 11. Better Proposals, 12. Hubflo, 13. Piktochart.", keywords: ["best AI proposal writer", "AI proposal generator comparison"], changeFrequency: "monthly", priority: 0.9 },
+  { path: "/blog/best-ai-proposal-generators", title: "11 Best AI Proposal Generators in 2026", description: "11 best AI proposal generators: 1. Freelance, 2. Graphic design, 3. Web design, 4. Website development, 5. Brand identity, 6. UI/UX, 7. Copywriting and more. Each opens its own generator.", keywords: ["best AI proposal generator", "freelance proposal generator"], changeFrequency: "monthly", priority: 0.9 },
+  { path: "/generate/library", title: "Generate a Proposal", description: "Public DealPilot generators for the document you need to send. Proposal, quote, estimate, and retainer tools.", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/generate/proposal", title: "Proposal Generators", description: "Browse every DealPilot proposal generator by niche. Paste a brief and send a scoped proposal, quote, estimate, or retainer.", changeFrequency: "weekly", priority: 0.9 },
   ...GENERATORS.map((generator) => ({
     path: `/ai-generators/${generator.slug}`,
     title: generator.seoTitle,
@@ -110,7 +114,17 @@ export function getPageMetadata(path: string): Metadata {
 
 export function getSitemapEntries() {
   const now = new Date();
-  return SEO_PAGES.map((page) => ({
+  const pages = [
+    ...SEO_PAGES,
+    ...PROPOSAL_TOOLS.map((tool) => ({
+      path: tool.path,
+      title: tool.seoTitle,
+      description: tool.seoDescription,
+      changeFrequency: "monthly" as const,
+      priority: 0.64,
+    })),
+  ];
+  return pages.map((page) => ({
     url: `${APP_URL}${page.path === "/" ? "" : page.path}`,
     lastModified: now,
     changeFrequency: page.changeFrequency ?? "monthly",

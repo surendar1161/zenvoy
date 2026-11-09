@@ -1,0 +1,15 @@
+node_modules/
+android/local.properties
+*.keystore
+*.jks
+android/.gradle/
+android/app/build/
+android/build/
+android/captain-debug*
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/DerivedData/
+*.apk
+*.aab
+*.ipa
+*.dSYM.zip

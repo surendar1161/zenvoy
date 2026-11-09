@@ -10,10 +10,19 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "best-ai-proposal-generators",
+    tag: "Roundup",
+    title: "11 Best AI Proposal Generators in 2026",
+    excerpt: "Eleven DealPilot generators for the briefs freelancers actually get — design, web, SEO, video, consulting — each with its own generator URL.",
+    date: "November 9, 2026",
+    dateIso: "2026-11-09",
+    readTime: "8 min read",
+  },
+  {
     slug: "best-ai-proposal-writers",
     tag: "Roundup",
-    title: "9 Best AI Proposal Writers in 2026",
-    excerpt: "Looking for the best AI proposal writer? We compared 9 tools — DealPilot, ChatGPT, Jasper, Proposify, and more — so you can pick one and send a proposal tonight.",
+    title: "13 Best AI Proposal Writers in 2026",
+    excerpt: "Looking for the best AI proposal writer? We compared 13 tools — DealPilot, ChatGPT, Jasper, Proposify, Qwilr, Better Proposals, Hubflo, Piktochart, and more.",
     date: "November 4, 2026",
     dateIso: "2026-11-04",
     readTime: "11 min read",

@@ -44,6 +44,17 @@ function humanize(slug: string) {
 
 export function crumbsFromPath(pathname: string): Crumb[] {
   if (!pathname || pathname === "/") return [];
+  if (pathname === "/generate/library" || pathname.startsWith("/generate/proposal")) {
+    const items: Crumb[] = [
+      { name: "Home", path: "/" },
+      { name: "Generate", path: "/generate/library" },
+    ];
+    if (pathname === "/generate/library") return items;
+    items.push({ name: "Proposal", path: "/generate/proposal" });
+    const slug = pathname.split("/")[3];
+    if (slug) items.push({ name: humanize(slug), path: pathname });
+    return items;
+  }
   const parts = pathname.split("/").filter(Boolean);
   const items: Crumb[] = [{ name: "Home", path: "/" }];
   let acc = "";
