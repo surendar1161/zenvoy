@@ -3,24 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { getPlan } from "@/lib/plans";
 
 const PLANS = [
   {
     name: "Free",
-    monthlyPrice: 0, yearlyPrice: 0,
+    monthlyPrice: getPlan("free").monthlyPrice, yearlyPrice: getPlan("free").yearlyPrice,
     features: ["5 proposals/month", "2 contracts/month", "All 15 contract types", "19+ templates", "Brand kit", "Stripe payment links"],
     missing: ["E-signatures", "Analytics", "Client portals"],
   },
   {
     name: "Pro",
-    monthlyPrice: 12, yearlyPrice: 9,
+    monthlyPrice: getPlan("pro").monthlyPrice, yearlyPrice: getPlan("pro").yearlyPrice,
     popular: true,
     features: ["Unlimited proposals & contracts", "Digital e-signatures", "Proposal analytics", "Client portals", "Content library", "White-label branding", "Priority support"],
     missing: [],
   },
   {
     name: "Business",
-    monthlyPrice: 29, yearlyPrice: 22,
+    monthlyPrice: getPlan("business").monthlyPrice, yearlyPrice: getPlan("business").yearlyPrice,
     features: ["Everything in Pro", "5 team members", "API access", "Custom domain", "Dedicated onboarding"],
     missing: [],
   },

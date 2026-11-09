@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { CheckOutlined } from "@ant-design/icons";
 import { Reveal, useAnimatedNumber } from "@/components/site/motion";
+import { getPlan } from "@/lib/plans";
 
 const PLANS = [
-  { name: "Free", tag: "For trying it out", monthly: 0, yearly: 0,
+  { name: "Free", tag: "For trying it out", monthly: getPlan("free").monthlyPrice, yearly: getPlan("free").yearlyPrice,
     features: ["5 proposals / month", "2 contracts / month", "All 15 contract types", "19+ templates", "Brand kit & Stripe links"] },
-  { name: "Pro", tag: "For solo freelancers", monthly: 12, yearly: 9, popular: true,
+  { name: "Pro", tag: "For solo freelancers", monthly: getPlan("pro").monthlyPrice, yearly: getPlan("pro").yearlyPrice, popular: true,
     features: ["Unlimited proposals & contracts", "Digital e-signatures", "Proposal analytics", "Client portals", "White-label, no DealPilot branding", "Priority support"] },
-  { name: "Business", tag: "For small studios", monthly: 29, yearly: 22,
+  { name: "Business", tag: "For small studios", monthly: getPlan("business").monthlyPrice, yearly: getPlan("business").yearlyPrice,
     features: ["Everything in Pro", "5 team members", "Manager approvals", "Custom domain & API access", "Dedicated onboarding call"] },
 ];
 
