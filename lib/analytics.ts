@@ -7,7 +7,9 @@ type AnalyticsEvent =
   | "checkout_started"
   | "subscription_upgraded"
   | "preview_generated"
-  | "preview_cta_click";
+  | "preview_cta_click"
+  | "proposal_generated"
+  | "proposal_link_copied";
 
 export function trackEvent(event: AnalyticsEvent, properties?: Record<string, string | number | boolean>) {
   try {

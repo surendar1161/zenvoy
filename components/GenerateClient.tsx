@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Alert, Button, Card, Col, DatePicker, Divider, Form, Input, InputNumber,
@@ -34,6 +34,7 @@ import { MilestoneEditor } from "@/components/MilestoneBuilder";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
 import { clearHandoff, loadHandoff } from "@/lib/preview-handoff";
+import { trackEvent } from "@/lib/analytics";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -93,6 +94,7 @@ export default function GenerateClient() {
   const [showWizard, setShowWizard] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   const [jobPost, setJobPost] = useState("");
+  const fromPreview = useRef(false);
   const [parsingJob, setParsingJob] = useState(false);
 
   const depositAmount = Math.round(form.totalBudget * form.depositPercent / 100);
@@ -133,6 +135,7 @@ export default function GenerateClient() {
           projectDescription: f.projectDescription || handoff.brief,
         }));
         clearHandoff();
+        fromPreview.current = true;
         msgApi.info("We brought over the brief you wrote on the website. Check it, then generate.");
       }
     }
@@ -259,6 +262,7 @@ export default function GenerateClient() {
           msgApi.warning("Proposal generated but not saved: " + saveErr.message);
         } else {
           pid = saved!.id;
+          trackEvent("proposal_generated", { from_preview: fromPreview.current, from_template: !!activeTemplate });
           console.log("✅ Proposal saved:", pid);
         }
       } else {

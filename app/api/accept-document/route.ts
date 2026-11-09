@@ -1,3 +1,4 @@
+import { trackServer } from "@/lib/analytics-server";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { sendNotificationEmail } from "@/lib/email";
@@ -43,5 +44,6 @@ export async function POST(req: NextRequest) {
     }).catch(console.error);
   }
 
+  await trackServer("proposal_accepted", { type: String(documentType) });
   return NextResponse.json({ ok: true, acceptedAt: now });
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, Segmented } from "antd";
 import { EditOutlined, EyeOutlined } from "@ant-design/icons";
 import type { PricingTier, AddOn, Milestone } from "@/lib/types";
+import { trackEvent } from "@/lib/analytics";
 import type { BrandKit } from "@/lib/brand";
 import { PricingTiersView } from "@/components/PricingTiersEditor";
 import { AddOnsView } from "@/components/AddOnsPanel";
@@ -320,7 +321,7 @@ export default function ProposalDisplay({
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <button
-              onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/proposal/${proposalId}`); alert("Link copied!"); }}
+              onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/proposal/${proposalId}`); trackEvent("proposal_link_copied"); alert("Link copied!"); }}
               className="btn-secondary text-xs py-1.5 px-3"
             >📋 Copy Link</button>
             <a href={`/proposal/${proposalId}`} target="_blank" rel="noopener noreferrer"

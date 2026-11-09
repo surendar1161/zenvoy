@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { sendNotificationEmail } from "@/lib/email";
 import { executeAutomations } from "@/lib/automations/engine";
+import { trackServer } from "@/lib/analytics-server";
 
 export async function POST(req: NextRequest) {
   const { documentId, documentType, sectionTimes, durationSec } = await req.json();
@@ -20,6 +21,8 @@ export async function POST(req: NextRequest) {
     section_times: sectionTimes ?? {},
     duration_sec: durationSec ?? 0,
   });
+
+  await trackServer("document_viewed", { type: String(documentType) });
 
   // Update view_count and last_viewed_at on the document
   const table = documentType === "proposal" ? "proposals" : "contracts";

@@ -1,3 +1,4 @@
+import { trackServer } from "@/lib/analytics-server";
 import { createClient as createSupabase } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { sendNotificationEmail } from "@/lib/email";
@@ -80,5 +81,6 @@ export async function POST(req: NextRequest) {
     }).catch(console.error);
   }
 
+  await trackServer("document_signed", { type: String(documentType) });
   return NextResponse.json({ ok: true, signedAt: now });
 }
