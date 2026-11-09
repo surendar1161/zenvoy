@@ -33,6 +33,7 @@ import { AddOnsEditor } from "@/components/AddOnsPanel";
 import { MilestoneEditor } from "@/components/MilestoneBuilder";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
+import { clearHandoff, loadHandoff } from "@/lib/preview-handoff";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -120,6 +121,21 @@ export default function GenerateClient() {
     }
     if (wizard === "1") setShowWizard(true);
     if (client) setForm(f => ({ ...f, clientName: client, clientCompany: company ?? "" }));
+
+    // Brief typed into the public generator preview before sign-up. Only used
+    // when nothing else (template, wizard, client, extension) pre-filled the form.
+    if (!tplId && !ftype && !wizard && !client && !searchParams.get("ext_data")) {
+      const handoff = loadHandoff();
+      if (handoff) {
+        setForm(f => ({
+          ...f,
+          projectType: f.projectType || handoff.projectType,
+          projectDescription: f.projectDescription || handoff.brief,
+        }));
+        clearHandoff();
+        msgApi.info("We brought over the brief you wrote on the website. Check it, then generate.");
+      }
+    }
 
     // Chrome extension pre-fill — ?ext_data=<base64-encoded-JSON>
     const extData = searchParams.get("ext_data");

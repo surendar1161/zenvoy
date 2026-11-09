@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { BRIEF_MAX, BRIEF_MIN } from "@/lib/public-preview";
+import { saveHandoff } from "@/lib/preview-handoff";
 import type { ProposalTool } from "@/lib/proposal-catalog";
 
 export default function PreviewGenerator({ tool }: { tool: ProposalTool }) {
@@ -32,6 +33,7 @@ export default function PreviewGenerator({ tool }: { tool: ProposalTool }) {
         return;
       }
       setPreview(data.preview);
+      saveHandoff({ slug: tool.slug, projectType: tool.name, brief: brief.trim() });
       trackEvent("preview_generated", { generator: tool.slug });
     } catch {
       setError("Network problem. Please try again.");
