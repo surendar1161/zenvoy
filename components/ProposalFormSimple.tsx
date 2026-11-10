@@ -16,6 +16,7 @@ import type { User } from "@supabase/supabase-js";
 import ClientSelect from "@/components/ClientSelect";
 import type { ClientOption } from "@/components/ClientSelect";
 import dayjs, { Dayjs } from "dayjs";
+import { clearHandoff, loadHandoff, matchProjectType } from "@/lib/preview-handoff";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
@@ -94,6 +95,24 @@ export default function ProposalFormSimple({ onGenerate, loading }: ProposalForm
         // Invalid draft, ignore
       }
     }
+  }, [form, msgApi]);
+
+  // Brief typed into the public generator preview before sign-up. Fills only
+  // empty fields, so a restored draft or anything already typed is never overwritten.
+  useEffect(() => {
+    const handoff = loadHandoff();
+    if (!handoff) return;
+    const patch: Partial<SimpleFormData> = {};
+    if (!form.getFieldValue("projectDescription")) patch.projectDescription = handoff.brief;
+    if (!form.getFieldValue("projectType")) {
+      const type = matchProjectType(`${handoff.slug} ${handoff.projectType}`, PROJECT_TYPES);
+      if (type) patch.projectType = type;
+    }
+    if (Object.keys(patch).length > 0) {
+      form.setFieldsValue(patch);
+      msgApi.info("We brought over the brief you wrote on the website. Check it, then generate.");
+    }
+    clearHandoff();
   }, [form, msgApi]);
 
   // Auto-save to localStorage

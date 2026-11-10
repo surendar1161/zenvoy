@@ -76,3 +76,27 @@ export function clearHandoff(store: Store | null = defaultStore()): void {
     /* ignore */
   }
 }
+
+const TYPE_KEYWORDS: Array<[RegExp, string]> = [
+  [/mobile|app\b/i, "Mobile App Development"],
+  [/ui\/?ux|ui-ux|product design/i, "UI/UX Design"],
+  [/brand|logo|graphic/i, "Branding & Identity"],
+  [/web|wordpress|shopify|e-?commerce|landing|saas|site/i, "Web Design & Development"],
+  [/seo|content/i, "SEO & Content Marketing"],
+  [/social|paid-?ads|ads\b/i, "Social Media Management"],
+  [/copy/i, "Copywriting"],
+  [/video/i, "Video Production"],
+  [/data|analytic/i, "Data Analysis"],
+  [/consult/i, "Consulting"],
+];
+
+/**
+ * Maps a generator name or slug to one of the Quick Start form's fixed project
+ * types. Returns null when nothing fits, so the user picks it themselves.
+ */
+export function matchProjectType(hint: string, options: readonly string[]): string | null {
+  for (const [pattern, type] of TYPE_KEYWORDS) {
+    if (pattern.test(hint) && options.includes(type)) return type;
+  }
+  return null;
+}

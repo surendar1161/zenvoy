@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HANDOFF_KEY, HANDOFF_TTL_MS, clearHandoff, loadHandoff, saveHandoff } from "../lib/preview-handoff";
+import { HANDOFF_KEY, HANDOFF_TTL_MS, clearHandoff, loadHandoff, matchProjectType, saveHandoff } from "../lib/preview-handoff";
 
 function memoryStore() {
   const m = new Map<string, string>();
@@ -43,5 +43,25 @@ describe("preview handoff", () => {
     expect(loadHandoff(s)).toBeNull();
     expect(() => saveHandoff(sample, null)).not.toThrow();
     expect(loadHandoff(null)).toBeNull();
+  });
+});
+
+const TYPES = [
+  "Web Design & Development", "Mobile App Development", "Branding & Identity",
+  "SEO & Content Marketing", "Social Media Management", "Copywriting",
+  "Video Production", "UI/UX Design", "Data Analysis", "Consulting", "Other",
+] as const;
+
+describe("matchProjectType", () => {
+  it("maps generator names to the Quick Start dropdown options", () => {
+    expect(matchProjectType("web-design-proposal web design proposal", TYPES)).toBe("Web Design & Development");
+    expect(matchProjectType("logo-design-proposal logo design", TYPES)).toBe("Branding & Identity");
+    expect(matchProjectType("mobile-app-quote mobile app", TYPES)).toBe("Mobile App Development");
+    expect(matchProjectType("ui-ux-estimate UI/UX", TYPES)).toBe("UI/UX Design");
+    expect(matchProjectType("copywriting-proposal copywriting", TYPES)).toBe("Copywriting");
+  });
+  it("returns null when nothing fits or the option is missing", () => {
+    expect(matchProjectType("freelance-proposal freelance", TYPES)).toBeNull();
+    expect(matchProjectType("web-design", ["Consulting"])).toBeNull();
   });
 });
