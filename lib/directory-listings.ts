@@ -117,10 +117,13 @@ export const LISTING_COPY = {
 
 /**
  * Organization.sameAs — only URLs that are this product.
- * Do not add G2, Capterra, Product Hunt, YouTube, or Reddit until a listing
- * for dealpilot.co.in exists. The Product Hunt "Deal Pilot" page is a
- * different cold-email product. Launch Llama is a real listing of this site.
+ * Do not add G2, Capterra, YouTube, or Reddit until a listing for
+ * dealpilot.co.in exists. Product Hunt: /products/zenvoy lists dealpilot.co.in
+ * as its website (checked 2026-11-10; slug is the old name). Another Product Hunt
+ * "Deal Pilot" page is a different cold-email product: do not use that one.
+ * Launch Llama is a real listing of this site.
  */
 export const SAME_AS: string[] = [
   "https://tools.launchllama.co/products/deal-pilot",
+  "https://www.producthunt.com/products/zenvoy",
 ];

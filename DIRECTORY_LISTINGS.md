@@ -47,7 +47,7 @@ Prepare before submitting:
 | 10 | AlternativeTo | Not a fixed URL: per its FAQ (as summarised by a web search), sign up, then use "Suggest new application" in the top-right user menu. The old repo link returned 404. Its pages sit behind a Cloudflare security check, so I could not read them | Free review queue (one blog says a $5 priority option exists, unconfirmed) | You | Not started | | | |
 | 11 | Toolify | `toolify.ai/submit` blocked my fetch (403); open in browser | Not checked | You | Not started | | | |
 | 12 | Futurepedia | No public submit page found. The old repo link returned 404 and the homepage shows no submit or advertise link. Third-party reports (not the site itself) say the only option is a paid Verified Listing (about $497 at `futurepedia.io/enhanced`) and that the site now belongs to HubSpot | Paid per reports; unconfirmed | You, if you decide it is worth it | Skip for now | | | |
-| 13 | Product Hunt | `producthunt.com/posts/new` | Not checked | You, on a planned launch day | Not started | | | |
+| 13 | Product Hunt | Existing page: `producthunt.com/products/zenvoy` (name "Deal Pilot", website dealpilot.co.in, launched 2026-04-22, 2 points, no rank or badge when checked 2026-11-10). New launch page: `producthunt.com/posts/new` | Not checked | You; plan a launch day | Page exists; footer link and schema link added; fix the leftover "Zenvoy" wording on the page; plan a proper launch | 2026-04-22 | `https://www.producthunt.com/products/zenvoy` | Not checked |
 | 14 | Crunchbase | Not looked up | Not checked | You | Not started | | | |
 | 15 | Future Tools, Best of AI, ToolScout | Not looked up | Search results say free; ToolScout reviews take a week or more | You | Not started | | | |
 

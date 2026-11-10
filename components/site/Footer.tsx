@@ -28,6 +28,9 @@ export default function Footer() {
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-5 text-[12.5px] text-ink-300 sm:px-6">
           <span>© {new Date().getFullYear()} DealPilot. All rights reserved.</span>
+          <a href="https://www.producthunt.com/products/zenvoy" target="_blank" rel="noopener noreferrer" className="transition hover:text-brand-600">
+            DealPilot on Product Hunt
+          </a>
           <span>Built with Claude AI · Stripe · Supabase</span>
         </div>
       </div>
