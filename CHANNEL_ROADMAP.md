@@ -1,6 +1,6 @@
 # DealPilot — Channel Roadmap
 
-The "what, where, and in what order" view. Detail lives elsewhere: strategy and checklist in `MARKETING_PLAN.md`, weekly rhythm in `SOLO_FOUNDER_PLAN.md`, Reddit in `REDDIT_PLAN.md`.
+The "what, where, and in what order" view. Detail lives elsewhere: strategy and checklist in `MARKETING_PLAN.md`, weekly rhythm in `SOLO_FOUNDER_PLAN.md`. Reddit is handled manually by the owner and is not part of this roadmap.
 
 **How to read it:** phases are gated by evidence, not by dates. Move to the next phase when the gate is met, not because the calendar says so. No numeric targets are set here, because there is no traffic baseline yet. Fill the "baseline" cells after two weeks of data.
 
@@ -22,7 +22,6 @@ Control metric across all channels: **proposals sent to real clients per week.**
 | Channel | Action | Asset | Metric |
 |---|---|---|---|
 | Direct outreach | 10 personalised messages a week to freelancers (design and web first); offer a free proposal for one real lead in exchange for 15 min | Target list, message, call notes | Replies, calls, "no" reasons logged |
-| Reddit (helpful, no links at first) | Read rules for 3 subreddits; 3 to 5 genuine answers a week; disclose when mentioning the product | `REDDIT_PLAN.md` drafts | Replies received, mod actions |
 | SEO (already live) | Check indexing weekly; fix pages that are "crawled, not indexed" | ~220 generator pages, roundup, guides | Indexed pages, impressions (baseline) |
 | Own site | Add a 60-second demo to the home page | Demo video | Home to sign-up rate (baseline) |
 
@@ -54,7 +53,7 @@ Control metric across all channels: **proposals sent to real clients per week.**
 ## Phase 4: Compound
 
 - Refresh top pages every quarter; prune pages that are not indexed.
-- Reply to and update Reddit threads that AI engines cite (check with ChatGPT, Perplexity, Gemini, Google AI Overview separately; results vary by engine).
+- Check how ChatGPT, Perplexity, Gemini and Google AI Overview describe DealPilot (separately; results vary by engine) and correct outdated pages.
 - Template marketplace and integrations ideas go here, after the core loop works.
 
 ## Channel scorecard (fill in as data arrives)
@@ -62,7 +61,6 @@ Control metric across all channels: **proposals sent to real clients per week.**
 | Channel | Effort / week | Sign-ups (30d) | Activated (sent a proposal) | Keep / pause / stop |
 |---|---|---|---|---|
 | Direct outreach | | | | |
-| Reddit | | | | |
 | SEO pages | | | | |
 | Build in public | | | | |
 | Directories / reviews | | | | |
@@ -76,8 +74,8 @@ Rule: keep at most three active channels until two have shown activated users; p
 
 ## Tools on this machine, not yet set up
 
-Several marketing plugins were installed during this session (for SEO and ads data, content planning, email, ActiveCampaign, Shipstar, and a Reddit research tool). None are configured or signed in, and I have not verified what any of them can do for DealPilot. Treat them as options after Phase 1, not prerequisites. Reddit research needs your own Reddit app credentials first (see `REDDIT_PLAN.md`).
+Several marketing plugins were installed during this session (for SEO and ads data, content planning, email, ActiveCampaign and Shipstar). None are configured or signed in, and I have not verified what any of them can do for DealPilot. Treat them as options after Phase 1, not prerequisites.
 
 ## Do not
 
-Fake reviews or upvotes, alternate accounts, buy followers, automate posting on Reddit, launch before the funnel is measurable, or spread across more than three channels at once.
+Fake reviews or upvotes, alternate accounts, buy followers, automate posting on any social platform without approving each post, launch before the funnel is measurable, or spread across more than three channels at once.

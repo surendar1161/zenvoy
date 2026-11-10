@@ -31,7 +31,7 @@ Frameworks used: campaign-plan (marketing plugin), find-first-customers (founder
 - Targets (90 days): 150+ indexed URLs, 1,500 organic visits/month, 3% visit-to-signup = ~45 signups/month from SEO alone. Treat as estimates, not promises.
 
 ### B. Communities (zero cost, founder-led, do not automate)
-- Reddit: r/freelance, r/Entrepreneur, r/webdev, r/graphic_design. Answer "how do I price / write a proposal" questions with the real answer first; link the free generator only when it helps. Follow each subreddit's self-promotion rule.
+- Reddit: handled manually by the owner, outside this plan.
 - Indie Hackers, Hacker News "Show HN" (once the public generator works without login), Product Hunt launch (own listing for dealpilot.co.in — do not use the existing unrelated "Deal Pilot" page).
 - Facebook groups and Slack/Discord for freelancers and Upwork/Fiverr sellers.
 
@@ -111,6 +111,5 @@ Frameworks used: campaign-plan (marketing plugin), find-first-customers (founder
 - [ ] **Confirm `SUPABASE_SERVICE_ROLE_KEY` is set in Vercel** so the "Made with DealPilot" badge can read another user's plan. Test on a Free-plan proposal link.
 - [ ] **Fix `NEXT_PUBLIC_APP_URL` in Vercel** to `https://www.dealpilot.co.in` (build guard covers it, but the variable itself is still wrong).
 - [ ] **Confirm funnel events in Vercel Analytics:** `proposal_generated`, `proposal_link_copied`, `document_viewed`, `proposal_accepted`, `document_signed`, `preview_generated`, `preview_cta_click`.
-- [ ] Record a 60-second product demo for the home page and Reddit/YouTube.
+- [ ] Record a 60-second product demo for the home page and YouTube.
 - [ ] Create real G2 / Capterra / Product Hunt listings, then add them to `SAME_AS` in `lib/directory-listings.ts`.
-- [ ] Reddit programme: see `REDDIT_PLAN.md` (start with section 9).

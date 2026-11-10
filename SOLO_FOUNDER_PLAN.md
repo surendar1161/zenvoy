@@ -1,6 +1,6 @@
 # DealPilot — Solo-Founder Marketing Plan
 
-For one person with limited hours. It picks a few channels, does them every week, and cuts the rest. It builds on `MARKETING_PLAN.md` (strategy and checklist) and `REDDIT_PLAN.md` (Reddit detail); read those for the reasoning.
+For one person with limited hours. It picks a few channels, does them every week, and cuts the rest. It builds on `MARKETING_PLAN.md` (strategy and checklist); read it for the reasoning. Reddit is handled manually by the owner and is not part of this plan.
 
 **Assumption to change:** about 8 hours a week of marketing time, with the rest on product and support. If you have more or less, scale the weekly blocks, not the number of channels.
 
@@ -15,7 +15,7 @@ For one person with limited hours. It picks a few channels, does them every week
 - About 220 public generator pages, a roundup post, and 12 help guides, with schema markup (built this session; indexing takes time).
 - A no-login preview on every generator page that hands the brief to the dashboard after sign-up.
 - A "Made with DealPilot" badge on Free-plan proposals (needs the Supabase service-role key set in Vercel to appear).
-- Funnel events, a Reddit plan with drafts, and a checklist of open items.
+- Funnel events and a checklist of open items.
 
 So the job now is **distribution and learning**, not more features.
 
@@ -24,10 +24,9 @@ So the job now is **distribution and learning**, not more features.
 | Rank | Channel | Why it fits one person | Weekly time | Start |
 |---|---|---|---|---|
 | 1 | Direct outreach to 10 freelancers a week | Fastest feedback, no audience needed | 2.5 h | Week 1 |
-| 2 | Reddit, helpful answers first (see `REDDIT_PLAN.md`) | Free, where the questions are asked | 2 h | Week 1 (no links) |
-| 3 | SEO pages already live | Compounds without weekly effort | 1 h (check Search Console, request indexing) | Week 1 |
-| 4 | One public "build in public" post a week | Cheap, builds trust and backlinks | 1 h | Week 2 |
-| 5 | Directory listings and reviews | One-time work, lasting links | 1.5 h total in month 1 | Week 3 |
+| 2 | SEO pages already live | Compounds without weekly effort | 1 h (check Search Console, request indexing) | Week 1 |
+| 3 | One public "build in public" post a week | Cheap, builds trust and backlinks | 1 h | Week 2 |
+| 4 | Directory listings and reviews | One-time work, lasting links | 1.5 h total in month 1 | Week 3 |
 | Later | Paid ads, Product Hunt launch, partnerships | Needs a working funnel and some proof first | | After month 2 |
 
 Do not start channel 6 before channels 1 to 3 have run for four weeks.
@@ -38,7 +37,7 @@ Do not start channel 6 before channels 1 to 3 have run for four weeks.
 |---|---|---|
 | Mon (1 h) | Review | Check the one number, sign-ups by source, replies received. Pick this week's 10 outreach targets. |
 | Tue (1.5 h) | Outreach | Send 5 personal messages: reference their work, name the proposal problem, offer to build a proposal for one of their real leads for 15 minutes of feedback. |
-| Wed (1 h) | Reddit | 3 to 5 helpful answers. No links in the first weeks. |
+| Wed (1 h) | Replies and follow-ups | Answer replies to outreach, follow up once on quiet threads, and log the reasons for every "no". |
 | Thu (1.5 h) | Outreach + calls | Send 5 more messages. Do any feedback calls. |
 | Fri (1.5 h) | Content | One post: a lesson from a call, a teardown, or a pricing tip. Reuse it on LinkedIn or X. |
 | Fri (1.5 h) | Close the loop | Write down what you learned in a running notes file. Fix the one friction point that came up most. |
@@ -50,7 +49,7 @@ Outreach rules: personalise the first line, ask for a conversation rather than a
 **Week 1: foundation**
 - Confirm `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_APP_URL` in Vercel (items on the checklist).
 - Test the badge on a Free-plan proposal link, and the preview on one generator page, with a real brief.
-- Build a list of 40 target freelancers (design and web first). Read the rules of 3 subreddits.
+- Build a list of 40 target freelancers (design and web first).
 - Request indexing for the hub, the roundup and your 10 best generator pages in Search Console.
 
 **Week 2: first conversations**
@@ -75,7 +74,7 @@ Positioning for every channel: **"Paste the client's brief, get a proposal draft
 - Do not spread across more than three channels at once.
 - Do not buy followers, upvotes or reviews, and do not post under fake accounts.
 - Do not set revenue targets before you have a funnel baseline.
-- Do not skip disclosure on Reddit or in posts: say you built it.
+- Do not skip disclosure in posts: say you built it.
 
 ## 8. Decision rules
 
