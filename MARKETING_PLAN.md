@@ -136,11 +136,18 @@ Do the first item before the rest; it blocks most listings.
 Items already listed above are not repeated: push the commits, service-role key, app URL variable, analytics events, demo video, referral reward, refund guarantee, and the directory tasks.
 
 **A. Do first (they unblock the rest)**
-- [ ] **Test the funnel end to end on production** with a real brief: public preview on a generator page, sign-up, the brief appearing in the dashboard generator, then open a sent proposal as a client (check the "Made with DealPilot" badge on a Free-plan proposal).
+- [x] **Funnel test on production, run 2026-11-10** (a clean browser session, then a login to a Free-plan test account):
+  - Passed: public preview on `/generate/proposal/web-design-proposal` returned a real draft with a `[timeline]` placeholder; the brief was saved in the browser; sign-in worked; the client view of an existing proposal loads.
+  - **Failed: the brief did not appear in the dashboard.** `/generate` opens in Quick Start mode, and the hand-off code only ran in the advanced form. Fixed in commit `d689185` (local until pushed).
+  - **Failed: no "Made with DealPilot" badge** on a proposal owned by a Free-plan account (`/api/proposal-badge` returned `showBadge:false`; the subscription page shows "Free Plan"). Most likely `SUPABASE_SERVICE_ROLE_KEY` is not set in Vercel, so the route fails closed. Not proven; the row-level policies could also be the cause.
+  - Not tested: generating a new proposal from the dashboard (spends a quota slot), and the analytics events (they need Vercel Analytics).
+- [ ] **Push `d689185`, wait for the deploy, then re-run the prefill test** (preview a brief, sign in, open `/generate`, see the brief and the notice).
+- [ ] **Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel, redeploy, then re-test the badge** on a Free-plan proposal link.
+- [ ] **Change the test account's password**, since it was typed into a chat session. Do not reuse it elsewhere.
 
 **B. Product and site fixes**
 - [ ] **Host a logo and favicon.** `/icon.png` and `/favicon.ico` return 404 and the schema logo URL points at the missing file; directories also ask for a logo. (Code change; pairs with the directory code fixes above.)
-- [ ] **Confirm which AI model runs in production** (`lib/ai-client.ts` uses OpenAI first and Claude as fallback), then fix the "generated with Claude" wording on the home page, directory copy in `lib/directory-listings.ts`, and the BetaList draft if it is wrong.
+- [ ] **Confirm which AI model runs in production** (`lib/ai-client.ts` uses OpenAI first and Claude as fallback), then fix the "generated with Claude" wording on the home page, directory copy in `lib/directory-listings.ts`, and the BetaList draft if it is wrong. The site footer also says "Built with Claude AI · Stripe · Supabase" (seen on a generator page 2026-11-10).
 - [ ] **Source or remove unsourced numbers** on the home page: "Loved by 1,200+ freelancers", the 4.9 rating, and "Generation time is the average of 1,200 real proposals".
 - [ ] **Label the close-rate stat as industry data.** The footnote attributes it to Proposify's 2025 data, not DealPilot's results.
 - [ ] **Compliance wording:** "eIDAS & ESIGN compliant" is stated flatly while the FAQ recommends a lawyer review. Support it with a compliance page or soften it.
