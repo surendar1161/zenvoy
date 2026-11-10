@@ -112,4 +112,21 @@ Frameworks used: campaign-plan (marketing plugin), find-first-customers (founder
 - [ ] **Fix `NEXT_PUBLIC_APP_URL` in Vercel** to `https://www.dealpilot.co.in` (build guard covers it, but the variable itself is still wrong).
 - [ ] **Confirm funnel events in Vercel Analytics:** `proposal_generated`, `proposal_link_copied`, `document_viewed`, `proposal_accepted`, `document_signed`, `preview_generated`, `preview_cta_click`.
 - [ ] Record a 60-second product demo for the home page and YouTube.
-- [ ] Create real G2 / Capterra / Product Hunt listings, then add them to `SAME_AS` in `lib/directory-listings.ts`.
+- [ ] **Push the local commits** (the AI assistant cannot run `git push` here): in the prompt type `! git push origin main`, then check `git status -sb` shows no "ahead".
+
+### Directory listings (details, copy and status table: `DIRECTORY_LISTINGS.md`)
+
+Do the first item before the rest; it blocks most listings.
+
+- [ ] **Prepare assets:** square logo PNG (the site hosts none), 2 to 3 screenshots (generated proposal, client view with pricing tiers, signature screen), a company-domain email such as you@dealpilot.co.in.
+- [ ] **BetaList: finish the draft before 2026-11-17 02:20 UTC.** Open the claim link (shared in chat only; never save it in a file), confirm email, upload an icon and a screenshot, check the plan prices, then decide whether to pay. It is a paid listing; skip it if the price is not worth the backlink.
+- [ ] **SaaSHub:** submit by hand at `https://www.saashub.com/services/submit` (the site asks AI agents not to submit). Add categories and competitors (Bonsai, HoneyBook, Proposify, PandaDoc, Better Proposals), verify with the company email.
+- [ ] **G2** at `https://www.g2.com/products/new` (bot check blocks automated browsers; do it in your own browser). Then check whether the listing also appears on **Capterra, GetApp and Software Advice**; if not, use each one's vendor page.
+- [ ] **Uneed:** submit by hand at `https://www.uneed.best/submit`, free waiting line. Do not ask friends for upvotes or buy any.
+- [ ] **AlternativeTo:** sign up, then "Suggest new application" in the user menu; read `alternativeto.net/faq` first (account-age and queue rules are unconfirmed).
+- [ ] **Look up and submit the rest:** Toolify, Future Tools, Best of AI, ToolScout, Crunchbase, SourceForge. Check each site's current terms and cost before submitting.
+- [ ] **Decide on paid options** (owner decision, free routes first): There's An AI For That ($49 or $437), Futurepedia (about $497, reported by third parties), BetaList plan.
+- [ ] **Product Hunt:** plan one launch day when you can answer comments for a full day; not a drive-by submit.
+- [ ] **After each listing goes live:** record the live URL and date in `DIRECTORY_LISTINGS.md`, view the page source to see whether the link has `rel="nofollow"`, `ugc` or `sponsored`, and fix any wrong details.
+- [ ] **Add real listing URLs to `SAME_AS`** in `lib/directory-listings.ts` (small code change, only for listings that exist).
+- [ ] **Code fixes for later:** host a logo/favicon (the schema logo URL `/icon.png` is 404) and correct the outdated directory URLs in `lib/directory-listings.ts` and `scripts/open-directory-listings.mjs` (SaaSHub `/services/submit`; AlternativeTo and Futurepedia links are broken).
