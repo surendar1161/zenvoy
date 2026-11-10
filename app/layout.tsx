@@ -5,6 +5,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { organizationJsonLd, softwareApplicationJsonLd } from "@/lib/json-ld";
 import { SAME_AS } from "@/lib/directory-listings";
+import { GoogleTagManagerNoscript, GoogleTagManagerScript } from "@/components/seo/GoogleTagManager";
 
 // Brand type system: Plus Jakarta Sans for display, Inter for UI/body.
 const fontDisplay = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700", "800"], display: "swap" });
@@ -76,7 +77,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <GoogleTagManagerNoscript />
         <AntdRegistry>{children}</AntdRegistry>
+        <GoogleTagManagerScript />
         <Analytics />
       </body>
     </html>

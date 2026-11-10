@@ -17,4 +17,12 @@ export function trackEvent(event: AnalyticsEvent, properties?: Record<string, st
   } catch {
     // Analytics should never block user flows
   }
+  try {
+    // Lets Google Tag Manager trigger conversions (for example a sign-up) from the same events.
+    const w = window as unknown as { dataLayer?: Array<Record<string, unknown>> };
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push({ event, ...properties });
+  } catch {
+    // Not in a browser, or blocked: ignore
+  }
 }

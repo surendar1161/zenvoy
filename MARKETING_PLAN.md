@@ -165,3 +165,10 @@ Items already listed above are not repeated: push the commits, service-role key,
 **D. Later**
 - [ ] **Guided first run for new sign-ups:** start at "paste a brief" with a sample brief pre-filled, not an empty dashboard.
 - [ ] **Optional reviews not yet done:** app security, performance, signed-in dashboard, and email deliverability.
+
+### Google Tag Manager and ads (added 2026-11-10)
+
+- [ ] **Push and deploy the Google Tag Manager install**, then check Tag Assistant / GTM preview mode shows container `GTM-PW6H8RDZ` firing on `https://www.dealpilot.co.in`. (Code added in `components/seo/GoogleTagManager.tsx`, loaded from `app/layout.tsx`; it does not load in development.)
+- [ ] **In the Google Tag Manager dashboard,** create a Custom Event trigger for the `signup_email` and `signup_google` events (the site now pushes them into the dataLayer), then a Google Ads conversion tag on that trigger. Link the Google Ads account to the container.
+- [ ] **Cookie consent for visitors in regions that require it** (for example the EU/UK). The tag currently loads for everyone with no consent banner. Decide whether to add one, or restrict the tag by region, before running ads there. This needs a legal read; I have not checked requirements.
+- [ ] **Link the Google Ads account to AdsAgent** at `https://google.adsagent.md/oauth/authorize`, then ask for the read-only account, billing and keyword-estimate checks before approving any campaign or daily cap.
