@@ -130,3 +130,31 @@ Do the first item before the rest; it blocks most listings.
 - [ ] **After each listing goes live:** record the live URL and date in `DIRECTORY_LISTINGS.md`, view the page source to see whether the link has `rel="nofollow"`, `ugc` or `sponsored`, and fix any wrong details.
 - [ ] **Add real listing URLs to `SAME_AS`** in `lib/directory-listings.ts` (small code change, only for listings that exist).
 - [ ] **Code fixes for later:** host a logo/favicon (the schema logo URL `/icon.png` is 404) and correct the outdated directory URLs in `lib/directory-listings.ts` and `scripts/open-directory-listings.mjs` (SaaSHub `/services/submit`; AlternativeTo and Futurepedia links are broken).
+
+### Product and growth to-dos (added 2026-11-10)
+
+Items already listed above are not repeated: push the commits, service-role key, app URL variable, analytics events, demo video, referral reward, refund guarantee, and the directory tasks.
+
+**A. Do first (they unblock the rest)**
+- [ ] **Test the funnel end to end on production** with a real brief: public preview on a generator page, sign-up, the brief appearing in the dashboard generator, then open a sent proposal as a client (check the "Made with DealPilot" badge on a Free-plan proposal).
+
+**B. Product and site fixes**
+- [ ] **Host a logo and favicon.** `/icon.png` and `/favicon.ico` return 404 and the schema logo URL points at the missing file; directories also ask for a logo. (Code change; pairs with the directory code fixes above.)
+- [ ] **Confirm which AI model runs in production** (`lib/ai-client.ts` uses OpenAI first and Claude as fallback), then fix the "generated with Claude" wording on the home page, directory copy in `lib/directory-listings.ts`, and the BetaList draft if it is wrong.
+- [ ] **Source or remove unsourced numbers** on the home page: "Loved by 1,200+ freelancers", the 4.9 rating, and "Generation time is the average of 1,200 real proposals".
+- [ ] **Label the close-rate stat as industry data.** The footnote attributes it to Proposify's 2025 data, not DealPilot's results.
+- [ ] **Compliance wording:** "eIDAS & ESIGN compliant" is stated flatly while the FAQ recommends a lawyer review. Support it with a compliance page or soften it.
+- [ ] **Make the headline say what the product does.** "Your AI envoy for every client, every deal" does not; the page title says "AI Proposal Software for Freelancers".
+- [ ] **Replace the placeholder-looking hero mockup** ("Proposal for", "$0") with a real example, and add a real screenshot or video behind "See it in action".
+- [ ] **Re-check the pricing page "Contact sales" button** (it linked to the Business sign-up on an older deploy) and the Enterprise mention.
+- [ ] **Source the "60 seconds" claim:** time a real brief-to-draft run and use the measured number.
+- [ ] **Resource pack copy:** the heading said "5 templates" but listed 4 on an older deploy; re-check.
+
+**C. Growth**
+- [ ] **Send the first 10 outreach messages** and fill in the pipeline table (`FIRST_CUSTOMERS_PLAYBOOK.md`, section 8).
+- [ ] **Test the ICP and positioning in your first 10 conversations**, then update `POSITIONING.md` (sections 2 and 4) and clear its `[MISSING]` list.
+- [ ] **LaunchRecord (low priority, optional):** its "Add Your Product" button leads to a free account for an audit tool; no listing or backlink terms are stated. If tried, use Google sign-in with a business email, read its terms and privacy page first, and do not pay.
+
+**D. Later**
+- [ ] **Guided first run for new sign-ups:** start at "paste a brief" with a sample brief pre-filled, not an empty dashboard.
+- [ ] **Optional reviews not yet done:** app security, performance, signed-in dashboard, and email deliverability.
