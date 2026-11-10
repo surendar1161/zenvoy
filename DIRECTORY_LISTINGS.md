@@ -44,9 +44,9 @@ Prepare before submitting:
 | 7 | GetApp | Probably via G2 (unverified) | Not checked | You | Not started | | | |
 | 8 | Software Advice | Probably via G2 (unverified) | Not checked | You | Not started | | | |
 | 9 | There's An AI For That | `theresanaiforthat.com/launch/` | **$49** one-off, or **$437** "Maximum exposure"; free route via a monthly X thread where one tool is picked | You | Not started; no package selected | | | |
-| 10 | AlternativeTo | Repo link `alternativeto.net/manage/add-item/` returned 404; find the current page | Not checked | You | Not started | | | |
+| 10 | AlternativeTo | Not a fixed URL: per its FAQ (as summarised by a web search), sign up, then use "Suggest new application" in the top-right user menu. The old repo link returned 404. Its pages sit behind a Cloudflare security check, so I could not read them | Free review queue (one blog says a $5 priority option exists, unconfirmed) | You | Not started | | | |
 | 11 | Toolify | `toolify.ai/submit` blocked my fetch (403); open in browser | Not checked | You | Not started | | | |
-| 12 | Futurepedia | Repo link `futurepedia.io/submit-tool` returned 404; find the current page | Not checked | You | Not started | | | |
+| 12 | Futurepedia | No public submit page found. The old repo link returned 404 and the homepage shows no submit or advertise link. Third-party reports (not the site itself) say the only option is a paid Verified Listing (about $497 at `futurepedia.io/enhanced`) and that the site now belongs to HubSpot | Paid per reports; unconfirmed | You, if you decide it is worth it | Skip for now | | | |
 | 13 | Product Hunt | `producthunt.com/posts/new` | Not checked | You, on a planned launch day | Not started | | | |
 | 14 | Crunchbase | Not looked up | Not checked | You | Not started | | | |
 | 15 | Future Tools, Best of AI, ToolScout | Not looked up | Search results say free; ToolScout reviews take a week or more | You | Not started | | | |
@@ -63,6 +63,10 @@ Skip for now: Fazier and Startup Fame (reported to require a backlink or badge o
 
 **G2 / Capterra / GetApp / Software Advice.** Capterra's vendor page says "powered by G2 Digital Markets" and sends vendors to `g2.com/products/new`. That page showed a DataDome "Verification Required" challenge to the automated browser. Do it in your own browser. Expect account creation, a category choice and possibly verification. Check each site's current terms.
 
+**AlternativeTo.** Its pages (including the FAQ) showed a Cloudflare "Performing security verification" check to the automated browser, so I stopped and did not attempt to pass it. From a web search summarising its FAQ: add an app by signing up, then "Suggest new application" in the user menu; it does not accept unreleased, closed-beta or invite-only apps. Blogs add a 7-day account-age rule and a $5 priority fee and say the free queue is long; none of that is confirmed. Check `alternativeto.net/faq` yourself.
+
+**Futurepedia.** Homepage and `/enhanced` show a HubSpot cookie banner; the homepage has no submit link. Recent third-party write-ups say there is no free or public form, only a paid Verified Enhanced Listing (about $497) and possibly a sold-out basic tier. Unconfirmed from Futurepedia itself; contact them before paying anything.
+
 **There's An AI For That.** Paid listing: $49 or $437 (pre-selected). Monthly X thread picks one tool for free. 1 to 2 days to process; full automatic refund if not published. The PPC bonus footnote says the tool must not appear on other platforms before launching there, so you probably would not qualify if you list elsewhere first.
 
 ## 4. After each listing goes live
@@ -77,7 +81,7 @@ Skip for now: Fazier and Startup Fame (reported to require a backlink or badge o
 ## 5. Known issues to fix later (code changes, not done)
 
 - The site has no hosted logo or favicon; the Organization schema's logo URL (`/icon.png`) is 404.
-- `lib/directory-listings.ts` and `scripts/open-directory-listings.mjs` point at outdated submit URLs for SaaSHub (`/submit`), AlternativeTo and Futurepedia.
+- `lib/directory-listings.ts` and `scripts/open-directory-listings.mjs` point at outdated submit URLs: SaaSHub (`/submit` should be `/services/submit`), AlternativeTo (`/manage/add-item/` returns 404) and Futurepedia (`/submit-tool` returns 404, no public form found).
 
 ## 6. Rules for this tracker
 
