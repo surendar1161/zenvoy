@@ -7,6 +7,9 @@ import { PROPOSAL_TOOLS } from "@/lib/proposal-catalog";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 const APP_NAME = "DealPilot";
 
+/** Page-level openGraph/twitter objects replace the file-based image, so reference it explicitly. */
+const OG_IMAGE = { url: "/opengraph-image", width: 1200, height: 630, alt: `${APP_NAME}: AI proposal software for freelancers` };
+
 /** Public profiles (G2, Capterra, Product Hunt, socials). Fill after each listing is live. */
 export { SAME_AS };
 
@@ -21,13 +24,13 @@ export type SeoPage = {
 
 export const SEO_PAGES: SeoPage[] = [
   // Core
-  { path: "/", title: "AI Proposal Software for Freelancers", description: "Generate professional freelance proposals in seconds with Claude AI. E-signatures, Stripe payments, client portals, and contracts. Free to start.", keywords: ["freelance proposal software", "AI proposal generator"], changeFrequency: "weekly", priority: 1.0 },
+  { path: "/", title: "AI Proposal Software for Freelancers", description: "Generate professional freelance proposals with AI. E-signatures, Stripe payments, client portals, and contracts. Free to start.", keywords: ["freelance proposal software", "AI proposal generator"], changeFrequency: "weekly", priority: 1.0 },
   { path: "/pricing", title: "Pricing — Free, Pro & Business Plans", description: "Simple pricing for freelancers. Free plan with 5 proposals/month. Pro from $12/mo. Business from $29/mo. No per-user fees.", changeFrequency: "monthly", priority: 0.9 },
   { path: "/sign-up", title: "Sign Up Free", description: "Create your free DealPilot account. Generate AI proposals, contracts, and payment links in minutes. No credit card required.", changeFrequency: "monthly", priority: 0.7 },
   { path: "/sign-in", title: "Sign In", description: "Sign in to your DealPilot account to manage proposals, contracts, clients, and invoices.", changeFrequency: "monthly", priority: 0.4 },
 
   // Product landing pages
-  { path: "/ai-proposal-generator", title: "AI Proposal Generator for Freelancers", description: "Generate complete freelance proposals with Claude AI in 60 seconds. Paste a job post, pick a tone, and send a polished proposal.", keywords: ["AI proposal generator", "automated proposal writing"], changeFrequency: "monthly", priority: 0.9 },
+  { path: "/ai-proposal-generator", title: "AI Proposal Generator for Freelancers", description: "Generate complete freelance proposals with AI. Paste a job post, pick a tone, and send a polished proposal.", keywords: ["AI proposal generator", "automated proposal writing"], changeFrequency: "monthly", priority: 0.9 },
   { path: "/free-proposal-maker", title: "Free Proposal Maker", description: "Create professional freelance proposals for free. 5 proposals per month, templates, AI generation, and Stripe payment links.", changeFrequency: "monthly", priority: 0.85 },
   { path: "/proposal-software-for-freelancers", title: "Proposal Software for Freelancers", description: "All-in-one proposal software built for solo freelancers — AI generation, e-signatures, invoicing, and client portals.", changeFrequency: "monthly", priority: 0.9 },
   { path: "/proposal-templates", title: "Freelance Proposal Templates", description: "19+ industry proposal templates for designers, developers, consultants, and agencies. Customize with AI.", changeFrequency: "monthly", priority: 0.8 },
@@ -103,17 +106,21 @@ export function getPageMetadata(path: string): Metadata {
       title: `${page.title} | ${APP_NAME}`,
       description: page.description,
       siteName: APP_NAME,
+      images: [OG_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: `${page.title} | ${APP_NAME}`,
       description: page.description,
+      images: [OG_IMAGE.url],
     },
   };
 }
 
+/** Utility pages that should not be indexed or listed in the sitemap. */
+const NOINDEX_PATHS = new Set(["/sign-in", "/sign-up"]);
+
 export function getSitemapEntries() {
-  const now = new Date();
   const pages = [
     ...SEO_PAGES,
     ...PROPOSAL_TOOLS.map((tool) => ({
@@ -124,9 +131,10 @@ export function getSitemapEntries() {
       priority: 0.64,
     })),
   ];
-  return pages.map((page) => ({
+  // lastModified is omitted on purpose: pages have no real modified dates, and stamping every URL
+  // with the generation time teaches search engines to ignore the field.
+  return pages.filter((page) => !NOINDEX_PATHS.has(page.path)).map((page) => ({
     url: `${APP_URL}${page.path === "/" ? "" : page.path}`,
-    lastModified: now,
     changeFrequency: page.changeFrequency ?? "monthly",
     priority: page.priority ?? 0.5,
   }));

@@ -132,7 +132,7 @@ export function organizationJsonLd(sameAs: string[] = []) {
     "@type": "Organization",
     name: APP_NAME,
     url: APP_URL,
-    logo: `${APP_URL}/icon.png`,
+    logo: `${APP_URL}/logo.png`,
     ...(sameAs.length ? { sameAs } : {}),
   };
 }
@@ -146,7 +146,7 @@ export function softwareApplicationJsonLd() {
     operatingSystem: "Web",
     url: APP_URL,
     description:
-      "Generate professional freelance proposals in seconds with Claude AI. Includes e-signatures, Stripe payment links, client portals, AI contracts, milestone billing, and analytics. Free to start.",
+      "Generate professional freelance proposals with AI. Includes e-signatures, Stripe payment links, client portals, AI contracts, milestone billing, and analytics. Free to start.",
     offers: [
       { "@type": "Offer", price: "0", priceCurrency: "USD", name: "Free Plan" },
       { "@type": "Offer", price: "12", priceCurrency: "USD", name: "Pro Plan", billingIncrement: "P1M" },

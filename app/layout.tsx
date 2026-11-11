@@ -15,7 +15,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 const APP_NAME = "DealPilot";
 const TAGLINE = "Your AI Co-Pilot for Closing Client Deals";
 const DESCRIPTION =
-  "Generate professional freelance proposals in seconds with Claude AI. Includes e-signatures, Stripe payment links, client portals, AI contracts, milestone billing, and analytics. Free to start.";
+  "Generate professional freelance proposals with AI. Includes e-signatures, Stripe payment links, client portals, AI contracts, milestone billing, and analytics. Free to start.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -47,12 +47,14 @@ export const metadata: Metadata = {
     siteName: APP_NAME,
     title: `${APP_NAME} — ${TAGLINE}`,
     description: DESCRIPTION,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${APP_NAME}: AI proposal software for freelancers` }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${APP_NAME} — ${TAGLINE}`,
     description: DESCRIPTION,
     creator: "@dealpilot",
+    images: ["/opengraph-image"],
   },
   alternates: { canonical: APP_URL },
   verification: {
