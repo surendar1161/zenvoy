@@ -3,8 +3,8 @@ import Logo from "./Logo";
 
 const COLS = [
   { h: "Product", l: [["AI proposals", "/ai-proposal-generator"], ["Contracts", "/features/contracts"], ["E-signatures", "/features/e-signatures"], ["Invoicing", "/features/invoicing"], ["Client portal", "/features/client-portal"]] },
-  { h: "For", l: [["Designers", "/for/designers"], ["Web developers", "/for/web-developers"], ["Copywriters", "/for/copywriters"], ["Consultants", "/for/consultants"], ["Agencies", "/for/marketing-agencies"]] },
-  { h: "Compare", l: [["vs Bonsai", "/alternative/bonsai"], ["vs HoneyBook", "/alternative/honeybook"], ["vs PandaDoc", "/alternative/pandadoc"], ["vs Proposify", "/alternative/proposify"]] },
+  { h: "For", l: [["Designers", "/for/designers"], ["Web developers", "/for/web-developers"], ["Copywriters", "/for/copywriters"], ["Consultants", "/for/consultants"], ["Agencies", "/for/marketing-agencies"], ["Small agencies", "/for/small-agencies"]] },
+  { h: "Compare", l: [["vs Bonsai", "/alternative/bonsai"], ["vs HoneyBook", "/alternative/honeybook"], ["vs PandaDoc", "/alternative/pandadoc"], ["vs Proposify", "/alternative/proposify"], ["vs Rocketlane", "/alternative/rocketlane"]] },
   { h: "Resources", l: [["Blog", "/blog"], ["Proposal generators", "/generate/proposal"], ["11 best generators", "/blog/best-ai-proposal-generators"], ["Guides", "/guides"], ["Pricing", "/pricing"]] },
 ];
 

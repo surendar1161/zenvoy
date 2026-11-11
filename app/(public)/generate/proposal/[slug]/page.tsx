@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProposalToolPage from "@/components/marketing/ProposalToolPage";
-import { PROPOSAL_TOOLS, getProposalTool } from "@/lib/proposal-catalog";
+import { PROPOSAL_TOOLS, getProposalTool, isIndexableProposalTool } from "@/lib/proposal-catalog";
 import { OG_IMAGE } from "@/lib/seo";
 
 type Params = { slug: string };
@@ -17,6 +17,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
     title: tool.seoTitle,
     description: tool.seoDescription,
     alternates: { canonical: tool.path },
+    robots: isIndexableProposalTool(tool) ? undefined : { index: false, follow: true },
     openGraph: {
       type: "website",
       url: tool.path,

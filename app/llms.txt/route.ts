@@ -23,6 +23,7 @@ export async function GET() {
 - 11 best AI proposal generators: ${APP_URL}/blog/best-ai-proposal-generators
 - Graphic design proposal generator: ${APP_URL}/ai-generators/graphic-design-proposal
 - Free Proposal Maker: ${APP_URL}/free-proposal-maker
+- For small agencies: ${APP_URL}/for/small-agencies
 - Proposal Software Comparison: ${APP_URL}/compare/proposal-software
 - Best AI proposal writers (2026): ${APP_URL}/blog/best-ai-proposal-writers
 - Guides: ${APP_URL}/guides
@@ -34,6 +35,7 @@ export async function GET() {
 - PandaDoc Alternative: ${APP_URL}/alternative/pandadoc
 - HoneyBook Alternative: ${APP_URL}/alternative/honeybook
 - Bonsai Alternative: ${APP_URL}/alternative/bonsai
+- Rocketlane Alternative (for small teams): ${APP_URL}/alternative/rocketlane
 
 ## Features
 

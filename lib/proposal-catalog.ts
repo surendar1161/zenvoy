@@ -159,6 +159,20 @@ export const PROPOSAL_TOOLS: ProposalTool[] = PROPOSAL_NICHES.flatMap((niche) =>
   FORMATS.map((format) => buildTool(niche, format)),
 );
 
+/**
+ * Formats that search engines may index. The quote, estimate and retainer pages of one niche share
+ * the same checklist and differ only by a few words, so they are near-duplicates of the proposal page.
+ * Only the proposal page per niche is indexed and listed in the sitemap; the others stay reachable
+ * (noindex, follow). Add a format id here once it has content of its own, or after Search Console
+ * shows the variants are being indexed and getting impressions.
+ */
+export const INDEXED_PROPOSAL_FORMATS: ReadonlyArray<ProposalFormat["id"]> = ["proposal"];
+
+/** True when this generator page should be indexed and appear in the sitemap. */
+export function isIndexableProposalTool(tool: Pick<ProposalTool, "format">): boolean {
+  return INDEXED_PROPOSAL_FORMATS.includes(tool.format);
+}
+
 const BY_SLUG = new Map(PROPOSAL_TOOLS.map((tool) => [tool.slug, tool]));
 
 export function getProposalTool(slug: string) {

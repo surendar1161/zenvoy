@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { GENERATORS } from "@/lib/generators";
 import { GUIDES } from "@/lib/guides";
 import { SAME_AS } from "@/lib/directory-listings";
-import { PROPOSAL_TOOLS } from "@/lib/proposal-catalog";
+import { PROPOSAL_TOOLS, isIndexableProposalTool } from "@/lib/proposal-catalog";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 const APP_NAME = "DealPilot";
@@ -43,6 +43,7 @@ export const SEO_PAGES: SeoPage[] = [
   { path: "/alternative/proposify", title: "Proposify Alternative for Freelancers", description: "DealPilot vs Proposify — AI-generated proposals, unlimited sends, and $12/mo instead of $49/user/mo.", keywords: ["proposify alternative"], changeFrequency: "monthly", priority: 0.85 },
   { path: "/alternative/pandadoc", title: "PandaDoc Alternative for Freelancers", description: "DealPilot vs PandaDoc — built for freelancers, not enterprise sales teams. AI proposals from $12/mo.", keywords: ["pandadoc alternative"], changeFrequency: "monthly", priority: 0.85 },
   { path: "/alternative/honeybook", title: "HoneyBook Alternative with AI Proposals", description: "DealPilot vs HoneyBook — AI-first proposals, contracts, and client portals for freelancers.", keywords: ["honeybook alternative"], changeFrequency: "monthly", priority: 0.85 },
+  { path: "/alternative/rocketlane", title: "Rocketlane Alternative for Small Teams", description: "Rocketlane is a professional-services platform priced per user. DealPilot is a self-serve option for freelancers and agencies of up to five people. How they differ and who should pick which.", keywords: ["rocketlane alternative", "rocketlane alternative for small agencies"], changeFrequency: "monthly", priority: 0.8 },
   { path: "/alternative/bonsai", title: "Bonsai Alternative for Freelancers", description: "DealPilot vs Bonsai vs HoneyBook — AI proposal generation, e-signatures, and flat-rate pricing.", keywords: ["bonsai alternative"], changeFrequency: "monthly", priority: 0.85 },
 
   // Features
@@ -56,6 +57,7 @@ export const SEO_PAGES: SeoPage[] = [
   { path: "/for/web-developers", title: "Proposal Software for Web Developers", description: "Win more dev projects with AI-generated proposals, milestone billing, and scope-of-work contracts.", changeFrequency: "monthly", priority: 0.7 },
   { path: "/for/consultants", title: "Proposal Software for Consultants", description: "Professional proposals and SOWs for independent consultants. AI-generated, e-sign ready.", changeFrequency: "monthly", priority: 0.7 },
   { path: "/for/copywriters", title: "Proposal Software for Copywriters", description: "Pitch faster with AI proposals tailored for copywriters, content strategists, and writers.", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/for/small-agencies", title: "Proposal to Paid Project for Small Agencies", description: "One link takes a small agency from proposal to signature to payment. Then projects, time tracking and a client portal. Free plan, Business plan for up to 5 team members.", keywords: ["proposal software for agencies", "small agency client portal"], changeFrequency: "monthly", priority: 0.8 },
   { path: "/for/marketing-agencies", title: "Proposal Software for Marketing Agencies", description: "Proposals, contracts, and client portals for small marketing agencies and freelancers.", changeFrequency: "monthly", priority: 0.7 },
   { path: "/for/video-production", title: "Proposal Software for Video Production", description: "AI proposals with milestone schedules for videographers and production freelancers.", changeFrequency: "monthly", priority: 0.7 },
 
@@ -123,7 +125,7 @@ const NOINDEX_PATHS = new Set(["/sign-in", "/sign-up"]);
 export function getSitemapEntries() {
   const pages = [
     ...SEO_PAGES,
-    ...PROPOSAL_TOOLS.map((tool) => ({
+    ...PROPOSAL_TOOLS.filter(isIndexableProposalTool).map((tool) => ({
       path: tool.path,
       title: tool.seoTitle,
       description: tool.seoDescription,
