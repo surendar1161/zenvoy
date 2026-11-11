@@ -8,7 +8,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 const APP_NAME = "DealPilot";
 
 /** Page-level openGraph/twitter objects replace the file-based image, so reference it explicitly. */
-const OG_IMAGE = { url: "/opengraph-image", width: 1200, height: 630, alt: `${APP_NAME}: AI proposal software for freelancers` };
+export const OG_IMAGE = { url: "/opengraph-image", width: 1200, height: 630, alt: `${APP_NAME}: AI proposal software for freelancers` };
 
 /** Public profiles (G2, Capterra, Product Hunt, socials). Fill after each listing is live. */
 export { SAME_AS };

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProposalToolPage from "@/components/marketing/ProposalToolPage";
 import { PROPOSAL_TOOLS, getProposalTool } from "@/lib/proposal-catalog";
+import { OG_IMAGE } from "@/lib/seo";
 
 type Params = { slug: string };
 
@@ -21,6 +22,13 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
       url: tool.path,
       title: `${tool.seoTitle} | DealPilot`,
       description: tool.seoDescription,
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${tool.seoTitle} | DealPilot`,
+      description: tool.seoDescription,
+      images: [OG_IMAGE.url],
     },
   };
 }
