@@ -105,7 +105,7 @@ export default function ConsultantsPage() {
             proposals that prove <span style={{ color: "#7dd3fc" }}>ROI</span>
           </>
         }
-        subtitle="Stop spending half a day on every proposal. DealPilot generates consulting proposals with methodology breakdowns, ROI projections, and tiered pricing — in 60 seconds."
+        subtitle="Stop spending half a day on every proposal. DealPilot generates consulting proposals with methodology breakdowns, ROI projections, and tiered pricing."
         primaryCTA={{ text: "Create Your First Proposal", href: "/sign-up" }}
         secondaryCTA={{ text: "See Consulting Templates", href: "/templates" }}
         footnote="Free forever plan · No credit card required"
@@ -315,7 +315,7 @@ export default function ConsultantsPage() {
       {/* 8 · CTA */}
       <CTASection
         title="Close your next engagement faster"
-        subtitle="Generate a consulting proposal with methodology, deliverables, ROI projections, and tiered pricing — in 60 seconds. Free forever."
+        subtitle="Generate a consulting proposal with methodology, deliverables, ROI projections, and tiered pricing. Free forever."
         buttonText="Create Your Proposal"
         buttonHref="/sign-up"
       />

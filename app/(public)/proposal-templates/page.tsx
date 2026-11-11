@@ -222,7 +222,7 @@ export default function ProposalTemplatesPage() {
                 <Space direction="vertical" size={10} style={{ width: "100%" }}>
                   {[
                     "Structure from industry-specific templates",
-                    "Content personalised by Claude AI",
+                    "Content personalised by AI",
                     "Client language mirrored from job post",
                     "Section-level AI regeneration",
                     "3 tone styles to match every client",
@@ -246,7 +246,7 @@ export default function ProposalTemplatesPage() {
                 A template gives you structure. But you still have to write every word, customise every section, and tailor the proposal to each client manually. That takes 30-60 minutes per proposal.
               </p>
               <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.75, margin: "0 0 16px" }}>
-                DealPilot's AI reads your client's job post, understands the project requirements, and generates personalised content for every section -- using your template as the foundation. The result is a proposal that sounds hand-written but takes 60 seconds to create.
+                DealPilot's AI reads your client's job post, understands the project requirements, and generates personalised content for every section -- using your template as the foundation. The result is a proposal that sounds hand-written, and you can edit every line.
               </p>
               <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.75, margin: "0 0 24px" }}>
                 Don't settle for fill-in-the-blank. Get proposals that are both structured and intelligent.
@@ -289,7 +289,7 @@ export default function ProposalTemplatesPage() {
         emoji="📄"
         tagline="Template + AI = Done"
         title="Start with a Template, Finish with AI"
-        subtitle="Pick from 19+ industry-specific proposal templates. Let Claude AI personalise every section to your client. Send a winning proposal in 60 seconds."
+        subtitle="Pick from 19+ industry-specific proposal templates. Let AI personalise every section to your client."
         buttonText="Browse Templates Free"
         buttonHref="/sign-up"
         footnote="All templates free -- No credit card -- AI personalisation included"

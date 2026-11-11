@@ -247,7 +247,7 @@ export default function InvoicingPage() {
               Powered by Stripe
             </h2>
             <p style={{ color: "#64748b", fontSize: 17, maxWidth: 560, margin: "0 auto" }}>
-              Enterprise-grade payment processing trusted by millions of businesses. Connect your Stripe account in 60 seconds.
+              Enterprise-grade payment processing trusted by millions of businesses. Connect your Stripe account.
             </p>
           </div>
           <Row gutter={[20, 20]}>
@@ -321,7 +321,7 @@ export default function InvoicingPage() {
       {/* ── CTA ──────────────────────────────────────────── */}
       <CTASection
         emoji="💰"
-        title="Send Your First Invoice in 60 Seconds"
+        title="Send Your First Invoice"
         subtitle="Professional invoices with Stripe Pay Now buttons. Milestone billing. Auto-deposits. Get paid faster without chasing clients."
         buttonText="Start Invoicing for Free"
         buttonHref="/sign-up"

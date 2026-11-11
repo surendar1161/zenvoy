@@ -374,7 +374,7 @@ export default function IntakeWizard({ onComplete, onCancel }: Props) {
                   onChange={e => setFreelancerEmail(e.target.value)} />
               </div>
               <div className="rounded-xl bg-brand-50 border border-brand-100 p-4 text-sm text-brand-800">
-                <strong>Ready to generate!</strong> Claude Opus 4.6 will write your full proposal in seconds —
+                <strong>Ready to generate!</strong> AI will write your full proposal —
                 tailored to {clientName || "your client"}'s exact needs and mirroring their language.
               </div>
             </div>

@@ -31,7 +31,7 @@ export default function Footer() {
           <a href="https://www.producthunt.com/products/zenvoy" target="_blank" rel="noopener noreferrer" className="transition hover:text-brand-600">
             DealPilot on Product Hunt
           </a>
-          <span>Built with Claude AI · Stripe · Supabase</span>
+          <span>Built with AI · Stripe · Supabase</span>
         </div>
       </div>
     </footer>

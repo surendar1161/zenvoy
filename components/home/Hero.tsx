@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRightOutlined, CheckOutlined, EyeOutlined, EditOutlined,
-  DollarOutlined, SendOutlined, StarFilled, ThunderboltFilled, PlayCircleOutlined,
+  DollarOutlined, SendOutlined, ThunderboltFilled, PlayCircleOutlined,
 } from "@ant-design/icons";
 import { useAnimatedNumber } from "@/components/site/motion";
 import { ButtonLink } from "@/components/site/ui";
@@ -91,7 +91,7 @@ function ProposalDemo() {
           <ThunderboltFilled />
           {!ready && <span className="absolute inset-0 animate-ping2 rounded-full bg-brand-400" />}
         </span>
-        {ready ? "Written in 58 seconds" : "Claude is writing…"}
+        {ready ? "Draft ready to edit" : "AI is writing…"}
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-float">
@@ -237,17 +237,13 @@ export default function Hero() {
               <PlayCircleOutlined className="text-brand-600" /> See it in action
             </ButtonLink>
           </div>
-          <p className="mt-4 text-[13px] text-ink-400">Free plan · No credit card · Ready in 60 seconds</p>
+          <p className="mt-4 text-[13px] text-ink-400">Free plan · No credit card · Nothing to install</p>
 
           <div className="mt-10 flex items-center gap-4">
             <div className="flex -space-x-2.5">
               {AVATARS.map((g, i) => (
                 <span key={i} className={`grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-gradient-to-br ${g} text-[12px] font-bold text-white shadow-soft`}>{"MPJA"[i]}</span>
               ))}
-            </div>
-            <div>
-              <div className="flex items-center gap-0.5 text-[13px] text-amber-400">{[0, 1, 2, 3, 4].map(i => <StarFilled key={i} />)}<span className="ml-2 font-semibold text-ink">4.9</span></div>
-              <div className="text-[13px] text-ink-400">Loved by 1,200+ freelancers</div>
             </div>
           </div>
         </div>

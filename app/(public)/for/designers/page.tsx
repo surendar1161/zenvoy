@@ -88,7 +88,7 @@ export default function DesignersPage() {
             Get a brand proposal you can send tonight.
           </>
         }
-        subtitle="Your work is polished. Your proposals should be too. DealPilot generates branded design proposals with deliverable scoping, revision terms, and milestone payments — in 60 seconds."
+        subtitle="Your work is polished. Your proposals should be too. DealPilot generates branded design proposals with deliverable scoping, revision terms, and milestone payments."
         primaryCTA={{ text: "Paste a brief", href: "/sign-up?source=designers" }}
         secondaryCTA={{ text: "Start free", href: "/sign-up?source=designers" }}
         footnote="Free forever plan · No credit card required"
@@ -299,7 +299,7 @@ export default function DesignersPage() {
       {/* 8 · CTA */}
       <CTASection
         title="Your proposals should look as good as your designs"
-        subtitle="Generate a branded design proposal with deliverable scoping, revision terms, and milestone payments — in 60 seconds. Free forever."
+        subtitle="Generate a branded design proposal with deliverable scoping, revision terms, and milestone payments. Free forever."
         buttonText="Create Your Design Proposal"
         buttonHref="/sign-up?source=designers"
       />

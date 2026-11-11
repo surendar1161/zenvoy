@@ -124,7 +124,7 @@ export default function MarketingAgenciesPage() {
             proposals that <span style={{ color: "#7dd3fc" }}>sell results</span>
           </>
         }
-        subtitle="Stop rebuilding proposal decks from scratch. DealPilot generates multi-service marketing proposals with retainer pricing, campaign deliverables, and team features — in 60 seconds."
+        subtitle="Stop rebuilding proposal decks from scratch. DealPilot generates multi-service marketing proposals with retainer pricing, campaign deliverables, and team features."
         primaryCTA={{ text: "Build Your Agency Proposal", href: "/sign-up" }}
         secondaryCTA={{ text: "See Agency Templates", href: "/templates" }}
         footnote="Free forever plan · No credit card required"
@@ -353,7 +353,7 @@ export default function MarketingAgenciesPage() {
       {/* 8 · CTA */}
       <CTASection
         title="Stop rebuilding proposal decks from scratch"
-        subtitle="Generate a multi-service marketing proposal with retainer pricing, campaign deliverables, and team workflows — in 60 seconds. Free forever."
+        subtitle="Generate a multi-service marketing proposal with retainer pricing, campaign deliverables, and team workflows. Free forever."
         buttonText="Build Your Agency Proposal"
         buttonHref="/sign-up"
       />

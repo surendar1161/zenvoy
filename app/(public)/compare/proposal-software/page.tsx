@@ -535,7 +535,7 @@ export default function ProposalSoftwareComparisonPage() {
           </p>
           <Space direction="vertical" size={10} style={{ marginBottom: 24 }}>
             {[
-              "AI writes complete proposals in 60 seconds",
+              "AI writes complete proposals",
               "Free plan with 5 proposals/month + 2 contracts",
               "Pro at $12/mo — unlimited proposals, contracts, and e-signatures",
               "No per-user pricing, no send limits, no surprises",
@@ -557,7 +557,7 @@ export default function ProposalSoftwareComparisonPage() {
       {/* 7 — CTA */}
       <CTASection
         title="Start with the best proposal tool of 2026"
-        subtitle="Join thousands of freelancers using AI to win more clients. Free forever plan, 60-second setup."
+        subtitle="Use AI to draft proposals and win more clients. Free forever plan."
         buttonText="Try DealPilot Free"
         buttonHref="/sign-up"
         footnote="Free forever plan · No credit card · Instant access"

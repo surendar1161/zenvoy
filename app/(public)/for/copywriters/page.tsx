@@ -121,7 +121,7 @@ export default function CopywritersPage() {
             proposals that <span style={{ color: "#7dd3fc" }}>sell your words</span>
           </>
         }
-        subtitle="Stop underselling your writing in a plain email. DealPilot generates copywriting proposals with content deliverables, word count pricing, revision terms, and tone of voice briefs — in 60 seconds."
+        subtitle="Stop underselling your writing in a plain email. DealPilot generates copywriting proposals with content deliverables, word count pricing, revision terms, and tone of voice briefs."
         primaryCTA={{ text: "Create a Writing Proposal", href: "/sign-up" }}
         secondaryCTA={{ text: "Preview a Template", href: "/templates" }}
         footnote="Free forever plan · No credit card required"
@@ -348,7 +348,7 @@ export default function CopywritersPage() {
       {/* 8 · CTA */}
       <CTASection
         title="Stop pitching writing projects over email"
-        subtitle="Generate a copywriting proposal with content deliverables, word count pricing, revision terms, and tone of voice briefs — in 60 seconds. Free forever."
+        subtitle="Generate a copywriting proposal with content deliverables, word count pricing, revision terms, and tone of voice briefs. Free forever."
         buttonText="Create Your Writing Proposal"
         buttonHref="/sign-up"
       />

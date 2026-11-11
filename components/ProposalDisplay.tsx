@@ -400,7 +400,7 @@ export default function ProposalDisplay({
         <div className="card">
           <div className="flex items-center gap-3 text-brand-600 animate-pulse mb-4">
             <span className="text-2xl animate-spin inline-block">⚡</span>
-            <span className="font-medium">Claude is writing your proposal…</span>
+            <span className="font-medium">AI is writing your proposal…</span>
           </div>
           <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans leading-relaxed">
             {proposal}
@@ -412,7 +412,7 @@ export default function ProposalDisplay({
       {loading && !proposal && (
         <div className="card flex items-center gap-3 py-12 justify-center text-brand-600 animate-pulse">
           <span className="text-3xl animate-spin inline-block">⚡</span>
-          <span className="font-medium text-lg">Claude is writing your proposal…</span>
+          <span className="font-medium text-lg">AI is writing your proposal…</span>
         </div>
       )}
 

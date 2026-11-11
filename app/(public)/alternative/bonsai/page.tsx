@@ -366,7 +366,7 @@ export default function BonsaiAlternativePage() {
       {/* 7 — CTA */}
       <CTASection
         title="Get more for $0 than Bonsai's $9 plan"
-        subtitle="DealPilot's free plan includes proposals, contracts, invoicing, and AI generation. Start in 60 seconds."
+        subtitle="DealPilot's free plan includes proposals, contracts, invoicing, and AI generation. Start free."
         buttonText="Start Free — No Credit Card"
         buttonHref="/sign-up"
       />

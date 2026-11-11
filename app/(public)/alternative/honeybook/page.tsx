@@ -20,7 +20,7 @@ const AI_DIFFERENCES = [
   {
     label: "What it does",
     honeybook: "AI assists with writing and suggests edits to existing templates",
-    dealpilot: "AI generates a complete, personalised proposal from scratch in 60 seconds",
+    dealpilot: "AI generates a complete, personalised proposal from scratch",
   },
   {
     label: "Input required",
@@ -102,7 +102,7 @@ const TESTIMONIALS = [
 const FAQS = [
   {
     q: "How is DealPilot's AI different from HoneyBook's AI?",
-    a: "HoneyBook's AI assists with writing and suggests edits within existing templates. DealPilot's AI generates complete proposals from scratch — answer 5 questions (or paste a job post) and get a polished, personalised proposal in under 60 seconds. You can also regenerate any section with 3 AI alternatives.",
+    a: "HoneyBook's AI assists with writing and suggests edits within existing templates. DealPilot's AI generates complete proposals from scratch — answer 5 questions (or paste a job post) and get a polished, personalised proposal. You can also regenerate any section with 3 AI alternatives.",
   },
   {
     q: "Can I use DealPilot outside the US and Canada?",
@@ -547,7 +547,7 @@ export default function HoneyBookAlternativePage() {
       {/* 8 — CTA */}
       <CTASection
         title="Ready for AI-generated proposals?"
-        subtitle="Stop tweaking templates and start generating. Your first proposal is 60 seconds away — and it works from anywhere in the world."
+        subtitle="Stop tweaking templates and start generating. Your first proposal is a few answers away — and it works from anywhere in the world."
         buttonText="Start Free — Works Worldwide"
         buttonHref="/sign-up"
       />

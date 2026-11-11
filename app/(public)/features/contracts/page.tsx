@@ -59,7 +59,7 @@ export default function ContractsPage() {
       <LandingHero
         tag="AI Contract Generator"
         title={<>AI Contract Generator<br />for Freelancers</>}
-        subtitle="Generate legally sound contracts in 60 seconds. 15 contract types. 249 countries. Auto-applied compliance. Edit like Google Docs. Get it signed -- all inside DealPilot."
+        subtitle="Generate legally sound contracts. 15 contract types. 249 countries. Auto-applied compliance. Edit like Google Docs. Get it signed -- all inside DealPilot."
         primaryCTA={{ text: "Create Your First Contract", href: "/sign-up" }}
         secondaryCTA={{ text: "See All Contract Types", href: "#contract-types" }}
         footnote="Free plan includes 2 contracts/month -- no credit card required"
@@ -323,7 +323,7 @@ export default function ContractsPage() {
       {/* ── CTA ──────────────────────────────────────────── */}
       <CTASection
         emoji="📝"
-        title="Generate Your First Contract in 60 Seconds"
+        title="Generate Your First Contract"
         subtitle="Pick a contract type, select your jurisdiction, and let AI handle the legal heavy lifting. Edit, customise, and get it signed -- all free."
         buttonText="Start for Free"
         buttonHref="/sign-up"

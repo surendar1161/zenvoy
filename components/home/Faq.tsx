@@ -5,7 +5,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Reveal } from "@/components/site/motion";
 
 const FAQ = [
-  { q: "How does the AI generate proposals?", a: "You answer five questions, or paste a job post. Claude writes a fully tailored proposal in under 60 seconds, mirroring your client's language and addressing their specific pain points. You can regenerate any section and pick from three alternatives." },
+  { q: "How does the AI generate proposals?", a: "You answer five questions, or paste a job post. The AI writes a fully tailored first draft, mirroring your client's language and addressing their specific pain points. You can regenerate any section and pick from three alternatives." },
   { q: "Are the contracts legally binding?", a: "Contracts follow the right legal frameworks for the jurisdiction you choose (UCC, ESIGN, state-specific rules and more). We always recommend a licensed attorney review high-value or complex engagements before signing." },
   { q: "Do my clients need an account?", a: "No. Clients open proposals and portals from a unique link. They can sign, pay, message you and download files with no login and no app." },
   { q: "Can I use my own branding?", a: "Yes. Upload your logo, set your colours and choose your font. Proposals, contracts, portals and cover pages all use your brand, and clients never see DealPilot on Pro and Business." },

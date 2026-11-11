@@ -81,7 +81,7 @@ export default function Pricing() {
             );
           })}
         </div>
-        <p className="mt-10 text-center text-[13.5px] text-ink-400">Cancel anytime · No hidden fees · All plans include Claude-powered generation</p>
+        <p className="mt-10 text-center text-[13.5px] text-ink-400">Cancel anytime · No hidden fees · All plans include AI generation</p>
       </div>
     </section>
   );

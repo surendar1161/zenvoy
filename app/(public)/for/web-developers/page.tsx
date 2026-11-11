@@ -85,7 +85,7 @@ export default function WebDevelopersPage() {
             as you ship <span style={{ color: "#7dd3fc" }}>code</span>
           </>
         }
-        subtitle="Stop copying project scope docs into Google Docs. DealPilot generates technical proposals with sprint milestones, tech stack breakdowns, and milestone billing — in 60 seconds."
+        subtitle="Stop copying project scope docs into Google Docs. DealPilot generates technical proposals with sprint milestones, tech stack breakdowns, and milestone billing."
         primaryCTA={{ text: "Build Your First Proposal", href: "/sign-up" }}
         secondaryCTA={{ text: "See a Sample Proposal", href: "/templates" }}
         footnote="Free forever plan · No credit card required"
@@ -291,7 +291,7 @@ export default function WebDevelopersPage() {
       {/* 8 · CTA */}
       <CTASection
         title="Stop scoping projects in Google Docs"
-        subtitle="Generate a technical proposal with sprint milestones, payment links, and e-signatures — in 60 seconds. Free forever."
+        subtitle="Generate a technical proposal with sprint milestones, payment links, and e-signatures. Free forever."
         buttonText="Start Building Proposals"
         buttonHref="/sign-up"
       />

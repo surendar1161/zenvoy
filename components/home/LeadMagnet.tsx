@@ -10,7 +10,7 @@ import { Button, ButtonLink } from "@/components/site/ui";
 
 const ITEMS = [
   { icon: <FileTextOutlined />, title: "5 proposal templates", desc: "Web dev, design, SEO, consulting and copywriting, ready to send", tone: "bg-brand-50 text-brand-600" },
-  { icon: <CheckSquareOutlined />, title: "Proposal checklist", desc: "12 points used by freelancers with 60%+ close rates", tone: "bg-emerald-50 text-emerald-600" },
+  { icon: <CheckSquareOutlined />, title: "Proposal checklist", desc: "12 points to check before you send a proposal", tone: "bg-emerald-50 text-emerald-600" },
   { icon: <DollarOutlined />, title: "Freelance rate guide", desc: "Market rates for 10 professions across the US, UK and AU", tone: "bg-amber-50 text-amber-600" },
   { icon: <MailOutlined />, title: "5 follow-up scripts", desc: "What to say when they go quiet, politely and effectively", tone: "bg-violet-50 text-violet-600" },
 ];
@@ -55,7 +55,7 @@ export default function LeadMagnet() {
               <DownloadOutlined /> Free resource pack
             </span>
             <h2 className="mt-5 text-[30px] font-extrabold leading-tight text-ink sm:text-[40px]">Get 5 freelance proposal templates, free.</h2>
-            <p className="mt-4 max-w-lg text-[16.5px] leading-relaxed text-ink-500">Used by 1,200+ freelancers to win higher-paying clients. Drop your email and get the full pack instantly. No spam, ever.</p>
+            <p className="mt-4 max-w-lg text-[16.5px] leading-relaxed text-ink-500">Drop your email and get the full pack instantly. No spam, ever.</p>
             <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {ITEMS.map(i => (
                 <li key={i.title} className="flex items-start gap-3">
@@ -74,7 +74,7 @@ export default function LeadMagnet() {
               <div className="animate-pop py-4 text-center" role="status">
                 <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-50 text-[28px] text-emerald-500"><CheckCircleFilled /></span>
                 <div className="mt-4 font-display text-[22px] font-bold text-ink">You&rsquo;re in!</div>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-500">The pack is on its way to <b className="text-ink">{email}</b>. While you wait, try DealPilot and generate your first proposal in 60 seconds.</p>
+                <p className="mt-2 text-[15px] leading-relaxed text-ink-500">The pack is on its way to <b className="text-ink">{email}</b>. While you wait, try DealPilot and generate your first proposal.</p>
                 <ButtonLink href="/sign-up" size="lg" className="mt-6 w-full">Try DealPilot free <ArrowRightOutlined className="text-[13px]" /></ButtonLink>
               </div>
             ) : (

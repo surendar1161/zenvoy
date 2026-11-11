@@ -5,7 +5,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://dealpilot.co.in";
 export async function GET() {
   const body = `# DealPilot
 
-> AI proposal and contract software for freelancers. Generate proposals with Claude AI, collect e-signatures, send Stripe payment links, and manage clients in one place.
+> AI proposal and contract software for freelancers. Generate proposals with AI, collect e-signatures, send Stripe payment links, and manage clients in one place.
 
 ## Product
 

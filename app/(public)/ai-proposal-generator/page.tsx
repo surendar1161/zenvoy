@@ -30,7 +30,7 @@ const STEPS = [
     num: "2",
     icon: <ThunderboltFilled style={{ fontSize: 32, color: "#7c3aed" }} />,
     title: "AI Writes Your Proposal",
-    desc: "Claude Opus 4.6 generates a fully personalised proposal with scope of work, deliverables, pricing tiers, timeline, and terms and conditions -- all in your brand voice.",
+    desc: "AI generates a fully personalised proposal with scope of work, deliverables, pricing tiers, timeline, and terms and conditions -- all in your brand voice.",
     color: "#f5f3ff",
     border: "#ddd6fe",
   },
@@ -46,21 +46,17 @@ const STEPS = [
 
 /* ── Before vs After ─────────────────────────────────────────── */
 const BEFORE_ITEMS = [
-  { label: "Time per proposal", value: "45-90 min" },
   { label: "Personalisation", value: "Copy-paste boilerplate" },
   { label: "Pricing presentation", value: "Single flat rate" },
   { label: "Follow-up timing", value: "Guesswork" },
   { label: "Brand consistency", value: "Inconsistent every time" },
-  { label: "Close rate", value: "~15-20%" },
 ];
 
 const AFTER_ITEMS = [
-  { label: "Time per proposal", value: "Under 60 seconds" },
   { label: "Personalisation", value: "Mirrors client language" },
   { label: "Pricing presentation", value: "Good / Better / Best tiers" },
   { label: "Follow-up timing", value: "Real-time open alerts" },
   { label: "Brand consistency", value: "Locked brand kit" },
-  { label: "Close rate", value: "~43% higher*" },
 ];
 
 /* ── AI Features ─────────────────────────────────────────────── */
@@ -97,9 +93,7 @@ const AI_FEATURES = [
 
 /* ── Stats ────────────────────────────────────────────────────── */
 const STATS = [
-  { value: "60s", label: "Average AI generation time", icon: <ClockCircleOutlined style={{ fontSize: 22, color: "#0ea5e9" }} /> },
   { value: "19+", label: "Industry-specific templates", icon: <AppstoreOutlined style={{ fontSize: 22, color: "#7c3aed" }} /> },
-  { value: "43%", label: "Higher close rate*", icon: <BarChartOutlined style={{ fontSize: 22, color: "#10b981" }} /> },
   { value: "5", label: "Questions to a full proposal", icon: <RocketOutlined style={{ fontSize: 22, color: "#f59e0b" }} /> },
 ];
 
@@ -112,7 +106,7 @@ const TESTIMONIALS = [
 
 /* ── FAQs ─────────────────────────────────────────────────────── */
 const FAQS = [
-  { q: "Which AI model does DealPilot use?", a: "DealPilot uses Anthropic's Claude Opus 4.6, one of the most capable language models available. It excels at following instructions, matching tone, and producing well-structured professional writing -- perfect for client-facing proposals." },
+  { q: "Which AI model does DealPilot use?", a: "DealPilot uses large language models from leading AI providers to draft proposals. You review and edit every line before anything is sent." },
   { q: "Will the AI-generated proposal sound generic?", a: "No. The AI mirrors the client's own language from the job post you paste, uses your brand kit (colors, logo, tone), and adapts to your chosen tone style. Every proposal reads as uniquely written for that specific opportunity." },
   { q: "Can I edit what the AI writes?", a: "Absolutely. You can edit any text directly, regenerate individual sections with 3 alternative versions, change the tone, and adjust pricing -- all before sending. The AI gives you a strong first draft; you have full control over the final product." },
   { q: "How many proposals can I generate for free?", a: "The free plan includes 5 AI-generated proposals per month, plus access to all 19+ templates, a brand kit, and Stripe payment links. No credit card required to start." },
@@ -129,10 +123,10 @@ export default function AIProposalGeneratorPage() {
         title={
           <>
             Generate Winning Proposals{" "}
-            <span style={{ color: "#bae6fd" }}>in 60 Seconds</span> with AI
+            <span style={{ color: "#bae6fd" }}>from a Job Post</span> with AI
           </>
         }
-        subtitle="Paste a job post. Answer 5 questions. Claude AI writes a fully personalised, professionally formatted proposal -- complete with scope, pricing tiers, timeline, and terms. Ready to send in under a minute."
+        subtitle="Paste a job post. Answer 5 questions. AI writes a fully personalised, professionally formatted first draft -- complete with scope, pricing tiers, timeline, and terms. Review, edit, and send."
         primaryCTA={{ text: "Generate Your First Proposal Free", href: "/sign-up" }}
         secondaryCTA={{ text: "See How It Works", href: "#how-it-works" }}
         footnote="Free forever plan -- No credit card required -- 60-second setup"
@@ -287,7 +281,7 @@ export default function AIProposalGeneratorPage() {
       {/* ── 6. Social Proof ───────────────────────────────────── */}
       <SocialProof
         title="Freelancers Love the AI Proposal Generator"
-        subtitle="Join thousands of freelancers who write proposals in seconds, not hours."
+        subtitle="Draft proposals from a pasted brief. Free forever plan."
         testimonials={TESTIMONIALS}
       />
 
@@ -300,8 +294,8 @@ export default function AIProposalGeneratorPage() {
 
       {/* ── 8. CTA ────────────────────────────────────────────── */}
       <CTASection
-        title="Write Your Next Proposal in 60 Seconds"
-        subtitle="Paste a job post, answer 5 questions, and let Claude AI generate a personalised, professional proposal. Free forever -- no credit card required."
+        title="Write Your Next Proposal with AI"
+        subtitle="Paste a job post, answer 5 questions, and let AI generate a personalised, professional proposal. Free forever -- no credit card required."
         buttonText="Generate Your First Proposal Free"
         buttonHref="/sign-up"
       />

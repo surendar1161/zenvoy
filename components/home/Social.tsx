@@ -24,7 +24,7 @@ export default function Social() {
               <div className="relative">
                 <div className="font-display text-[80px] font-extrabold leading-[0.6] text-brand-400/40" aria-hidden>“</div>
                 <blockquote className="mt-2 font-display text-[22px] font-semibold leading-snug sm:text-[26px]">
-                  I used to spend 2 hours writing every proposal. Now I answer a few questions and it&rsquo;s done in 60 seconds. My win rate actually went up, because the proposals are better than what I was writing.
+                  I used to spend 2 hours writing every proposal. Now I answer a few questions and it&rsquo;s done. My win rate actually went up, because the proposals are better than what I was writing.
                 </blockquote>
                 <figcaption className="mt-8 flex items-center gap-3">
                   <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 font-bold">M</span>

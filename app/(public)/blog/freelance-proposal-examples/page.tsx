@@ -387,7 +387,7 @@ export default function FreelanceProposalExamples() {
         Study the structures. Steal the techniques. And remember — the best proposal in the world is worthless if you never send it. Speed matters. The first freelancer to send a thoughtful, structured proposal is often the one who wins the gig.
       </p>
       <p style={{ fontSize: 16, color: "#334155", lineHeight: 1.8, margin: "0 0 20px" }}>
-        These proposals took hours to write. With DealPilot, the AI generates a proposal like these in 60 seconds — structured, personalised, and ready to send. So you can spend less time writing proposals and more time doing the work you love.
+        These proposals took hours to write. With DealPilot, the AI generates a proposal like these — structured, personalised, and ready to send. So you can spend less time writing proposals and more time doing the work you love.
       </p>
     </BlogArticle>
   );

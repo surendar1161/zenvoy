@@ -62,7 +62,7 @@ const DIFFERENTIATORS = [
   {
     icon: <ThunderboltFilled style={{ fontSize: 24, color: "#7c3aed" }} />,
     title: "AI Writes For You",
-    desc: "Paste a job post and Claude AI generates a complete proposal in 60 seconds. Tone control, section regeneration, and job post parsing built in.",
+    desc: "Paste a job post and AI generates a complete proposal. Tone control, section regeneration, and job post parsing built in.",
   },
   {
     icon: <RocketOutlined style={{ fontSize: 24, color: "#10b981" }} />,
@@ -76,7 +76,7 @@ const FEATURES = [
   {
     icon: <ThunderboltFilled style={{ fontSize: 28, color: "#0ea5e9" }} />,
     title: "AI Proposal Generation",
-    desc: "Answer 5 questions and Claude Opus 4.6 writes a complete, personalised proposal. Paste a job post for auto-fill. Choose from Professional, Friendly, or Bold tones.",
+    desc: "Answer 5 questions and AI writes a complete, personalised proposal. Paste a job post for auto-fill. Choose from Professional, Friendly, or Bold tones.",
     points: ["60-second generation", "Job post parsing and auto-fill", "3 tone styles", "Section-level regeneration"],
     bg: "#eff6ff",
     border: "#bfdbfe",

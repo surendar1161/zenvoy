@@ -17,7 +17,7 @@ const COPY: Record<Variant, { title: string; sub: string; bullets?: string[] }> 
     title: "Win more clients with proposals that close themselves.",
     sub: "Free to start. No credit card required.",
     bullets: [
-      "AI proposals in under 60 seconds",
+      "AI proposals",
       "Stripe payment links, auto-generated",
       "Contracts and e-signatures built in",
       "A branded portal your clients will love",
@@ -80,13 +80,6 @@ export default function AuthShell({ variant = "signin", children }: { variant?: 
               </div>
             )}
           </div>
-
-          <figure className="relative max-w-md border-t border-white/10 pt-6">
-            <blockquote className="text-[14.5px] leading-relaxed text-ink-300">
-              &ldquo;I used to spend 2 hours on every proposal. Now it&rsquo;s done in 60 seconds, and my win rate actually went up.&rdquo;
-            </blockquote>
-            <figcaption className="mt-3 text-[13px] font-semibold text-white">Marcus R. <span className="font-normal text-ink-400">· UX designer, London</span></figcaption>
-          </figure>
         </aside>
 
         {/* Form side */}

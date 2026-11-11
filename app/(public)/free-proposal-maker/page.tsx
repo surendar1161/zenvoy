@@ -45,7 +45,7 @@ const STEPS = [
     num: "1",
     icon: <GiftOutlined style={{ fontSize: 32, color: "#0ea5e9" }} />,
     title: "Sign Up Free",
-    desc: "Create your account in 60 seconds. No credit card, no trial expiry, no strings attached. Your free plan never expires.",
+    desc: "Create your account. No credit card, no trial expiry, no strings attached. Your free plan never expires.",
     color: "#eff6ff",
     border: "#bfdbfe",
   },
@@ -105,7 +105,7 @@ export default function FreeProposalMakerPage() {
           </>
         }
         subtitle="DealPilot's free proposal maker gives you AI-powered proposals, 19+ industry templates, a brand kit, and Stripe payment links -- all without ever entering a credit card. No trial. No watermarks. No catch."
-        primaryCTA={{ text: "Sign Up Free -- 60 Seconds", href: "/sign-up" }}
+        primaryCTA={{ text: "Sign Up Free", href: "/sign-up" }}
         secondaryCTA={{ text: "See What's Included", href: "#whats-free" }}
         footnote="No credit card -- No watermarks -- No trial period"
       />
@@ -363,7 +363,7 @@ export default function FreeProposalMakerPage() {
         emoji="🎁"
         title="Start Making Proposals -- Free, Forever"
         subtitle="5 AI proposals, 19+ templates, a brand kit, and Stripe payment links. No credit card. No trial. No catch."
-        buttonText="Sign Up Free -- 60 Seconds"
+        buttonText="Sign Up Free"
         buttonHref="/sign-up"
         footnote="Free forever -- No credit card -- No watermarks"
       />

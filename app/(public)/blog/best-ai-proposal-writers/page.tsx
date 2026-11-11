@@ -29,7 +29,7 @@ const TOOLS = [
     n: "3",
     name: "Claude",
     href: "https://claude.ai",
-    blurb: "Strong long-form drafting. DealPilot uses Claude specifically for proposals; the chatbot alone still is not a send workflow.",
+    blurb: "Strong long-form drafting. A chatbot like Claude drafts text, but on its own it is not a send workflow.",
     best: "Writers who want a thinking partner before they open a proposal tool",
     watch: "Same gap as ChatGPT: the client never sees Claude. They see whatever you paste next.",
   },

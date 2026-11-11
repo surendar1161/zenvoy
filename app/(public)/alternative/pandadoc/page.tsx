@@ -24,7 +24,7 @@ const REASONS = [
   {
     icon: <ThunderboltFilled style={{ fontSize: 24, color: "#0ea5e9" }} />,
     title: "AI writes the proposal for you",
-    desc: "PandaDoc offers templates and some AI assist features — but it can't generate an entire proposal from scratch. DealPilot's AI reads your project details (or a pasted job post) and writes a polished, personalised proposal in under 60 seconds.",
+    desc: "PandaDoc offers templates and some AI assist features — but it can't generate an entire proposal from scratch. DealPilot's AI reads your project details (or a pasted job post) and writes a polished, personalised proposal.",
   },
   {
     icon: <UserOutlined style={{ fontSize: 24, color: "#7c3aed" }} />,
@@ -51,7 +51,7 @@ const REASONS = [
 const SIDE_BY_SIDE = [
   { label: "Target audience", pandadoc: "Sales teams & enterprises", dealpilot: "Freelancers & solopreneurs" },
   { label: "AI capability", pandadoc: "Template assist only", dealpilot: "Full proposal generation from scratch" },
-  { label: "Setup time", pandadoc: "Hours (templates, workflows)", dealpilot: "60 seconds" },
+  { label: "Setup time", pandadoc: "Hours (templates, workflows)", dealpilot: "Answer a few questions" },
   { label: "Invoicing", pandadoc: "Requires integration", dealpilot: "Built in with Stripe" },
   { label: "Contract generation", pandadoc: "Template-based", dealpilot: "AI-generated, 15 types, 249 jurisdictions" },
   { label: "Client portal", pandadoc: "Not included", dealpilot: "Branded portal included" },
@@ -377,7 +377,7 @@ export default function PandaDocAlternativePage() {
       {/* 7 — CTA */}
       <CTASection
         title="Skip the enterprise complexity"
-        subtitle="Generate your first AI-powered proposal in 60 seconds. Built for freelancers, priced for freelancers."
+        subtitle="Generate your first AI-powered proposal. Built for freelancers, priced for freelancers."
         buttonText="Start Free — No Credit Card"
         buttonHref="/sign-up"
       />

@@ -266,7 +266,7 @@ function InsightsPanel() {
 
 const TABS: { key: string; icon: ReactNode; title: string; blurb: string; tone: string; panel: ReactNode }[] = [
   { key: "proposals", icon: <ThunderboltFilled />, title: "AI proposals", tone: "from-brand-500 to-brand-700",
-    blurb: "Answer five questions or paste a job post. Claude writes a tailored proposal with Good / Better / Best pricing and a Stripe deposit link.", panel: <ProposalPanel /> },
+    blurb: "Answer five questions or paste a job post. AI writes a tailored proposal with Good / Better / Best pricing and a Stripe deposit link.", panel: <ProposalPanel /> },
   { key: "contracts", icon: <SafetyCertificateOutlined />, title: "Contracts & e-sign", tone: "from-violet-500 to-violet-700",
     blurb: "15 contract types, jurisdiction-aware for 249 countries. Clients sign by typing or drawing, with no account needed.", panel: <ContractPanel /> },
   { key: "portal", icon: <GlobalOutlined />, title: "Client portal", tone: "from-emerald-500 to-emerald-700",

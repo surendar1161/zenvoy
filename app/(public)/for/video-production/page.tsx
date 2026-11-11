@@ -108,7 +108,7 @@ export default function VideoProductionPage() {
             that close <span style={{ color: "#7dd3fc" }}>production deals</span>
           </>
         }
-        subtitle="Stop scoping shoot days in email threads. DealPilot generates video production proposals with pre-production timelines, equipment lists, milestone payments, and licensing terms — in 60 seconds."
+        subtitle="Stop scoping shoot days in email threads. DealPilot generates video production proposals with pre-production timelines, equipment lists, milestone payments, and licensing terms."
         primaryCTA={{ text: "Create a Production Proposal", href: "/sign-up" }}
         secondaryCTA={{ text: "See a Sample Proposal", href: "/templates" }}
         footnote="Free forever plan · No credit card required"
@@ -329,7 +329,7 @@ export default function VideoProductionPage() {
       {/* 8 · CTA */}
       <CTASection
         title="Stop scoping productions in email threads"
-        subtitle="Generate a video production proposal with phase breakdowns, equipment lists, milestone payments, and licensing terms — in 60 seconds. Free forever."
+        subtitle="Generate a video production proposal with phase breakdowns, equipment lists, milestone payments, and licensing terms. Free forever."
         buttonText="Create Your Production Proposal"
         buttonHref="/sign-up"
       />

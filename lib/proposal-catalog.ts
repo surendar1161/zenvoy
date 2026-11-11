@@ -128,7 +128,7 @@ function buildTool(niche: ProposalNiche, format: ProposalFormat): ProposalTool {
     title: `${titled} generator`,
     subtitle: `Turn a ${niche.name} brief into a ${format.noun} covering ${niche.work}. Built for ${niche.who} who need to send something tonight.`,
     seoTitle: `${titled} Generator`,
-    seoDescription: `Generate a ${name} in 60 seconds. Scope, fees, and timeline for ${niche.who}. Free to start, edit every line before you send.`,
+    seoDescription: `Generate a ${name}. Scope, fees, and timeline for ${niche.who}. Free to start, edit every line before you send.`,
     who: niche.who,
     work: niche.work,
     includes: niche.includes,

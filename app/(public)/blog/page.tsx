@@ -68,7 +68,7 @@ export default function BlogIndexPage() {
           <div className="dp-grid absolute inset-0 opacity-30" aria-hidden />
           <div className="relative">
             <h2 className="text-[28px] font-extrabold">Stop writing proposals from scratch</h2>
-            <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-ink-300">Generate a professional, AI-written proposal in 60 seconds. Free plan available.</p>
+            <p className="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-ink-300">Generate a professional, AI-written proposal. Free plan available.</p>
             <div className="mt-7">
               <ButtonLink href="/sign-up" variant="light" size="lg" className="font-bold">Try DealPilot free <ArrowRightOutlined className="text-[13px]" /></ButtonLink>
             </div>

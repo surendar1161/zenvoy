@@ -106,7 +106,7 @@ export default function ESignaturesPage() {
       <LandingHero
         tag="E-Signatures for Freelancers"
         title={<>Legally Binding E-Signatures<br />Built Right In</>}
-        subtitle="Get contracts and proposals signed in seconds. eIDAS and ESIGN Act compliant. Type or draw. Works on any device. No separate tool needed."
+        subtitle="Get contracts and proposals signed. eIDAS and ESIGN Act compliant. Type or draw. Works on any device. No separate tool needed."
         primaryCTA={{ text: "Start Signing for Free", href: "/sign-up" }}
         secondaryCTA={{ text: "See How It Works", href: "#sign-flow" }}
         footnote="Included with every DealPilot plan -- no per-signature fees"

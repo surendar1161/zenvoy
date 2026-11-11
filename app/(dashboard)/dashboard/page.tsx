@@ -250,7 +250,7 @@ export default function DashboardPage() {
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-[18px]"><ThunderboltOutlined /></span>
           <span className="text-left">
             <span className="block text-[14.5px] font-bold">Generate proposal</span>
-            <span className="block text-[12px] text-white/75">AI-written in 60 seconds</span>
+            <span className="block text-[12px] text-white/75">AI-written</span>
           </span>
           <ArrowRightOutlined className="ml-auto text-[12px] opacity-70 transition group-hover:translate-x-0.5" />
         </Link>
@@ -274,7 +274,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<ThunderboltOutlined />}
           title="Create your first proposal"
-          body="Answer a few questions and Claude writes a branded proposal with pricing tiers and a Stripe payment link."
+          body="Answer a few questions and AI writes a branded proposal with pricing tiers and a Stripe payment link."
         >
           <ButtonLink href="/generate" size="lg">Generate my first proposal <ThunderboltOutlined /></ButtonLink>
           <ButtonLink href="/clients" variant="secondary" size="lg">Add a client</ButtonLink>

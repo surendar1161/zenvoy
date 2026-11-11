@@ -308,7 +308,7 @@ function ContractGenerateQuickClient() {
         <div style={{ marginTop: 16, padding: "12px 16px", background: "#fff", borderRadius: 10 }}>
           {mode === "quick" && (
             <Text type="secondary" style={{ fontSize: 13 }}>
-              ⚡ <strong>Fastest way.</strong> Generate a contract with an existing client in seconds using smart defaults.
+              ⚡ <strong>Fastest way.</strong> Generate a contract with an existing client using smart defaults.
             </Text>
           )}
           {mode === "custom" && (

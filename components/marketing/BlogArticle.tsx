@@ -68,7 +68,7 @@ export default function BlogArticle({
           <div className="relative">
             <h2 className="text-[28px] font-extrabold leading-tight sm:text-[34px]">Skip the writing. Generate with AI.</h2>
             <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink-300">
-              DealPilot writes a personalised proposal in 60 seconds. Try it free — no credit card required.
+              DealPilot writes a personalised proposal. Try it free — no credit card required.
             </p>
             <div className="mt-7">
               <ButtonLink href={`/sign-up?source=${source}`} variant="light" size="lg" className="font-bold">

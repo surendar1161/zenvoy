@@ -99,9 +99,9 @@ export const LISTING_COPY = {
   name: "DealPilot",
   website: "https://www.dealpilot.co.in",
   signup: "https://www.dealpilot.co.in/sign-up",
-  tagline: "AI proposals, contracts, and invoices for freelancers — send a branded proposal in 60 seconds.",
+  tagline: "AI proposals, contracts, and invoices for freelancers — send a branded proposal.",
   short:
-    "DealPilot is AI proposal software for freelancers. Paste a brief, generate a scoped proposal with Claude, collect an e-signature, and attach a Stripe payment link.",
+    "DealPilot is AI proposal software for freelancers. Paste a brief, generate a scoped proposal with AI, collect an e-signature, and attach a Stripe payment link.",
   long:
     "DealPilot helps independent designers, consultants, and other freelancers close client work without a 90-minute proposal ritual. Paste a job post or brief, generate a personalised proposal (scope, pricing tiers, timeline, terms), send a branded link, and collect e-signatures plus Stripe deposits in the same workspace. Free plan: 5 proposals/month. Pro from $12/month.",
   categories: [

@@ -437,7 +437,7 @@ export default function ContractGeneratePage() {
             type="info"
             showIcon
             message="AI will generate a complete, formatted contract"
-            description={`Claude Opus 4.6 will write a full ${contract.name} with all required clauses, ${jurisdiction} law provisions, and a signature block. Generation takes ~30–60 seconds.`}
+            description={`AI will write a full ${contract.name} with all required clauses, ${jurisdiction} law provisions, and a signature block.`}
             style={{ marginBottom: 24, borderRadius: 10 }}
           />
 
@@ -459,7 +459,7 @@ export default function ContractGeneratePage() {
               {loading && !contractText && (
                 <Space style={{ color }}>
                   <span style={{ fontSize: 20 }}>⚡</span>
-                  <Text style={{ color }}>Claude is drafting your {contract.name}…</Text>
+                  <Text style={{ color }}>AI is drafting your {contract.name}…</Text>
                 </Space>
               )}
             </Space>
@@ -473,7 +473,7 @@ export default function ContractGeneratePage() {
             <Card style={{ borderRadius: 16, border: `1px solid ${color}30`, marginBottom: 16, background: `${color}05` }} styles={{ body: { padding: 32 } }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, color, marginBottom: 20 }}>
                 <span style={{ fontSize: 20 }}>⚡</span>
-                <Text style={{ color, fontSize: 14, fontWeight: 600 }}>Claude is drafting your {contract.name}…</Text>
+                <Text style={{ color, fontSize: 14, fontWeight: 600 }}>AI is drafting your {contract.name}…</Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>Editing available when complete</Text>
               </div>
               <div

@@ -65,7 +65,7 @@ export const PLANS: PlanConfig[] = [
       "Unlimited contracts",
       "All 15 contract types",
       "19+ industry templates (+ 5 by freelancer type)",
-      "AI generation — Claude Opus 4.6",
+      "AI generation",
       "Digital e-signatures (type & draw)",
       "Accept without signing",
       "Proposal open tracking & notifications",

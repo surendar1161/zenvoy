@@ -356,7 +356,7 @@ export default function HowToWriteAFreelanceProposal() {
           {" "}The best proposal you ever write is the one you improve after every send. Track which proposals
           win and which don&apos;t. Look for patterns. Ask clients who chose you what stood out. Ask clients
           who didn&apos;t choose you what was missing. Every proposal is a data point — use them. And if you
-          want a head start, DealPilot can generate a polished first draft in about 60 seconds, giving you
+          want a head start, DealPilot can generate a polished first draft, giving you
           a strong foundation to customize with your expertise.
         </span>
       </Card>

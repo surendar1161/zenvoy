@@ -24,7 +24,7 @@ const REASONS = [
     num: 1,
     icon: <ThunderboltFilled style={{ fontSize: 26, color: "#0ea5e9" }} />,
     title: "AI generates proposals from scratch",
-    desc: "Proposify relies on templates you fill in manually. DealPilot asks 5 questions, then Claude Opus 4.6 writes a complete, personalised proposal in under 60 seconds.",
+    desc: "Proposify relies on templates you fill in manually. DealPilot asks 5 questions, then AI writes a complete, personalised proposal.",
   },
   {
     num: 2,
@@ -69,7 +69,7 @@ const COMPARISON_FEATURES = [
 
 const TESTIMONIALS = [
   {
-    quote: "I switched from Proposify because I was spending 40 minutes on every proposal. DealPilot's AI generates a better draft in 60 seconds. I just tweak the tone and hit send.",
+    quote: "I switched from Proposify because I was spending 40 minutes on every proposal. DealPilot's AI generates a better draft. I just tweak the tone and hit send.",
     name: "Sarah M.",
     role: "Freelance Copywriter",
   },
@@ -104,7 +104,7 @@ const FAQS = [
   },
   {
     q: "How long does it take to set up DealPilot?",
-    a: "About 60 seconds. Sign up, connect your Stripe account (optional), and generate your first proposal. There's no lengthy onboarding or template setup required — the AI handles it.",
+    a: "Sign up, connect your Stripe account (optional), and generate your first proposal. There's no lengthy onboarding or template setup required — the AI handles it.",
   },
   {
     q: "Is Proposify better for larger teams?",
@@ -415,7 +415,7 @@ export default function ProposifyAlternativePage() {
                     <CheckCircleFilled
                       style={{ color: "#10b981", marginRight: 8 }}
                     />
-                    AI-generated proposals (60 seconds)
+                    AI-generated proposals
                   </Text>
                   <Text style={{ color: "#475569", fontSize: 14 }}>
                     <CheckCircleFilled
@@ -483,7 +483,7 @@ export default function ProposifyAlternativePage() {
       {/* 7 — CTA */}
       <CTASection
         title="Ready to ditch the send limits?"
-        subtitle="Generate your first AI-powered proposal in 60 seconds. No credit card, no templates to set up, no per-user fees."
+        subtitle="Generate your first AI-powered proposal. No credit card, no templates to set up, no per-user fees."
         buttonText="Start Free — 60-Second Setup"
         buttonHref="/sign-up"
       />

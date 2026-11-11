@@ -653,7 +653,7 @@ export default function GenerateClient() {
         {loading ? "Generating your proposal…" : "Generate Proposal + Payment Link"}
       </Button>
       <Text type="secondary" style={{ display: "block", textAlign: "center", marginTop: 10, fontSize: 12 }}>
-        Powered by Claude Opus 4.6 · Takes ~20–40 seconds
+        AI-powered draft · you can edit every line
       </Text>
     </div>
   );
