@@ -1,6 +1,6 @@
 # DealPilot — Directory Listings Tracker
 
-Documentation only; no code depends on this file. Last updated 2026-11-10.
+Documentation only; no code depends on this file. Last updated 2026-11-13.
 
 **Secrets:** do not paste claim links, tokens or passwords into this file. The BetaList claim link was shared in chat only.
 
@@ -50,6 +50,7 @@ Prepare before submitting:
 | 13 | Product Hunt | Existing page: `producthunt.com/products/zenvoy` (name "Deal Pilot", website dealpilot.co.in, launched 2026-04-22, 2 points, no rank or badge when checked 2026-11-10). New launch page: `producthunt.com/posts/new` | Not checked | You; plan a launch day | Page exists; footer link and schema link added; fix the leftover "Zenvoy" wording on the page; plan a proper launch | 2026-04-22 | `https://www.producthunt.com/products/zenvoy` | Not checked |
 | 14 | Crunchbase | Not looked up | Not checked | You | Not started | | | |
 | 15 | Future Tools, Best of AI, ToolScout | Not looked up | Search results say free; ToolScout reviews take a week or more | You | Not started | | | |
+| 16 | Launchbase (India) | `launchbase.in/submit` (needs a Launchbase account) | Free (no payment step on the form) | You signed in and pressed Submit; the form was filled in a browser session | **Submitted, under review** (profile shows "UNDER REVIEW"); not live yet | 2026-11-13 | Not live yet | Not checked |
 
 Skip for now: Fazier and Startup Fame (reported to require a backlink or badge on your site), DevHunt (developer tools).
 
@@ -66,6 +67,8 @@ Skip for now: Fazier and Startup Fame (reported to require a backlink or badge o
 **AlternativeTo.** Its pages (including the FAQ) showed a Cloudflare "Performing security verification" check to the automated browser, so I stopped and did not attempt to pass it. From a web search summarising its FAQ: add an app by signing up, then "Suggest new application" in the user menu; it does not accept unreleased, closed-beta or invite-only apps. Blogs add a 7-day account-age rule and a $5 priority fee and say the free queue is long; none of that is confirmed. Check `alternativeto.net/faq` yourself.
 
 **Futurepedia.** Homepage and `/enhanced` show a HubSpot cookie banner; the homepage has no submit link. Recent third-party write-ups say there is no free or public form, only a paid Verified Enhanced Listing (about $497) and possibly a sold-out basic tier. Unconfirmed from Futurepedia itself; contact them before paying anything.
+
+**Launchbase.** An India-focused launch board. Submitting needs an account: sign in with Google, LinkedIn or email (Google refused sign-in from an automated browser, so LinkedIn was used). Form fields: logo (required), name, tagline, website link, description (200-word minimum), founders (name plus LinkedIn), screenshots (up to 10), private contact name, email and phone, and a terms checkbox. The first logo and screenshot uploads returned "Image upload failed (401)" and worked on a later try. Submitted 2026-11-13 with a 296-word description, the DealPilot logo, two screenshots of the live site (home and the 220 proposal generators page) and the founder's name and LinkedIn; phone left empty. Launchbase's guidelines say every submission goes through manual moderation and reviewers may log in and use the product, so the signup flow should work before they look. Status on the profile page: "UNDER REVIEW". The profile was also improved from 13% to 63% (position, company, bio, LinkedIn); location, college, GitHub and photo are still blank. Images used are in `~/Documents/dealpilot-marketing-assets/launchbase/` (outside the repo). When approved, record the URL and check the link's `rel` (section 4).
 
 **There's An AI For That.** Paid listing: $49 or $437 (pre-selected). Monthly X thread picks one tool for free. 1 to 2 days to process; full automatic refund if not published. The PPC bonus footnote says the tool must not appear on other platforms before launching there, so you probably would not qualify if you list elsewhere first.
 
