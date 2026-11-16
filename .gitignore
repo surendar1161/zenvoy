@@ -27,3 +27,6 @@ yarn-error.log*
 /.clerk/
 package-lock.json
 .superstack/
+
+# local test login, keep out of git
+.env.test
