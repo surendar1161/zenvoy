@@ -8,8 +8,11 @@ const FREELANCER_ONLY = [
   "/brand", "/subscription", "/portals", "/settings", "/pipeline", "/invoices", "/time-tracking", "/automations", "/bookings", "/editor", "/api/seed-demo", "/api/delete-demo",
 ];
 
-// Client-accessible routes
-const CLIENT_ROUTES = ["/my-portal", "/portal"];
+// Client-accessible routes that need a signed-in client account.
+// /portal/<token> is intentionally NOT listed: it is public by secret link and is
+// served by the token API (/api/portal/data), because the portal tables are closed
+// to anonymous visitors by row-level security (supabase/update-07-roles.sql).
+const CLIENT_ROUTES = ["/my-portal"];
 
 // Public routes (no auth needed)
 const PUBLIC = ["/", "/pricing", "/sign-in", "/sign-up", "/auth", "/forgot-password", "/reset-password"];

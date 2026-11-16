@@ -12,8 +12,6 @@ import {
   UploadOutlined, InboxOutlined,
 } from "@ant-design/icons";
 import { Upload } from "antd";
-import { createClient } from "@/lib/supabase/client";
-import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { BrandKit } from "@/lib/brand";
 import { DEFAULT_BRAND } from "@/lib/brand";
 import SchedulingEmbed from "@/components/SchedulingEmbed";
@@ -28,6 +26,10 @@ interface PMsg { id: string; sender: string; sender_name: string | null; content
 interface PInvoice { id: string; invoice_number: string | null; title: string; line_items: { description: string; quantity: number; unit_price: number; amount: number }[]; total: number; currency: string; status: string; due_date: string | null; payment_link: string | null; }
 interface PContract { id: string; title: string | null; contract_type: string | null; party_a_name: string | null; party_b_name: string | null; governing_law: string | null; contract_text: string | null; status: string; signed_at: string | null; signer_name: string | null; created_at: string; }
 interface PProposal { id: string; client_name: string | null; project_type: string | null; proposal_text: string | null; tiers: unknown; total_budget: number | null; currency: string | null; status: string; signed_at: string | null; signer_name: string | null; accepted_at: string | null; created_at: string; freelancer_name: string | null; }
+// Shape returned by GET /api/portal/data (token-based, served with the service-role key on the server).
+interface PortalData { portal?: Partial<Portal>; files?: PFile[]; messages?: PMsg[]; invoices?: PInvoice[]; schedulingLink?: string | null; }
+
+const MESSAGE_POLL_MS = 8000;
 
 const FILE_ICONS: Record<string, string> = { contract: "📄", invoice: "💰", design: "🎨", image: "🖼️", document: "📝", general: "📎" };
 
@@ -58,78 +60,80 @@ export default function ClientPortalPage() {
   const [schedulingLink, setSchedulingLink] = useState<string | null>(null);
   const [msgApi, ctx] = message.useMessage();
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<RealtimeChannel | null>(null);
-  const visitTracked = useRef(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     load();
-    return () => { channelRef.current?.unsubscribe(); };
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [token]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   async function load() {
-    const supabase = createClient();
-    const { data: p } = await supabase.from("client_portals").select("*").eq("token", token).maybeSingle();
-    if (!p) { setLoading(false); return; }
-    setPortal(p as Portal);
-    setClientName(p.client_name ?? "");
+    // The portal is read through the token API, not the browser Supabase client:
+    // portal tables are closed to anonymous visitors by row-level security.
+    const tk = encodeURIComponent(token);
+    let data: PortalData | null = null;
+    try {
+      const res = await fetch(`/api/portal/data?token=${tk}&visit=1`, { cache: "no-store" });
+      if (res.ok) data = await res.json();
+    } catch { /* fall through to the "not found" screen */ }
+    if (!data?.portal) { setLoading(false); return; }
 
-    const [{ data: f }, { data: m }, { data: inv }] = await Promise.all([
-      supabase.from("portal_files").select("*").eq("portal_id", p.id).order("created_at", { ascending: false }),
-      supabase.from("portal_messages").select("*").eq("portal_id", p.id).order("created_at"),
-      supabase.from("portal_invoices").select("*").eq("portal_id", p.id).neq("status", "draft").order("created_at", { ascending: false }),
-    ]);
-    setFiles((f ?? []) as PFile[]);
-    setMessages((m ?? []) as PMsg[]);
-    setInvoices((inv ?? []) as PInvoice[]);
+    const p = { ...data.portal, token } as Portal;
+    setPortal(p);
+    setClientName(p.client_name ?? "");
+    if (!p.is_active) { setLoading(false); return; }
+
+    setFiles(data.files ?? []);
+    setMessages(data.messages ?? []);
+    setInvoices(data.invoices ?? []);
+    setSchedulingLink(data.schedulingLink ?? null);
 
     // Fetch contracts and proposals via portal API
     const [contractsRes, proposalsRes] = await Promise.all([
-      fetch(`/api/portal/contracts?token=${token}`).then(r => r.ok ? r.json() : []),
-      fetch(`/api/portal/proposals?token=${token}`).then(r => r.ok ? r.json() : []),
+      fetch(`/api/portal/contracts?token=${tk}`).then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch(`/api/portal/proposals?token=${tk}`).then(r => r.ok ? r.json() : []).catch(() => []),
     ]);
     setContracts(contractsRes as PContract[]);
     setProposals(proposalsRes as PProposal[]);
 
-    // Fetch freelancer's scheduling link
-    if (p.user_id) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("scheduling_enabled, scheduling_link")
-        .eq("id", p.user_id)
-        .maybeSingle();
-      if (profile?.scheduling_enabled && profile?.scheduling_link) {
-        setSchedulingLink(profile.scheduling_link);
-      }
-    }
-
     setLoading(false);
 
-    // Track visit
-    if (!visitTracked.current) {
-      visitTracked.current = true;
-      await supabase.from("client_portals").update({ last_client_visit: new Date().toISOString() }).eq("id", p.id);
-    }
-
-    // Subscribe realtime
-    const ch = supabase.channel(`client-portal-${p.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "portal_messages", filter: `portal_id=eq.${p.id}` },
-        payload => setMessages(prev => [...prev, payload.new as PMsg]))
-      .subscribe();
-    channelRef.current = ch;
+    // Poll for new messages. This replaces the realtime subscription, which
+    // needs a signed-in user and cannot work for a client opening the link.
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      try {
+        const r = await fetch(`/api/portal/data?token=${tk}&only=messages`, { cache: "no-store" });
+        if (!r.ok) return;
+        const d: PortalData = await r.json();
+        const next = d.messages ?? [];
+        setMessages(prev => (next.length !== prev.length ? next : prev));
+      } catch { /* try again on the next tick */ }
+    }, MESSAGE_POLL_MS);
   }
 
   async function sendMessage() {
     if (!msgText.trim() || !portal) return;
     setSending(true);
-    const supabase = createClient();
-    await supabase.from("portal_messages").insert({
-      portal_id: portal.id, sender: "client",
-      sender_name: clientName || "Client",
-      content: msgText.trim(), read_by_freelancer: false,
-    });
-    setMsgText("");
+    try {
+      const res = await fetch("/api/portal/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, content: msgText.trim(), senderName: clientName || "Client" }),
+      });
+      if (res.ok) {
+        const sent = (await res.json()) as PMsg;
+        setMessages(prev => (prev.some(m => m.id === sent.id) ? prev : [...prev, sent]));
+        setMsgText("");
+      } else {
+        const err = await res.json().catch(() => ({} as { error?: string }));
+        msgApi.error(err.error || "Could not send your message");
+      }
+    } catch {
+      msgApi.error("Could not send your message");
+    }
     setSending(false);
   }
 
