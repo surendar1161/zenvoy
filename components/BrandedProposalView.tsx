@@ -1,5 +1,6 @@
 "use client";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { parseSections } from "@/lib/proposal-sections";
 
 import { useEffect, useState } from "react";
 import { BADGE_HREF } from "@/lib/proposal-badge";
@@ -45,23 +46,7 @@ interface Props {
   showBadge?: boolean;
 }
 
-// Parse markdown into sections
-function parseSections(text: string) {
-  const lines = text.split("\n");
-  const sections: { title: string; heading: string; content: string }[] = [];
-  let current: { title: string; heading: string; content: string } | null = null;
-  for (const line of lines) {
-    const m = line.match(/^#{1,2}\s+(.+)$/);
-    if (m) {
-      if (current) sections.push({ ...current, content: current.content.trim() });
-      current = { title: m[1].trim(), heading: line, content: "" };
-    } else if (current) {
-      current.content += line + "\n";
-    }
-  }
-  if (current) sections.push({ ...current, content: current.content.trim() });
-  return sections;
-}
+// Section parsing lives in lib/proposal-sections.ts so it can be unit tested.
 
 function parseMarkdownTable(block: string): string | null {
   const lines = block.trim().split("\n").map(l => l.trim()).filter(Boolean);
