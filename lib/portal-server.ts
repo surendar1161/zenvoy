@@ -27,6 +27,14 @@ export function clampText(value: unknown, max: number): string {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+/**
+ * Escape a value for a case-insensitive exact match with ILIKE, so that a
+ * client named "50%_off" matches only that name and not a wildcard pattern.
+ */
+export function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, ch => `\\${ch}`);
+}
+
 /** Service-role client, or null when the server is not configured for it. */
 export function getPortalAdminClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

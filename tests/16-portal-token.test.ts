@@ -1,5 +1,15 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { clampText, getPortalAdminClient, isValidPortalToken } from "../lib/portal-server";
+import { clampText, escapeLike, getPortalAdminClient, isValidPortalToken } from "../lib/portal-server";
+
+describe("escapeLike", () => {
+  it("escapes ILIKE wildcards so a name matches only itself", () => {
+    expect(escapeLike("50%_off")).toBe("50\\%\\_off");
+    expect(escapeLike("a\\b")).toBe("a\\\\b");
+  });
+  it("leaves ordinary names unchanged", () => {
+    expect(escapeLike("Priya Sharma")).toBe("Priya Sharma");
+  });
+});
 
 // Pure unit tests: no Supabase or network needed.
 describe("isValidPortalToken", () => {
