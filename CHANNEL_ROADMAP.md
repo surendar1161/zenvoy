@@ -56,6 +56,12 @@ Control metric across all channels: **proposals sent to real clients per week.**
 - Check how ChatGPT, Perplexity, Gemini and Google AI Overview describe DealPilot (separately; results vary by engine) and correct outdated pages.
 - Template marketplace and integrations ideas go here, after the core loop works.
 
+## Programs and funding
+
+| Program | Status | Date | Notes |
+|---|---|---|---|
+| Y Combinator, Winter 2027 | **Submitted, in review** (late application; YC gives no promised reply date) | 2026-11-13 | Home page showed "In review". Gaps seen in the submitted copy: product link unanswered; "Are people using your product?" showed No; city, cofounder, entity details, equity split and fundraising unanswered. A fix through "Submit an update, Progress Update" was started but not submitted. Secrets and login details are not recorded here. |
+
 ## Channel scorecard (fill in as data arrives)
 
 | Channel | Effort / week | Sign-ups (30d) | Activated (sent a proposal) | Keep / pause / stop |

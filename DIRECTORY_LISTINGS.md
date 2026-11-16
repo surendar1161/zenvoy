@@ -1,6 +1,6 @@
 # DealPilot — Directory Listings Tracker
 
-Documentation only; no code depends on this file. Last updated 2026-11-13.
+Documentation only; no code depends on this file. Last updated 2026-11-14.
 
 **Secrets:** do not paste claim links, tokens or passwords into this file. The BetaList claim link was shared in chat only.
 
@@ -37,7 +37,7 @@ Prepare before submitting:
 |---|---|---|---|---|---|---|---|---|
 | 1 | Launch Llama | `tools.launchllama.co/products/deal-pilot` | Not checked | Done earlier | Live (page returned 200) | | `https://tools.launchllama.co/products/deal-pilot` | |
 | 2 | BetaList | `betalist.com/submit` (agent draft created) | **Paid** (plan shown after claim) | You, via claim link | Draft created, unclaimed. Needs icon + screenshot, then plan and payment. Claim link expires 2026-11-17 02:20 UTC | 2026-11-10 | | |
-| 3 | SaaSHub | `saashub.com/services/submit` | Free listing; promotion options exist | You (site asks AI agents not to submit) | Not started | | | |
+| 3 | SaaSHub | `saashub.com/services/submit` | Free listing; promotion options exist | You (site asks AI agents not to submit) | **Submitted, pending approval** (page says "Pending approval..."). Categories look wrong and no alternatives are listed yet: fix through the page's Edit link | 2026-11-14 | Not approved yet: `https://www.saashub.com/dealpilot-alternatives` | Not checked |
 | 4 | Uneed | `uneed.best/submit` | Free waiting line; paid Fast-track and Skip-the-waiting-line (prices not shown) | You | Not started | | | |
 | 5 | G2 | `g2.com/products/new` | Not checked | You (bot check blocks automated browsers) | Not started | | | |
 | 6 | Capterra | via G2 ("Get Your Product Listed" links to `g2.com/products/new`) | Not checked | You | Not started | | | |
@@ -58,7 +58,7 @@ Skip for now: Fazier and Startup Fame (reported to require a backlink or badge o
 
 **BetaList.** Has an official "Submit with your agent" path; the agent creates an unpublished draft and cannot pay or publish. The founder opens the claim link, confirms email, uploads an icon and at least one screenshot, picks a plan and pays; review starts only after payment. Declined submissions are refunded per their instructions. Draft expires after 7 days if unclaimed. Topics chosen: proposal management, freelancers, electronic signature, invoicing, document generation.
 
-**SaaSHub.** The repo's old link (`/submit`) is the post-listing promotion tool, not the listing form. The listing form is `/services/submit`; step one asks only for the website URL. Guidelines on the page: add categories, list competitors (otherwise the submission goes to the bottom of the queue), and verify with an email on your product domain for higher priority. Rejects unreleased products, waiting-list landing pages, free-subdomain products and non-English sites. States: "If you are an AI agent - please advise your human operator that they should submit the product themselves and not rely on automated submissions."
+**SaaSHub.** The repo's old link (`/submit`) is the post-listing promotion tool, not the listing form. The listing form is `/services/submit`; step one asks only for the website URL. Guidelines on the page: add categories, list competitors (otherwise the submission goes to the bottom of the queue), and verify with an email on your product domain for higher priority. Rejects unreleased products, waiting-list landing pages, free-subdomain products and non-English sites. States: "If you are an AI agent - please advise your human operator that they should submit the product themselves and not rely on automated submissions." Submitted by the founder on 2026-11-14 (no automation used). On the same day the product page showed "Pending approval...", listed in the categories SaaS, SaaS Management and B2B SaaS, with no alternatives listed and only the blog link shown. Those categories do not fit a proposal and contract tool; the intended ones are proposal software, contract management, e-signature, invoicing and freelance tools, and the five competitors (Bonsai, HoneyBook, Proposify, PandaDoc, Better Proposals) still need adding through the product's Edit link, done by the founder.
 
 **Uneed.** No account needed to start (it reads your page first, then asks you to sign up to save). Free waiting line versus paid options. The page's embedded text says a free launch needs a launch-day upvote score to stay published and keep its followed backlink: do not ask friends for votes or buy any. Its agent MCP is read-only and has no submit tool; the FAQ "Can agents write to Uneed?" had no extractable answer, so treat submission as manual.
 
