@@ -10,13 +10,19 @@ import type { MenuProps, TableColumnsType } from "antd";
 import {
   PlusOutlined, ProjectOutlined, FilterOutlined, CheckCircleOutlined,
   ClockCircleOutlined, EllipsisOutlined, EditOutlined, DeleteOutlined,
-  TeamOutlined, CalendarOutlined, DollarOutlined, FolderOpenOutlined,
+  TeamOutlined, CalendarOutlined, DollarOutlined, FolderOpenOutlined, SettingOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import dayjs from "dayjs";
 import { Page, PageHeader, Stat, EmptyState } from "@/components/app/ui";
 import { Button as BrandButton } from "@/components/site/ui";
+import { useCustomFields } from "@/lib/use-custom-fields";
+import type { CustomFieldValues } from "@/lib/custom-fields";
+import CustomFieldInputs from "@/components/custom-fields/CustomFieldInputs";
+import ManageFieldsDrawer from "@/components/custom-fields/ManageFieldsDrawer";
+import { customFieldColumns } from "@/components/custom-fields/columns";
+import { formFieldNames, fromFormValues, toFormValues } from "@/components/custom-fields/form-helpers";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -42,6 +48,7 @@ interface Project {
   status: string; start_date: string | null; due_date: string | null;
   budget: number | null; currency: string; tags: string[];
   client_id: string | null; created_at: string;
+  custom_fields?: CustomFieldValues | null;
   client?: Client;
   task_count?: number; done_count?: number;
 }
@@ -58,6 +65,8 @@ export default function ProjectsPage() {
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
+  const cf = useCustomFields("project");
+  const [fieldsOpen, setFieldsOpen] = useState(false);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -101,6 +110,7 @@ export default function ProjectsPage() {
 
   function openEdit(project: Project) {
     setEditing(project);
+    form.resetFields(formFieldNames(cf.defs)); // clear values left over from a previously edited project
     form.setFieldsValue({
       name: project.name, description: project.description,
       color: project.color, status: project.status,
@@ -109,6 +119,7 @@ export default function ProjectsPage() {
       due_date: project.due_date ? dayjs(project.due_date) : undefined,
       budget: project.budget ?? undefined, currency: project.currency,
       tags: project.tags ?? [],
+      ...toFormValues(cf.defs, project.custom_fields),
     });
     setModalOpen(true);
   }
@@ -129,6 +140,7 @@ export default function ProjectsPage() {
       due_date: values.due_date?.toISOString() ?? null,
       budget: values.budget ?? null, currency: values.currency ?? "USD",
       tags: values.tags ?? [],
+      custom_fields: fromFormValues(cf.defs, values),
     };
     if (editing) {
       const { error } = await supabase.from("projects").update(payload).eq("id", editing.id);
@@ -186,10 +198,13 @@ export default function ProjectsPage() {
   }
 
   // Table columns
+  const cfCols = customFieldColumns<Project>(cf.defs);
   const columns: TableColumnsType<Project> = [
     {
       title: "Project",
       key: "name",
+      // With custom field columns the fixed-width columns can fill the table, so keep the name readable.
+      width: cfCols.length ? 260 : undefined,
       render: (_, p) => (
         <Space>
           <div style={{ width: 12, height: 12, borderRadius: 3, background: p.color, flexShrink: 0 }} />
@@ -254,6 +269,7 @@ export default function ProjectsPage() {
         ? <Text style={{ fontSize: 13, fontWeight: 600, color: "#10b981" }}>{p.currency} {p.budget.toLocaleString()}</Text>
         : <Text type="secondary" style={{ fontSize: 12 }}>—</Text>,
     },
+    ...cfCols,
     {
       key: "actions",
       width: 48,
@@ -273,7 +289,15 @@ export default function ProjectsPage() {
         title="Projects"
         sub="Track all your client projects, deadlines, and task progress."
         count={projects.length ? `${projects.length} total` : undefined}
-        action={<BrandButton onClick={openCreate}><PlusOutlined /> New Project</BrandButton>}
+        action={
+          <Space wrap>
+            <Button icon={<SettingOutlined />} onClick={() => setFieldsOpen(true)} data-testid="open-project-fields"
+              style={{ borderRadius: 999, height: 40, fontWeight: 600 }}>
+              Custom fields{cf.defs.length > 0 ? ` (${cf.defs.length})` : ""}
+            </Button>
+            <BrandButton onClick={openCreate}><PlusOutlined /> New Project</BrandButton>
+          </Space>
+        }
       />
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -309,6 +333,7 @@ export default function ProjectsPage() {
             dataSource={filtered}
             columns={columns}
             rowKey="id"
+            scroll={cfCols.length ? { x: "max-content" } : undefined}
             pagination={{ pageSize: 20, showSizeChanger: false, showTotal: (t) => `${t} projects` }}
             style={{ borderRadius: 16 }}
             onRow={p => ({ style: { cursor: "pointer" }, onClick: (e) => { if ((e.target as HTMLElement).closest(".ant-dropdown-trigger,.ant-btn")) return; window.location.href = `/projects/${p.id}`; } })}
@@ -391,9 +416,14 @@ export default function ProjectsPage() {
                   options={["Design","Development","Marketing","Content","Strategy","Branding"].map(t => ({ value: t, label: t }))} />
               </Form.Item>
             </Col>
+            <Col span={24}>
+              <CustomFieldInputs defs={cf.defs} entity="project" onManage={() => setFieldsOpen(true)} />
+            </Col>
           </Row>
         </Form>
       </Modal>
+
+      <ManageFieldsDrawer open={fieldsOpen} onClose={() => setFieldsOpen(false)} entity="project" api={cf} />
     </Page>
   );
 }

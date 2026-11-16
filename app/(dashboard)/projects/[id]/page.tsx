@@ -16,7 +16,7 @@ import {
   CalendarOutlined, FolderOpenOutlined, CheckOutlined,
   ExclamationCircleOutlined, MessageOutlined, SendOutlined,
   UserOutlined, FieldTimeOutlined, PlayCircleOutlined, PauseCircleOutlined,
-  PaperClipOutlined, DownloadOutlined, InboxOutlined,
+  PaperClipOutlined, DownloadOutlined, InboxOutlined, SettingOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -25,6 +25,13 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Page, PageHeader, Stat } from "@/components/app/ui";
 import { Button as BrandButton } from "@/components/site/ui";
+import { useCustomFields } from "@/lib/use-custom-fields";
+import type { CustomFieldValues as CustomFieldValuesMap } from "@/lib/custom-fields";
+import CustomFieldInputs from "@/components/custom-fields/CustomFieldInputs";
+import CustomFieldValues from "@/components/custom-fields/CustomFieldValues";
+import ManageFieldsDrawer from "@/components/custom-fields/ManageFieldsDrawer";
+import { customFieldColumns } from "@/components/custom-fields/columns";
+import { formFieldNames, fromFormValues, toFormValues } from "@/components/custom-fields/form-helpers";
 
 dayjs.extend(relativeTime);
 
@@ -60,6 +67,7 @@ interface Project {
   id: string; name: string; description: string | null; color: string;
   status: string; due_date: string | null; budget: number | null; currency: string;
   client_id: string | null; tags: string[]; created_at: string;
+  custom_fields?: CustomFieldValuesMap | null;
   clients?: { id: string; name: string; company: string | null; avatar_color: string; email: string | null };
 }
 
@@ -67,6 +75,7 @@ interface Task {
   id: string; title: string; description: string | null; status: string;
   priority: string; due_date: string | null; completed_at: string | null;
   tags: string[]; position: number; created_at: string;
+  custom_fields?: CustomFieldValuesMap | null;
 }
 
 interface TimeEntry {
@@ -104,6 +113,15 @@ export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState("tasks");
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
+
+  // Custom fields: definitions for projects and for tasks, drawers, and the project values form
+  const cfProject = useCustomFields("project");
+  const cfTask = useCustomFields("task");
+  const [projFieldsOpen, setProjFieldsOpen] = useState(false);
+  const [taskFieldsOpen, setTaskFieldsOpen] = useState(false);
+  const [projValuesOpen, setProjValuesOpen] = useState(false);
+  const [savingFields, setSavingFields] = useState(false);
+  const [projForm] = Form.useForm();
 
   // Files state
   const [files, setFiles] = useState<ProjectFile[]>([]);
@@ -382,13 +400,34 @@ export default function ProjectDetailPage() {
 
   function openEditTask(task: Task) {
     setEditingTask(task);
+    form.resetFields(formFieldNames(cfTask.defs)); // clear values left over from a previously edited task
     form.setFieldsValue({
       title: task.title, description: task.description,
       status: task.status, priority: task.priority,
       due_date: task.due_date ? dayjs(task.due_date) : undefined,
       tags: task.tags ?? [],
+      ...toFormValues(cfTask.defs, task.custom_fields),
     });
     setTaskModal(true);
+  }
+
+  function openProjectValues() {
+    projForm.resetFields();
+    projForm.setFieldsValue(toFormValues(cfProject.defs, project?.custom_fields));
+    setProjValuesOpen(true);
+  }
+
+  async function saveProjectValues() {
+    const values = await projForm.validateFields();
+    setSavingFields(true);
+    const custom_fields = fromFormValues(cfProject.defs, values);
+    const supabase = createClient();
+    const { error } = await supabase.from("projects").update({ custom_fields }).eq("id", id);
+    setSavingFields(false);
+    if (error) { msgApi.error("Could not save the fields: " + error.message); return; }
+    setProject(prev => (prev ? { ...prev, custom_fields } : prev));
+    setProjValuesOpen(false);
+    msgApi.success("Custom fields saved");
   }
 
   async function saveTask() {
@@ -406,6 +445,7 @@ export default function ProjectDetailPage() {
       project_id: id,
       client_id: project?.client_id ?? null,
       completed_at: values.status === "done" ? new Date().toISOString() : null,
+      custom_fields: fromFormValues(cfTask.defs, values),
     };
     if (editingTask) {
       const { data, error } = await supabase.from("tasks").update(payload).eq("id", editingTask.id).select().single();
@@ -469,6 +509,7 @@ export default function ProjectDetailPage() {
     };
   }
 
+  const cfTaskCols = customFieldColumns<Task>(cfTask.defs);
   const columns: TableColumnsType<Task> = [
     {
       key: "check", width: 44,
@@ -483,6 +524,8 @@ export default function ProjectDetailPage() {
     },
     {
       title: "Task", key: "title",
+      // With custom field columns the fixed-width columns can fill the table, so keep the title readable.
+      width: cfTaskCols.length ? 300 : undefined,
       render: (_, t) => (
         <div>
           <Text style={{ fontSize: 14, textDecoration: t.status === "done" ? "line-through" : "none", color: t.status === "done" ? "#94a3b8" : "#0f172a" }}>
@@ -528,6 +571,7 @@ export default function ProjectDetailPage() {
         );
       },
     },
+    ...cfTaskCols,
     {
       key: "actions", width: 48,
       render: (_, t) => (
@@ -581,6 +625,11 @@ export default function ProjectDetailPage() {
           {project.tags?.map(t => <Tag key={t} style={{ borderRadius: 20, fontSize: 11 }}>{t}</Tag>)}
         </Space>
 
+        <CustomFieldValues
+          defs={cfProject.defs} values={project.custom_fields} entity="project" accent={project.color}
+          onEdit={openProjectValues} onManage={() => setProjFieldsOpen(true)}
+        />
+
         {tasks.length > 0 && (
           <div style={{ marginTop: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -621,6 +670,9 @@ export default function ProjectDetailPage() {
                     <Option value="all">All Priorities</Option>
                     {Object.entries(PRIORITY_CONFIG).map(([k, v]) => <Option key={k} value={k}>{v.label}</Option>)}
                   </Select>
+                  <Button icon={<SettingOutlined />} onClick={() => setTaskFieldsOpen(true)} data-testid="open-task-fields">
+                    Task fields{cfTask.defs.length > 0 ? ` (${cfTask.defs.length})` : ""}
+                  </Button>
                 </Space>
 
                 <Card style={{ borderRadius: 16, border: "1px solid #e2e8f0" }} styles={{ body: { padding: 0 } }}>
@@ -638,6 +690,7 @@ export default function ProjectDetailPage() {
                       dataSource={filteredTasks}
                       columns={columns}
                       rowKey="id"
+                      scroll={cfTaskCols.length ? { x: "max-content" } : undefined}
                       pagination={false}
                       rowClassName={r => r.status === "done" ? "opacity-60" : ""}
                       style={{ borderRadius: 16 }}
@@ -1068,8 +1121,20 @@ export default function ProjectDetailPage() {
             <Select mode="tags" placeholder="Add tags (press Enter)" style={{ width: "100%" }}
               options={["Design","Dev","Copy","Review","QA","Research","Meeting"].map(t => ({ value: t, label: t }))} />
           </Form.Item>
+          <CustomFieldInputs defs={cfTask.defs} entity="task" onManage={() => setTaskFieldsOpen(true)} />
         </Form>
       </Modal>
+
+      {/* Project custom field values */}
+      <Modal open={projValuesOpen} onCancel={() => setProjValuesOpen(false)} title="Project custom fields" width={560}
+        okText="Save" confirmLoading={savingFields} onOk={saveProjectValues}>
+        <Form form={projForm} layout="vertical" size="large" style={{ marginTop: 16 }}>
+          <CustomFieldInputs defs={cfProject.defs} entity="project" onManage={() => { setProjValuesOpen(false); setProjFieldsOpen(true); }} />
+        </Form>
+      </Modal>
+
+      <ManageFieldsDrawer open={projFieldsOpen} onClose={() => setProjFieldsOpen(false)} entity="project" api={cfProject} />
+      <ManageFieldsDrawer open={taskFieldsOpen} onClose={() => setTaskFieldsOpen(false)} entity="task" api={cfTask} />
     </Page>
   );
 }
