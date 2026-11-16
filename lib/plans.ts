@@ -14,6 +14,8 @@ export interface PlanConfig {
     proposals: number | "unlimited";
     contracts: number | "unlimited";
     teamMembers: number | "unlimited";
+    /** Custom fields a user can define for projects, and again for tasks. */
+    customFieldsPerType: number | "unlimited";
   };
   features: string[];
   notIncluded?: string[];
@@ -28,7 +30,7 @@ export const PLANS: PlanConfig[] = [
     yearlyPrice: 0,
     yearlyTotal: 0,
     color: "#64748b",
-    limits: { proposals: 5, contracts: 2, teamMembers: 1 },
+    limits: { proposals: 5, contracts: 2, teamMembers: 1, customFieldsPerType: 3 },
     features: [
       "5 proposals / month",
       "2 contracts / month",
@@ -40,6 +42,7 @@ export const PLANS: PlanConfig[] = [
       "Google Docs-style editor",
       "Brand kit (logo, colours, font)",
       "Cover page & web view",
+      "3 custom fields on projects and 3 on tasks",
     ],
     notIncluded: [
       "Digital e-signatures",
@@ -59,7 +62,7 @@ export const PLANS: PlanConfig[] = [
     yearlyTotal: 108,
     color: "#0ea5e9",
     popular: true,
-    limits: { proposals: "unlimited", contracts: "unlimited", teamMembers: 1 },
+    limits: { proposals: "unlimited", contracts: "unlimited", teamMembers: 1, customFieldsPerType: "unlimited" },
     features: [
       "Unlimited proposals",
       "Unlimited contracts",
@@ -72,6 +75,7 @@ export const PLANS: PlanConfig[] = [
       "Password protection on proposals",
       "Document expiry dates",
       "Content Library (save & reuse sections)",
+      "Unlimited custom fields on projects and tasks",
       "Analytics dashboard",
       "Section-level AI regeneration",
       "Good / Better / Best pricing tiers",
@@ -88,7 +92,7 @@ export const PLANS: PlanConfig[] = [
     yearlyPrice: 22,    // $22/mo billed as $264/yr
     yearlyTotal: 264,
     color: "#7c3aed",
-    limits: { proposals: "unlimited", contracts: "unlimited", teamMembers: 5 },
+    limits: { proposals: "unlimited", contracts: "unlimited", teamMembers: 5, customFieldsPerType: "unlimited" },
     features: [
       "Everything in Pro",
       "Up to 5 team members",
